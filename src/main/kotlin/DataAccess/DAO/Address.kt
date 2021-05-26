@@ -1,6 +1,6 @@
 package DataAccess.DAO
 
-class Address(  val addressId : Long,
+class Address(
                 val clientUsername : String,
                 val postalCode : String,
                 val address : String){

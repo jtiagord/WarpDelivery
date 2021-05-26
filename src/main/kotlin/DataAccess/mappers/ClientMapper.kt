@@ -36,16 +36,47 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
         }
     }
 
-    override fun Read(key: String): Client {
-        TODO("Not yet implemented")
-    }
+    override fun Read(key: String): Client =
+        jdbi.inTransaction<Client ,Exception> { handle ->
+            val client = handle.createQuery(
+                "SELECT username, firstname , lastname, phonenumber, password, email" +
+                        "from $USER_TABLE" +
+                        "where username = :username"
+            )
+            .bind("username", key)
+            .mapTo(Client::class.java)
+            .one()
+
+            val addresses = handle.createQuery("SELECT  clientUsername , postal_code, address" +
+                    "from $CLIENT_ADDRESSES_TABLE" +
+                    "where clientUsername = :username"
+            ).bind("username", key).mapTo(Address::class.java).list()
+
+            client.addresses = addresses
+
+            return@inTransaction client
+        }
+
 
     override fun Update(DAO: Client) {
         TODO("Not yet implemented")
     }
 
     override fun Delete(key: String) {
-        TODO("Not yet implemented")
+        jdbi.useTransaction<Exception> { handle ->
+            handle.createUpdate("DELETE from $USER_TABLE" +
+                        "where username = :username"
+            )
+            .bind("username" , key)
+            .execute()
+
+            handle.createUpdate("DELETE from $CLIENT_ADDRESSES_TABLE" +
+                    "where clientUsername = :username"
+            )
+            .bind("username" , key)
+            .execute()
+        }
+
     }
 
     fun AddAddress(key : String, address : Address){
