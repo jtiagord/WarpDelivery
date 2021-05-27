@@ -6,5 +6,5 @@ class Warper (val username : String,
               val phonenumber : String,
               val email : String,
               val password :String?,
-              val vehicles : List<Vehicle>){
+              var vehicles : List<Vehicle>){
 }

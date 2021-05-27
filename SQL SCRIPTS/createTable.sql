@@ -8,6 +8,8 @@ CREATE TABLE STORE (
 
 CREATE TABLE DELIVERY (
 	deliveryId serial PRIMARY KEY,
+	warperId long REFERENCES WARPER(username),
+	clientId long NOT NULL REFERENCES USER(username),
 	state varchar(20) NOT NULL 
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')), 
 	purchase_date timestamp NOT NULL,
