@@ -3,25 +3,29 @@ package com.isel.warpDelivery.model
 import org.springframework.stereotype.Component
 
 
+
+class WarperLocation(val username : String, val location : Location)
+
+
 @Component
 class WarperList(val activeWarpers : WarperList){
-    private val warperList : ArrayList<Warper> = ArrayList()
+    private val warperLocationList : ArrayList<WarperLocation> = ArrayList()
 
-    fun add(warper : Warper){
-        warperList.add(warper)
+    fun add(warperLocation : WarperLocation){
+        warperLocationList.add(warperLocation)
     }
 
-    fun getClosest(location : Location) : Warper?{
-        var closestWarper : Warper? = null
+    fun getClosest(location : Location) : WarperLocation?{
+        var closestWarperLocation : WarperLocation? = null
         var closestDistance = Double.POSITIVE_INFINITY
-        for(warper in warperList){
+        for(warper in warperLocationList){
             val distance = warper.location.getDistance(location)
             if(distance < closestDistance) {
-                closestWarper = warper
+                closestWarperLocation = warper
                 closestDistance = distance
             }
         }
-        return closestWarper
+        return closestWarperLocation
     }
 
 }
