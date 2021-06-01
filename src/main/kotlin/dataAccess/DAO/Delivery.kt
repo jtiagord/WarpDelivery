@@ -1,4 +1,4 @@
-package DataAccess.DAO
+package dataAccess.DAO
 
 import java.sql.Timestamp
 

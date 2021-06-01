@@ -1,4 +1,4 @@
-package isel.warpDelivery.model
+package com.isel.warpDelivery.model
 
 import org.springframework.stereotype.Component
 

@@ -1,7 +1,7 @@
 package DataAccess.mappers
 
-import DataAccess.DAO.Address
-import DataAccess.DAO.Client
+import dataAccess.DAO.Address
+import dataAccess.DAO.Client
 import org.jdbi.v3.core.Jdbi
 
 class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {

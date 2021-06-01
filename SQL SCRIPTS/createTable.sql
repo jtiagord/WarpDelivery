@@ -1,19 +1,18 @@
 CREATE TABLE STORE (
-	storeId serial PRIMARY KEY,
+	storeid serial PRIMARY KEY,
 	name varchar(100) NOT NULL,
-	postal_code varchar(10) NOT NULL,
+	postalcode varchar(10) NOT NULL,
 	address varchar(100) NOT NULL,
 );
 
-
 CREATE TABLE DELIVERY (
-	deliveryId serial PRIMARY KEY,
-	warperId long REFERENCES WARPER(username),
-	clientId long NOT NULL REFERENCES USER(username),
+	deliveryid serial PRIMARY KEY,
+	warperusername long REFERENCES WARPER(username) on delete cascade,
+	clientusername long NOT NULL REFERENCES USER(username) on delete cascade,
 	state varchar(20) NOT NULL 
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')), 
-	purchase_date timestamp NOT NULL,
-	delivery_date timestamp CHECK (delivery_date > purchase_date),
+	purchasedate timestamp NOT NULL,
+	deliverydate timestamp CHECK (deliverydate > purchasedate),
 	rating int CHECK (rating >= 1 and rating <= 5),
 	price decimal(10,2) NOT NULL CHECK (price >= 0),
 	type varchar(50) NOT NULL --pode vir a ser mudado
@@ -29,33 +28,34 @@ CREATE TABLE USERS (
 );
 
 CREATE TABLE WARPER (
-	username varchar(50) PRIMARY KEY REFERENCES USERS(username)
+	username varchar(50) PRIMARY KEY REFERENCES USERS(username) on delete cascade,
+	state varchar(50)
 	--adicionar aqui a foto q ns como será ainda
 );
 
 CREATE TABLE VEHICLE (
-	username varchar(50) REFERENCES WARPER(username),
+	username varchar(50) REFERENCES WARPER(username) on delete cascade,
 	vehicletype varchar(50) NOT NULL,
 	vehicleregistration varchar(50) NOT NULL,
 	PRIMARY KEY (username, vehicleregistration)
 );
 
 CREATE TABLE STATE_TRANSITIONS (
-	deliveryId int REFERENCES DELIVERY(deliveryId),
+	deliveryid int REFERENCES DELIVERY(deliveryid) on delete cascade,
 	transitiondate timestamp,
-	previous_state varchar(20) NOT NULL CHECK (previous_state IN ( 
+	previousstate varchar(20) NOT NULL CHECK (previousstate IN (
 		'Em processamento', 'Pronto para recolha',
 		'Em distribuição', 'Entregue', 'Cancelada')),
-	next_state varchar(20) NOT NULL CHECK (next_state IN (
+	nextstate varchar(20) NOT NULL CHECK (nextstate IN (
 		'Em processamento', 'Pronto para recolha',
 		'Em distribuição', 'Entregue', 'Cancelada')), --convinha ver se ha melhor forma de fazer isto
-	PRIMARY KEY (deliveryId, transitiondate)
+	PRIMARY KEY (deliveryid, transitiondate)
 );
 
 CREATE TABLE CLIENT_ADDRESS (
-	addressId serial,
-	clientUsername varchar(50) REFERENCES USERS(username),
+	addressid serial,
+	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	postal_code varchar(10) NOT NULL,
 	address varchar(100) NOT NULL,
-	PRIMARY KEY (addressId, clientUsername)
+	PRIMARY KEY (addressid, clientusername)
 );

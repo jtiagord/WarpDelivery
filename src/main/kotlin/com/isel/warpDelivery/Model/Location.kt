@@ -1,10 +1,8 @@
-package isel.warpDelivery.model
+package com.isel.warpDelivery.model
 
 import kotlin.math.*
 
 class Location (val latitude : Double, val longitude : Double){
-
-
     fun getDistance(otherLocation : Location) : Double{
         val lat1rad  = (PI/180)*latitude
         val lat2rad = (PI/180)*otherLocation.latitude

@@ -1,4 +1,4 @@
-package DataAccess.DAO
+package dataAccess.DAO
 
 class Client(   val username : String,
                 val firstname : String,

@@ -1,6 +1,6 @@
 package DataAccess.mappers
 
-import DataAccess.DAO.Store
+import dataAccess.DAO.Store
 import org.jdbi.v3.core.Jdbi
 
 class StoreMapper(jdbi: Jdbi) : DataMapper<String, Store>(jdbi) {

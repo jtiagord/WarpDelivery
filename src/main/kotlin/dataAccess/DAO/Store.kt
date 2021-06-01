@@ -1,4 +1,4 @@
-package DataAccess.DAO
+package dataAccess.DAO
 
 class Store (
     val storeId : Long,
