@@ -1,8 +1,7 @@
 package isel.warpDelivery.Controllers
 
+import com.isel.warpDelivery.model.WarperList
 import isel.warpDelivery.inputmodels.RequestDeliveryInputModel
-import isel.warpDelivery.model.Warper
-import isel.warpDelivery.model.WarperList
 import org.springframework.web.bind.annotation.*
 
 @RestController

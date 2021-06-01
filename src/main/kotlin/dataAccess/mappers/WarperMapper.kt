@@ -26,7 +26,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                 .bind("username", DAO.username)
                 .bind("firstname", DAO.firstname)
                 .bind("lastname", DAO.lastname)
-                .bind("phonenumber", DAO.lastname)
+                .bind("phonenumber", DAO.phonenumber)
                 .bind("password", DAO.password)
                 .bind("email", DAO.email)
                 .execute()

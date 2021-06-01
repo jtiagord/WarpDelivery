@@ -100,16 +100,26 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    fun readAll(key: String): List<Delivery> =
+    fun readAll(): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
                 "SELECT deliveryid,clientusername,warperusername,state " +
-                        "from $DELIVERY_TABLE " +
-                        "where deliveryid=:id"
+                        "from $DELIVERY_TABLE "
             )
-                .bind("id",key)
                 .mapTo(Delivery::class.java)
                 .list()
+        }
+
+    fun updateState(key: String, state: String) =
+        jdbi.useTransaction<Exception> { handle ->
+            handle.createUpdate(
+                "UPDATE $DELIVERY_TABLE " +
+                        "SET state = :state" +
+                        "where deliveryid = :deliveryid"
+            )
+                .bind("state", state)
+                .bind("deliveryid", key)
+                .execute()
         }
 }
 
