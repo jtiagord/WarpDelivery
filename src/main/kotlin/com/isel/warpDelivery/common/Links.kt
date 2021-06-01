@@ -1,4 +1,4 @@
-package com.isel.warpDelivery.Common
+package com.isel.warpDelivery.common
 
 const val HOME="/WarpDelivery"
 

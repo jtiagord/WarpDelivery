@@ -1,11 +1,11 @@
-package dataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import DataAccess.mappers.DataMapper
-import dataAccess.DAO.Vehicle
-import dataAccess.DAO.Warper
+import com.isel.warpDelivery.dataAccess.DAO.Vehicle
+import com.isel.warpDelivery.dataAccess.DAO.Warper
 import org.jdbi.v3.core.Jdbi
-import org.springframework.stereotype.Repository
+import org.springframework.stereotype.Component
 
+@Component
 class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
 
     companion object {
@@ -14,7 +14,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         const val VEHICLE_TABLE = "VEHICLE"
     }
 
-    override fun Create(DAO: Warper) {
+    override fun create(DAO: Warper) {
         //TODO: ADD PHOTO
         jdbi.useTransaction<Exception> { handle ->
 
@@ -55,7 +55,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         }
     }
 
-    override fun Read(key: String): Warper =
+    override fun read(key: String): Warper =
         jdbi.inTransaction<Warper, Exception> { handle ->
             val warper = handle.createQuery(
                 "SELECT username, firstname , lastname, phonenumber, password, email " +
@@ -91,7 +91,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                 .list()
         }
 
-    override fun Update(DAO: Warper) {
+    override fun update(DAO: Warper) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $USER_TABLE " +
@@ -113,7 +113,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         }
     }
 
-    override fun Delete(key: String) {
+    override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $USER_TABLE " +

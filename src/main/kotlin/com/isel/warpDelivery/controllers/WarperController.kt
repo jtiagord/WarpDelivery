@@ -1,15 +1,18 @@
-import com.isel.warpDelivery.Common.*
-import com.isel.warpDelivery.Model.Warpers
-import dataAccess.DAO.Delivery
-import dataAccess.DAO.StateTransition
-import dataAccess.DAO.Vehicle
-import dataAccess.DAO.Warper
+package com.isel.warpDelivery.controllers
+
+import com.isel.warpDelivery.common.*
+import com.isel.warpDelivery.model.Warpers
+import com.isel.warpDelivery.dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.DAO.Vehicle
+import com.isel.warpDelivery.dataAccess.DAO.Warper
+import com.isel.warpDelivery.model.WarperList
+import com.isel.warpDelivery.model.WarperLocation
+import isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.net.URI
 
 @RestController
-class WarperController(val warpers : Warpers) {
+class WarperController(val warpers : Warpers,val activeWarpers : WarperList) {
 
     //-------------------------------Warper related endpoints-------------------------
     @GetMapping(WARPERS)
@@ -83,11 +86,11 @@ class WarperController(val warpers : Warpers) {
             .body(warpers.updateState(state))
     //-------------------------------------------------------------------------------
 
-    @GetMapping(WARPER_DELIVERIES)
+    /*@GetMapping(WARPER_DELIVERIES)
     fun getDeliveries(@PathVariable username:String)=
         ResponseEntity
             .ok()
-            .body(warpers.getDeliveries(username))
+            .body(warpers.getDeliveries(username))*/
 
     @PostMapping(WARPER_DELIVERIES)
     fun addDelivery(@PathVariable delivery: Delivery,@PathVariable username: String)=
@@ -115,9 +118,10 @@ class WarperController(val warpers : Warpers) {
             .ok()
             .body(warpers.getDeliveryTransitions(username))
 
-    /*@PostMapping("Warper")
-    fun addActiveWarper(@RequestBody warper : RequestActiveWarperInputModel) : String{
-        activeWarpers.add(Warper(warper.username,warper.currentLocation))
+    @PostMapping("Warper")
+    fun addActiveWarper(@RequestBody warper : RequestActiveWarperInputModel?) : String{
+
+        activeWarpers.add(WarperLocation(warper!!.username,warper.currentLocation))
         return "a"
-    }*/
+    }
 }

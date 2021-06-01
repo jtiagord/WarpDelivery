@@ -1,4 +1,4 @@
-package isel.warpDelivery.Controllers
+package com.isel.warpDelivery.controllers
 
 import com.isel.warpDelivery.model.WarperList
 import isel.warpDelivery.inputmodels.RequestDeliveryInputModel
@@ -9,8 +9,8 @@ class ShopController(val activeWarpers : WarperList) {
 
 
     @PostMapping("addDelivery")
-    fun RequestDelivery(@RequestBody input : RequestDeliveryInputModel) : String {
-        println("DISTANCE : ${input.storeLocation.getDistance(input.deliveryLocation)}")
+    fun requestDelivery(@RequestBody input : RequestDeliveryInputModel?) : String {
+        println("DISTANCE : ${input!!.storeLocation.getDistance(input.deliveryLocation)}")
         // return activeWarpers.getClosest(input.storeLocation)!!
         return "a"
     }

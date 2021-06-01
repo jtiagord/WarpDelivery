@@ -1,15 +1,18 @@
-package DataAccess.mappers
+package dataAccess.mappers
 
-import dataAccess.DAO.Store
+import com.isel.warpDelivery.dataAccess.DAO.Store
+import com.isel.warpDelivery.dataAccess.mappers.DataMapper
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class StoreMapper(jdbi: Jdbi) : DataMapper<String, Store>(jdbi) {
 
     companion object {
         const val STORE_TABLE = "STORE"
     }
 
-    override fun Create(DAO: Store) {
+    override fun create(DAO: Store) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "Insert Into $STORE_TABLE" +
@@ -25,7 +28,7 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<String, Store>(jdbi) {
         }
     }
 
-    override fun Read(key: String): Store =
+    override fun read(key: String): Store =
         jdbi.inTransaction<Store, Exception> { handle ->
             val store = handle.createQuery(
                 "SELECT storeId, name, postal_code , address" +
@@ -38,11 +41,11 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<String, Store>(jdbi) {
             return@inTransaction store
         }
 
-    override fun Update(DAO: Store) {
+    override fun update(DAO: Store) {
         TODO("Not yet implemented")
     }
 
-    override fun Delete(key: String) {
+    override fun delete(key: String) {
         TODO("Not yet implemented")
     }
 }

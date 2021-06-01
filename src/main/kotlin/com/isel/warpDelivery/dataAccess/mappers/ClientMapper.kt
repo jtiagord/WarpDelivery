@@ -1,15 +1,17 @@
-package DataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import dataAccess.DAO.Address
-import dataAccess.DAO.Client
+import com.isel.warpDelivery.dataAccess.DAO.Address
+import com.isel.warpDelivery.dataAccess.DAO.Client
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
     companion object{
         const val USER_TABLE = "USERS"
         const val CLIENT_ADDRESSES_TABLE = "CLIENT_ADDRESS"
     }
-    override fun Create(DAO: Client) {
+    override fun create(DAO: Client) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate("Insert Into $USER_TABLE" +
                     "(username, firstname , lastname, phonenumber, password, email) values" +
@@ -36,7 +38,7 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
         }
     }
 
-    override fun Read(key: String): Client =
+    override fun read(key: String): Client =
         jdbi.inTransaction<Client ,Exception> { handle ->
             val client = handle.createQuery(
                 "SELECT username, firstname , lastname, phonenumber, password, email" +
@@ -58,11 +60,11 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
         }
 
 
-    override fun Update(DAO: Client) {
+    override fun update(DAO: Client) {
         TODO("Not yet implemented")
     }
 
-    override fun Delete(key: String) {
+    override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate("DELETE from $USER_TABLE" +
                         "where username = :username"

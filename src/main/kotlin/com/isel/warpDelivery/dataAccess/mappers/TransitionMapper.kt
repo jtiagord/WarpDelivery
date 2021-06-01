@@ -1,18 +1,17 @@
-package dataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import DataAccess.mappers.DataMapper
-import DataAccess.mappers.DeliveryMapper
-import dataAccess.DAO.Delivery
-import dataAccess.DAO.StateTransition
+import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class TransitionMapper(jdbi: Jdbi) : DataMapper<List<String>, StateTransition>(jdbi) {
 
     companion object {
         const val STATE_TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
-    override fun Read(key: List<String>): StateTransition =
+    override fun read(key: List<String>): StateTransition =
         jdbi.inTransaction<StateTransition, Exception> { handle ->
             return@inTransaction handle.createQuery(
                 "SELECT * " +
@@ -40,15 +39,15 @@ class TransitionMapper(jdbi: Jdbi) : DataMapper<List<String>, StateTransition>(j
         }
 
 
-    override fun Create(DAO: StateTransition) {
+    override fun create(DAO: StateTransition) {
         TODO("Not yet implemented")
     }
 
-    override fun Delete(key: List<String>) {
+    override fun delete(key: List<String>) {
         TODO("Not yet implemented")
     }
 
-    override fun Update(DAO: StateTransition) {
+    override fun update(DAO: StateTransition) {
         TODO("Not yet implemented")
     }
 }

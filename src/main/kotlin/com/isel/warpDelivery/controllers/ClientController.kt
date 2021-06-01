@@ -1,8 +1,8 @@
-package com.isel.warpDelivery.Controllers
+package com.isel.warpDelivery.controllers
 
-import DataAccess.mappers.ClientMapper
-import com.isel.warpDelivery.Common.*
-import dataAccess.DAO.Client
+import com.isel.warpDelivery.dataAccess.mappers.ClientMapper
+import com.isel.warpDelivery.common.*
+import com.isel.warpDelivery.dataAccess.DAO.Client
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
@@ -16,19 +16,19 @@ class ClientController(val clientMapper: ClientMapper) {
         //TODO: IMPLEMENT
     }
 
-    @GetMapping(CLIENT)
+  /*  @GetMapping(CLIENT)
     fun getClients(
         req: HttpServletRequest,
     ) {
         //TODO: IMPLEMENT
-    }
+    }*/
 
     @GetMapping(CLIENT)
     fun getClient(
         req: HttpServletRequest,
         @PathVariable Username: String
     ): Client {
-        return clientMapper.Read(Username)
+        return clientMapper.read(Username)
     }
 
     @GetMapping(CLIENT_ADDRESSES)

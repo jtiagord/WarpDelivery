@@ -8,7 +8,7 @@ class WarperLocation(val username : String, val location : Location)
 
 
 @Component
-class WarperList(val activeWarpers : WarperList){
+class WarperList(){
     private val warperLocationList : ArrayList<WarperLocation> = ArrayList()
 
     fun add(warperLocation : WarperLocation){

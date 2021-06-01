@@ -1,10 +1,10 @@
-package com.isel.warpDelivery.Controllers
+package com.isel.warpDelivery.controllers
 
-import DataAccess.mappers.DeliveryMapper
-import com.isel.warpDelivery.Common.DELIVERIES
-import com.isel.warpDelivery.Common.DELIVERY
-import com.isel.warpDelivery.Common.DELIVERY_STATE
-import dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.common.DELIVERIES
+import com.isel.warpDelivery.common.DELIVERY
+import com.isel.warpDelivery.common.DELIVERY_STATE
+import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
@@ -31,6 +31,6 @@ class DeliveryController(val deliveryMapper: DeliveryMapper) {
 
     @GetMapping(DELIVERY)
     fun getDelivery(req: HttpServletRequest, @RequestParam id: String) : Delivery {
-        return deliveryMapper.Read(id)
+        return deliveryMapper.read(id)
     }
 }

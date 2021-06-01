@@ -1,19 +1,19 @@
-package dataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import DataAccess.mappers.DataMapper
-import dataAccess.DAO.Delivery
-import dataAccess.DAO.Warper
+import com.isel.warpDelivery.dataAccess.DAO.Warper
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
     companion object {
         const val USER_TABLE = "USER"
     }
-    override fun Create(DAO: Warper) {
+    override fun create(DAO: Warper) {
         TODO("Not yet implemented")
     }
 
-    override fun Read(key: String): Warper =
+    override fun read(key: String): Warper =
         jdbi.inTransaction<Warper, Exception> { handle ->
             return@inTransaction handle.createQuery(
                 "SELECT state " +
@@ -25,7 +25,7 @@ class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                 .one()
         }
 
-    override fun Update(DAO: Warper) {
+    override fun update(DAO: Warper) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $USER_TABLE} " +
@@ -38,7 +38,7 @@ class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         }
     }
 
-    override fun Delete(key: String) {
+    override fun delete(key: String) {
         TODO("Not yet implemented")
     }
 }

@@ -1,11 +1,11 @@
-package DataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import dataAccess.DAO.Delivery
-import dataAccess.DAO.StateTransition
-import dataAccess.DAO.Warper
-import dataAccess.mappers.WarperMapper
+import com.isel.warpDelivery.dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
 
     companion object {
@@ -13,7 +13,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         const val TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
-    override fun Create(DAO: Delivery) {
+    override fun create(DAO: Delivery) {
         jdbi.useTransaction<Exception> { handle ->
 
             handle.createUpdate(
@@ -49,7 +49,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    override fun Read(key: String): Delivery =
+    override fun read(key: String): Delivery =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val delivery = handle.createQuery(
                 "SELECT deliveryid, clientid, warperid, " +
@@ -72,7 +72,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
             return@inTransaction delivery
         }
 
-    override fun Update(DAO: Delivery) {
+    override fun update(DAO: Delivery) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $DELIVERY_TABLE " +
@@ -89,7 +89,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    override fun Delete(key: String) {
+    override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $DELIVERY_TABLE " +

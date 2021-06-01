@@ -1,15 +1,16 @@
-package dataAccess.mappers
+package com.isel.warpDelivery.dataAccess.mappers
 
-import DataAccess.mappers.DataMapper
-import dataAccess.DAO.Vehicle
+import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import org.jdbi.v3.core.Jdbi
+import org.springframework.stereotype.Component
 
+@Component
 class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
     companion object {
         const val VEHICLE_TABLE = "DELIVERY"
     }
 
-    override fun Create(DAO: Vehicle) {
+    override fun create(DAO: Vehicle) {
         jdbi.useTransaction<Exception> { handle ->
 
             handle.createUpdate(
@@ -26,7 +27,7 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
         }
     }
 
-    override fun Read(key: List<String>): Vehicle =
+    override fun read(key: List<String>): Vehicle =
         jdbi.inTransaction<Vehicle, Exception> { handle ->
             val vehicle = handle.createQuery(
                 "SELECT *" +
@@ -54,10 +55,10 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
                 .list()
         }
 
-    override fun Update(DAO: Vehicle) {
+    override fun update(DAO: Vehicle) {
     }
 
-    override fun Delete(key: List<String>) {
+    override fun delete(key: List<String>) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $VEHICLE_TABLE " +

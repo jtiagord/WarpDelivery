@@ -1,4 +1,4 @@
-package dataAccess.DAO
+package com.isel.warpDelivery.dataAccess.DAO
 
 class Store (
     val storeId : Long,

@@ -1,7 +1,7 @@
 package isel.warpDelivery.inputmodels
 
-import isel.warpDelivery.model.Location
-import isel.warpDelivery.model.Warper
+import com.isel.warpDelivery.model.Location
+
 
 data class RequestDeliveryInputModel(
     val storeID : Long,
