@@ -2,20 +2,7 @@ CREATE TABLE STORE (
 	storeid serial PRIMARY KEY,
 	name varchar(100) NOT NULL,
 	postalcode varchar(10) NOT NULL,
-	address varchar(100) NOT NULL,
-);
-
-CREATE TABLE DELIVERY (
-	deliveryid serial PRIMARY KEY,
-	warperusername long REFERENCES WARPER(username) on delete cascade,
-	clientusername long NOT NULL REFERENCES USER(username) on delete cascade,
-	state varchar(20) NOT NULL 
-	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')), 
-	purchasedate timestamp NOT NULL,
-	deliverydate timestamp CHECK (deliverydate > purchasedate),
-	rating int CHECK (rating >= 1 and rating <= 5),
-	price decimal(10,2) NOT NULL CHECK (price >= 0),
-	type varchar(50) NOT NULL --pode vir a ser mudado
+	address varchar(100) NOT NULL
 );
 
 CREATE TABLE USERS (
@@ -31,6 +18,19 @@ CREATE TABLE WARPER (
 	username varchar(50) PRIMARY KEY REFERENCES USERS(username) on delete cascade,
 	state varchar(50)
 	--adicionar aqui a foto q ns como será ainda
+);
+
+CREATE TABLE DELIVERY (
+	deliveryid serial PRIMARY KEY,
+	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
+	clientusername varchar(50) NOT NULL REFERENCES USERS(username) on delete cascade,
+	state varchar(20) NOT NULL
+	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
+	purchasedate timestamp NOT NULL,
+	deliverydate timestamp CHECK (deliverydate > purchasedate),
+	rating int CHECK (rating >= 1 and rating <= 5),
+	price decimal(10,2) NOT NULL CHECK (price >= 0),
+	type varchar(50) NOT NULL --pode vir a ser mudado
 );
 
 CREATE TABLE VEHICLE (

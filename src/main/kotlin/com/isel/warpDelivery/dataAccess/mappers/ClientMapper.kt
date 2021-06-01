@@ -2,6 +2,7 @@ package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.dataAccess.DAO.Address
 import com.isel.warpDelivery.dataAccess.DAO.Client
+import com.isel.warpDelivery.inputmodels.ClientInputModel
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -19,7 +20,7 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                 .bind("username"    , DAO.username)
                 .bind("firstname"   , DAO.firstname)
                 .bind("lastname"    , DAO.lastname)
-                .bind("phonenumber" , DAO.lastname)
+                .bind("phonenumber" , DAO.phonenumber)
                 .bind("password"    , DAO.password)
                 .bind("email"       , DAO.email)
                 .execute()
@@ -33,30 +34,37 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                     .bind("address"       ,      address.address)
                     .execute()
             }
-
-            handle.commit()
         }
     }
 
     override fun read(key: String): Client =
         jdbi.inTransaction<Client ,Exception> { handle ->
             val client = handle.createQuery(
-                "SELECT username, firstname , lastname, phonenumber, password, email" +
-                        "from $USER_TABLE" +
+                "SELECT username, firstname , lastname, phonenumber, password, email " +
+                        "from $USER_TABLE " +
                         "where username = :username"
             )
             .bind("username", key)
             .mapTo(Client::class.java)
             .one()
 
-            val addresses = handle.createQuery("SELECT  clientUsername , postal_code, address" +
-                    "from $CLIENT_ADDRESSES_TABLE" +
+            val addresses = handle.createQuery("SELECT clientUsername , postal_code, address " +
+                    "from $CLIENT_ADDRESSES_TABLE " +
                     "where clientUsername = :username"
             ).bind("username", key).mapTo(Address::class.java).list()
 
             client.addresses = addresses
 
             return@inTransaction client
+        }
+
+    fun readAll(): List<Client> =
+        jdbi.inTransaction<List<Client>, Exception> { handle ->
+            return@inTransaction handle.createQuery(
+                "SELECT * from $USER_TABLE "
+            )
+                .mapTo(Client::class.java)
+                .list()
         }
 
 
@@ -81,7 +89,7 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
 
     }
 
-    fun AddAddress(key : String, address : Address){
+    fun addAddress(key : String, address : Address){
         jdbi.useHandle<Exception> { handle ->
             handle.createUpdate(
                 "Insert Into $CLIENT_ADDRESSES_TABLE" +
@@ -95,14 +103,45 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
         }
     }
 
-    fun removeAddress(username: String, addressId: String) {
+    fun removeAddress(username: String, addressId: Int) {
         jdbi.useHandle<Exception> { handle ->
             handle.createUpdate(
-                "DELETE FROM $CLIENT_ADDRESSES_TABLE" +
-                        "WHERE id = :addressId"
-            )
+                "DELETE FROM $CLIENT_ADDRESSES_TABLE WHERE addressid = :addressId")
                 .bind("addressId", addressId)
                 .execute()
         }
     }
+
+    fun getAddress(username: String, addressId: Int) : Address =
+        jdbi.inTransaction<Address ,Exception> { handle ->
+
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $CLIENT_ADDRESSES_TABLE " +
+                        "WHERE clientusername = :username AND addressid = :addressId"
+            )
+                .bind("username", username)
+                .bind("addressId", addressId)
+                .mapTo(Address::class.java)
+                .one()
+        }
+
+    fun getAddresses(username: String) : List<Address> =
+        jdbi.inTransaction<List<Address> ,Exception> { handle ->
+
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $CLIENT_ADDRESSES_TABLE " +
+                        "WHERE clientusername = :username"
+            )
+                .bind("username", username)
+                .mapTo(Address::class.java)
+                .list()
+        }
+
+    fun addClient(client: ClientInputModel){
+        var clientDao = Client (client.username, client.firstName, client.lastName, client.phoneNumber,
+            client.email, client.password)
+        create(clientDao)
+    }
 }
+
+
