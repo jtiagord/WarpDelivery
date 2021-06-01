@@ -92,4 +92,15 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                 .execute()
         }
     }
+
+    fun removeAddress(username: String, addressId: String) {
+        jdbi.useHandle<Exception> { handle ->
+            handle.createUpdate(
+                "DELETE FROM $CLIENT_ADDRESSES_TABLE" +
+                        "WHERE id = :addressId"
+            )
+                .bind("addressId", addressId)
+                .execute()
+        }
+    }
 }
