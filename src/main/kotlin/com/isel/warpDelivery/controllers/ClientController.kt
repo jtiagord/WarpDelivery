@@ -2,7 +2,10 @@ package com.isel.warpDelivery.controllers
 
 import com.isel.warpDelivery.dataAccess.mappers.ClientMapper
 import com.isel.warpDelivery.common.*
+import com.isel.warpDelivery.dataAccess.DAO.Address
 import com.isel.warpDelivery.dataAccess.DAO.Client
+import com.isel.warpDelivery.inputmodels.ClientInputModel
+import isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
@@ -12,28 +15,24 @@ class ClientController(val clientMapper: ClientMapper) {
     @PostMapping(CLIENTS)
     fun addClient(
         req: HttpServletRequest,
+        @RequestBody client : ClientInputModel
     ) {
-        //TODO: IMPLEMENT
+       clientMapper.addClient(client) //TODO: Handle SQL exceptions
     }
 
-  /*  @GetMapping(CLIENT)
-    fun getClients(
-        req: HttpServletRequest,
-    ) {
-        //TODO: IMPLEMENT
-    }*/
+   @GetMapping(CLIENTS)
+    fun getClients(req: HttpServletRequest): List<Client> {
+       return clientMapper.readAll()
+   }
 
     @GetMapping(CLIENT)
-    fun getClient(
-        req: HttpServletRequest,
-        @PathVariable Username: String
-    ): Client {
-        return clientMapper.read(Username)
+    fun getClient(req: HttpServletRequest, @PathVariable Username: String): Client {
+        return clientMapper.read(Username) //TODO: Fix error when client doesn't exist
     }
 
     @GetMapping(CLIENT_ADDRESSES)
-    fun getClientAddresses(req: HttpServletRequest, @PathVariable Username: String) {
-        //TODO: IMPLEMENT
+    fun getClientAddresses(req: HttpServletRequest, @PathVariable Username: String): List<Address> {
+        return clientMapper.getAddresses(Username)
     }
 
     @PostMapping(CLIENT_ADDRESSES)
@@ -42,12 +41,14 @@ class ClientController(val clientMapper: ClientMapper) {
     }
 
     @GetMapping(CLIENT_ADDRESS)
-    fun getClientAddress(req: HttpServletRequest, @PathVariable Username: String, @PathVariable AddressId: String) {
-        //TODO: IMPLEMENT
+    fun getClientAddress(req: HttpServletRequest,
+                         @PathVariable Username: String,
+                         @PathVariable AddressId: Int): Address {
+        return clientMapper.getAddress(Username, AddressId)
     }
 
     @DeleteMapping(CLIENT_ADDRESS)
-    fun removeClientAddress(req: HttpServletRequest, @PathVariable Username: String, @PathVariable AddressId: String) {
+    fun removeClientAddress(req: HttpServletRequest, @PathVariable Username: String, @PathVariable AddressId: Int) {
         return clientMapper.removeAddress(Username, AddressId)
     }
 
