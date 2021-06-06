@@ -43,7 +43,7 @@ class Warpers(private val jdbi:Jdbi) {
 
     fun getVehicle(username: String,vehicleRegistration: String): Vehicle {
         return jdbi.onDemand(VehicleMapper::class.java).read(
-            listOf(username,vehicleRegistration)
+            vehicleRegistration
         )
     }
 
@@ -53,7 +53,7 @@ class Warpers(private val jdbi:Jdbi) {
 
     fun deleteVehicle(username: String,vehicleRegistration:String) {
         return jdbi.onDemand(VehicleMapper::class.java).delete(
-            listOf(username,vehicleRegistration)
+            vehicleRegistration
         )
     }
 

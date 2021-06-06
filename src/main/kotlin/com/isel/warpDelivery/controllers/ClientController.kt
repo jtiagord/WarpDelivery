@@ -10,7 +10,6 @@ import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.inputmodels.AddressInputModel
 import com.isel.warpDelivery.inputmodels.ClientInputModel
 import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
-import isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
@@ -109,7 +108,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         @PathVariable username: String,
         @PathVariable deliveryId: Int
     ): List<StateTransition> {
-        return clientMapper.getTransitions(deliveryId)
+        return deliveryMapper.getTransitions(deliveryId)
         //TODO: Handle case when there are no transitions
     }
 }

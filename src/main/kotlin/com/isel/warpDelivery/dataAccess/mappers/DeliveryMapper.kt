@@ -143,5 +143,17 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
 
             return@inTransaction deliveries
         }
+
+    fun getTransitions(deliveryId: Int): List<StateTransition> =
+        jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
+
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $TRANSITIONS_TABLE " +
+                        "WHERE deliveryid = :deliveryId"
+            )
+                .bind("deliveryId", deliveryId)
+                .mapTo(StateTransition::class.java)
+                .list()
+        }
 }
 

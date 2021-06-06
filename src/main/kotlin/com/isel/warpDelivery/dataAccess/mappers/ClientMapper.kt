@@ -1,10 +1,7 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.common.DELIVERIES
 import com.isel.warpDelivery.dataAccess.DAO.Address
 import com.isel.warpDelivery.dataAccess.DAO.Client
-import com.isel.warpDelivery.dataAccess.DAO.StateTransition
-import com.isel.warpDelivery.inputmodels.ClientInputModel
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -13,7 +10,6 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
     companion object{
         const val USER_TABLE = "USERS"
         const val CLIENT_ADDRESSES_TABLE = "CLIENT_ADDRESS"
-        const val STATE_TRANSITIONS_TABLE = "STATE_TRANSITIONS"
         const val DELIVERIES_TABLE = "DELIVERY"
     }
     override fun create(DAO: Client) {
@@ -151,19 +147,6 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                 .execute()
         }
     }
-
-    fun getTransitions(deliveryId: Int): List<StateTransition> =
-        jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
-
-            return@inTransaction handle.createQuery(
-                "SELECT * FROM $STATE_TRANSITIONS_TABLE " +
-                        "WHERE deliveryid = :deliveryId"
-            )
-                .bind("deliveryId", deliveryId)
-                .mapTo(StateTransition::class.java)
-                .list()
-        }
-
 }
 
 

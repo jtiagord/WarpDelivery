@@ -5,7 +5,7 @@ import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
 @Component
-class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
+class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
     companion object {
         const val VEHICLE_TABLE = "DELIVERY"
     }
@@ -27,7 +27,7 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
         }
     }
 
-    override fun read(key: List<String>): Vehicle =
+    override fun read(key: String): Vehicle =
         jdbi.inTransaction<Vehicle, Exception> { handle ->
             val vehicle = handle.createQuery(
                 "SELECT *" +
@@ -58,15 +58,13 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<List<String>, Vehicle>(jdbi) {
     override fun update(DAO: Vehicle) {
     }
 
-    override fun delete(key: List<String>) {
+    override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $VEHICLE_TABLE " +
-                        "where username = :username " +
-                        "and vehicleregistration= :vehicleregistration"
+                        "where vehicleregistration= :vehicleregistration"
             )
-                .bind("username", key[0])
-                .bind("vehicleregistration", key[1])
+                .bind("vehicleregistration", key)
                 .execute()
         }
     }

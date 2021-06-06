@@ -58,9 +58,9 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
     override fun read(key: String): Warper =
         jdbi.inTransaction<Warper, Exception> { handle ->
             val warper = handle.createQuery(
-                "SELECT username, firstname , lastname, phonenumber, password, email " +
-                        "from $USER_TABLE " +
-                        "where username = :username"
+                "SELECT $USER_TABLE.username, firstname , lastname, phonenumber, email, password, state " +
+                        "from $USER_TABLE JOIN $WARPER_TABLE ON $USER_TABLE.username = $WARPER_TABLE.username " +
+                        "where $USER_TABLE.username = :username"
             )
                 .bind("username", key)
                 .mapTo(Warper::class.java)
@@ -82,13 +82,28 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
 
     fun readAll(): List<Warper> =
         jdbi.inTransaction<List<Warper>, Exception> { handle ->
-
-            return@inTransaction handle.createQuery(
-                "SELECT username, firstname , lastname, phonenumber, password, email " +
-                        "from $USER_TABLE"
+            val warpers = handle.createQuery(
+                "SELECT $USER_TABLE.username, firstname , lastname, phonenumber, email, password, state " +
+                        "from $USER_TABLE JOIN $WARPER_TABLE ON $USER_TABLE.username = $WARPER_TABLE.username "
             )
                 .mapTo(Warper::class.java)
                 .list()
+
+            //TODO: MAYBE DO THIS WITH VEHICLE MAPPER ?
+            for (warper in warpers) {
+                val vehicles = handle.createQuery(
+                    "SELECT  username , vehicleType, vehicleRegistration " +
+                            "from $VEHICLE_TABLE " +
+                            "where username = :username"
+                )
+                    .bind("username", warper.username)
+                    .mapTo(Vehicle::class.java)
+                    .list()
+
+                warper.vehicles = vehicles
+            }
+
+            return@inTransaction warpers
         }
 
     override fun update(DAO: Warper) {

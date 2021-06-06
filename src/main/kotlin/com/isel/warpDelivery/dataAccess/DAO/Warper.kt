@@ -6,6 +6,6 @@ class Warper (val username : String,
               val phonenumber : String,
               val email : String,
               val password :String?,
-              val state:String,
-              var vehicles : List<Vehicle>){
+              val state: String,
+              var vehicles : List<Vehicle> = emptyList()){
 }
