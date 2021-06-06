@@ -7,16 +7,27 @@ import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.DAO.Warper
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.dataAccess.mappers.VehicleMapper
 import com.isel.warpDelivery.dataAccess.mappers.WarperMapper
 import com.isel.warpDelivery.model.WarperList
 import com.isel.warpDelivery.model.WarperLocation
 import com.isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
+import com.isel.warpDelivery.inputmodels.VehicleInputModel
+import com.isel.warpDelivery.inputmodels.WarperInputModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping(WARPERS_PATH)
-class WarperController(val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val warpers: Warpers, val activeWarpers: WarperList) {
+class WarperController(
+    val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val vehicleMapper: VehicleMapper,
+    val warpers: Warpers, val activeWarpers: WarperList
+) {
+
+    companion object {
+        const val WARPER_INACTIVE = "INACTIVE"
+        const val WARPER_ACTIVE = "ACTIVE"
+    }
 
     //-------------------------------Warper related endpoints-------------------------
     @GetMapping
@@ -33,8 +44,12 @@ class WarperController(val warperMapper: WarperMapper, val deliveryMapper: Deliv
     }
 
     @PostMapping
-    fun addWarper(@RequestBody warper: Warper): ResponseEntity<Unit> {
-        val warper = warperMapper.create(warper)
+    fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Unit> {
+        val warperDao: Warper = Warper(
+            warper.username, warper.firstname, warper.lastname, warper.phonenumber,
+            warper.email, warper.password, WARPER_INACTIVE, emptyList()
+        ) //TODO: HANDLE SQL ERRORS
+        val warper = warperMapper.create(warperDao) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
         return ResponseEntity.status(201).body(warper)
     }
 
@@ -42,7 +57,7 @@ class WarperController(val warperMapper: WarperMapper, val deliveryMapper: Deliv
     @DeleteMapping("/{username}")
     fun deleteWarper(@PathVariable username: String): ResponseEntity<String> {
         warperMapper.delete(username)
-        return ResponseEntity.status(204).body("Deleted user: $username")
+        return ResponseEntity.status(204).build()
     }
 
 
@@ -55,29 +70,34 @@ class WarperController(val warperMapper: WarperMapper, val deliveryMapper: Deliv
     //-------------------------------------------------------------------------------
 
     @GetMapping("/{username}/vehicles/{vehicleRegistration}")
-    fun getVehicle(@PathVariable username: String, vehicleRegistration: String) =
-        ResponseEntity
-            .ok()
-            .body(warpers.getVehicle(username, vehicleRegistration))
+    fun getVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<Vehicle> {
+        val vehicle = vehicleMapper.read(vehicleRegistration)
+        return ResponseEntity.ok().body(vehicle)
+    }
 
     @GetMapping("/{username}/vehicles")
-    fun getVehicles(@PathVariable username: String) =
-        ResponseEntity
-            .ok()
-            .body(warpers.getVehicles(username))
+    fun getVehicles(@PathVariable username: String): ResponseEntity<List<Vehicle>> {
+        val vehicles = vehicleMapper.readAll(username)
+        return ResponseEntity.ok().body(vehicles)
+    }
 
     @PostMapping("/{username}/vehicles")
-    fun addVehicle(@RequestBody vehicle: Vehicle, @PathVariable username: String) =
-        ResponseEntity
-            .status(201)
-            .body(warpers.addVehicle(vehicle))
+    fun addVehicle(
+        @PathVariable username: String,
+        @RequestBody vehicle: VehicleInputModel
+    ): ResponseEntity<String> {
+        val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
+        vehicleMapper.create(vehicleDao)
+        return ResponseEntity.status(201).build()
+    }
 
     @DeleteMapping("/{username}/vehicles/{vehicleRegistration}")
-    fun deleteVehicle(@PathVariable username: String, vehicleRegistration: String) =
-        ResponseEntity
-            .status(204)
-            .body(warpers.deleteVehicle(username, vehicleRegistration))
+    fun deleteVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<String>{
+        vehicleMapper.delete(vehicleRegistration)
+        return ResponseEntity.status(204).build()
+    }
 
+    //TODO: FIX METHODS BELOW
     //-------------------------------------------------------------------------------
 
     @GetMapping("/{username}/state")

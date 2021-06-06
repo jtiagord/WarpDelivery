@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
     companion object {
-        const val VEHICLE_TABLE = "DELIVERY"
+        const val VEHICLE_TABLE = "VEHICLE"
     }
 
     override fun create(DAO: Vehicle) {
@@ -22,8 +22,6 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
                 .bind("vehicletype", DAO.vehicleType)
                 .bind("vehicleregistration", DAO.vehicleRegistration)
                 .execute()
-
-            handle.commit()
         }
     }
 

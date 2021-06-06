@@ -33,10 +33,11 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
 
             handle.createUpdate(
                 "Insert Into $WARPER_TABLE " +
-                        "(username) values " +
-                        "(:name)"
+                        "(username, state) values " +
+                        "(:name, :state)"
             )
                 .bind("name", DAO.username)
+                .bind("state", DAO.state)
                 .execute()
 
             for (vehicle in DAO.vehicles) {
@@ -50,8 +51,6 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                     .bind("registration", vehicle.vehicleRegistration)
                     .execute()
             }
-
-            handle.commit()
         }
     }
 
