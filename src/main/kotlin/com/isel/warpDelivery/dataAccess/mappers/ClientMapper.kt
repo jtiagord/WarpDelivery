@@ -1,7 +1,9 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
+import com.isel.warpDelivery.common.DELIVERIES
 import com.isel.warpDelivery.dataAccess.DAO.Address
 import com.isel.warpDelivery.dataAccess.DAO.Client
+import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.inputmodels.ClientInputModel
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
@@ -11,6 +13,8 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
     companion object{
         const val USER_TABLE = "USERS"
         const val CLIENT_ADDRESSES_TABLE = "CLIENT_ADDRESS"
+        const val STATE_TRANSITIONS_TABLE = "STATE_TRANSITIONS"
+        const val DELIVERIES_TABLE = "DELIVERY"
     }
     override fun create(DAO: Client) {
         jdbi.useTransaction<Exception> { handle ->
@@ -89,14 +93,14 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
 
     }
 
-    fun addAddress(key : String, address : Address){
+    fun addAddress(address : Address){
         jdbi.useHandle<Exception> { handle ->
             handle.createUpdate(
                 "Insert Into $CLIENT_ADDRESSES_TABLE" +
                         "(clientusername, postal_code, address) values" +
                         "(:clientusername,:postal_code ,:address)"
             )
-                .bind("clientusername", key)
+                .bind("clientusername", address.clientUsername)
                 .bind("postal_code", address.postalCode)
                 .bind("address", address.address)
                 .execute()
@@ -137,11 +141,29 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                 .list()
         }
 
-    fun addClient(client: ClientInputModel){
-        var clientDao = Client (client.username, client.firstName, client.lastName, client.phoneNumber,
-            client.email, client.password)
-        create(clientDao)
+    fun giveRatingAndReward(username: String, deliveryId: Int, rating: Int, reward: Float) {
+        jdbi.useHandle<Exception> { handle ->
+            handle.createUpdate(
+                "UPDATE $DELIVERIES_TABLE SET rating = :rating, reward = :reward WHERE deliveryid = :deliveryId")
+                .bind("rating", rating)
+                .bind("reward", reward)
+                .bind("deliveryId", deliveryId)
+                .execute()
+        }
     }
+
+    fun getTransitions(deliveryId: Int): List<StateTransition> =
+        jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
+
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $STATE_TRANSITIONS_TABLE " +
+                        "WHERE deliveryid = :deliveryId"
+            )
+                .bind("deliveryId", deliveryId)
+                .mapTo(StateTransition::class.java)
+                .list()
+        }
+
 }
 
 

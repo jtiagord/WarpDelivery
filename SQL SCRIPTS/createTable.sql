@@ -30,6 +30,7 @@ CREATE TABLE DELIVERY (
 	deliverydate timestamp CHECK (deliverydate > purchasedate),
 	rating int CHECK (rating >= 1 and rating <= 5),
 	price decimal(10,2) NOT NULL CHECK (price >= 0),
+	reward decimal(10,2) CHECK (reward >= 0),
 	type varchar(50) NOT NULL --pode vir a ser mudado
 );
 

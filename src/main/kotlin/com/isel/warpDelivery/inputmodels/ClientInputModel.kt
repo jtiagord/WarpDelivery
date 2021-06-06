@@ -8,3 +8,13 @@ data class ClientInputModel(
     val password : String,
     val email : String
 )
+
+data class AddressInputModel (
+    val postalCode: String,
+    val address : String
+)
+
+data class RatingAndRewardInputModel (
+    val rating: Int,
+    val reward: Float
+)

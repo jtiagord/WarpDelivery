@@ -22,8 +22,8 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                         "(:id, :clientid, :warperid, :state, :purchasedate, :deliverydate, :rating, :price, :type)"
             )
                 .bind("id", DAO.deliveryId)
-                .bind("clientId", DAO.clientId)
-                .bind("warperId", DAO.warperId)
+                .bind("clientId", DAO.clientUsername)
+                .bind("warperId", DAO.warperUsername)
                 .bind("state", DAO.state)
                 .bind("purchase_date", DAO.purchaseDate)
                 .bind("delivery_date", DAO.deliveryDate)
@@ -32,7 +32,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                 .bind("type", DAO.type)
                 .execute()
 
-            for (transition in DAO.transitions) {
+            for (transition in DAO.transitions!!) {
                 handle.createUpdate(
                     "Insert Into $TRANSITIONS_TABLE" +
                             "(deliveryId, transitiondate, previous_state, next_state) values" +
@@ -120,6 +120,28 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                 .bind("state", state)
                 .bind("deliveryid", key)
                 .execute()
+        }
+
+    fun getClientDeliveries(username: String): List<Delivery> =
+
+        jdbi.inTransaction<List<Delivery>, Exception> { handle ->
+            val deliveries = handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
+                .bind("username", username)
+                .mapTo(Delivery::class.java)
+                .list()
+
+            for (delivery in deliveries) {
+                val transitions = handle.createQuery(
+                    "SELECT  deliveryid, transitiondate, previousstate, nextstate " +
+                            "from $TRANSITIONS_TABLE " +
+                            "where deliveryid = :id"
+                ).bind("id", delivery.deliveryId).mapTo(StateTransition::class.java).list()
+
+                delivery.transitions = transitions
+            }
+            //TODO: Improve code
+
+            return@inTransaction deliveries
         }
 }
 

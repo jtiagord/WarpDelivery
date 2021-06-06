@@ -4,83 +4,112 @@ import com.isel.warpDelivery.dataAccess.mappers.ClientMapper
 import com.isel.warpDelivery.common.*
 import com.isel.warpDelivery.dataAccess.DAO.Address
 import com.isel.warpDelivery.dataAccess.DAO.Client
+import com.isel.warpDelivery.dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.DAO.StateTransition
+import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.inputmodels.AddressInputModel
 import com.isel.warpDelivery.inputmodels.ClientInputModel
+import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
 import isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 
 @RestController
-class ClientController(val clientMapper: ClientMapper) {
+@RequestMapping(CLIENTS_PATH)
+class ClientController(val clientMapper: ClientMapper, val deliveryMapper: DeliveryMapper) {
 
-    @PostMapping(CLIENTS)
+    @PostMapping
     fun addClient(
         req: HttpServletRequest,
-        @RequestBody client : ClientInputModel
+        @RequestBody client: ClientInputModel
     ) {
-       clientMapper.addClient(client) //TODO: Handle SQL exceptions
+        var clientDao = Client(
+            client.username, client.firstName, client.lastName, client.phoneNumber,
+            client.email, client.password
+        )
+        clientMapper.create(clientDao) //TODO: Handle SQL exceptions
     }
 
-   @GetMapping(CLIENTS)
+    @GetMapping
     fun getClients(req: HttpServletRequest): List<Client> {
-       return clientMapper.readAll()
-   }
-
-    @GetMapping(CLIENT)
-    fun getClient(req: HttpServletRequest, @PathVariable Username: String): Client {
-        return clientMapper.read(Username) //TODO: Fix error when client doesn't exist
+        return clientMapper.readAll()
     }
 
-    @GetMapping(CLIENT_ADDRESSES)
-    fun getClientAddresses(req: HttpServletRequest, @PathVariable Username: String): List<Address> {
-        return clientMapper.getAddresses(Username)
+    @GetMapping("/{username}")
+    fun getClient(req: HttpServletRequest, @PathVariable username: String): Client {
+        return clientMapper.read(username) //TODO: Fix error when client doesn't exist
     }
 
-    @PostMapping(CLIENT_ADDRESSES)
-    fun addClientAddress(req: HttpServletRequest, @PathVariable Username: String) {
-        //TODO: IMPLEMENT
+    @GetMapping("/{username}/addresses")
+    fun getClientAddresses(req: HttpServletRequest, @PathVariable username: String): List<Address> {
+        return clientMapper.getAddresses(username)
     }
 
-    @GetMapping(CLIENT_ADDRESS)
-    fun getClientAddress(req: HttpServletRequest,
-                         @PathVariable Username: String,
-                         @PathVariable AddressId: Int): Address {
-        return clientMapper.getAddress(Username, AddressId)
-    }
-
-    @DeleteMapping(CLIENT_ADDRESS)
-    fun removeClientAddress(req: HttpServletRequest, @PathVariable Username: String, @PathVariable AddressId: Int) {
-        return clientMapper.removeAddress(Username, AddressId)
-    }
-
-    @GetMapping(CLIENT_DELIVERIES)
-    fun getClientDeliveries(req: HttpServletRequest, @PathVariable Username: String) {
-        //TODO: IMPLEMENT
-    }
-
-    @PostMapping(CLIENT_DELIVERIES)
-    fun addClientDelivery(req: HttpServletRequest, @PathVariable Username: String) {
-        //TODO: IMPLEMENT
-    }
-
-    @GetMapping(CLIENT_DELIVERY)
-    fun getClientDelivery(req: HttpServletRequest, @PathVariable Username: String, @PathVariable DeliveryId: String) {
-        //TODO: IMPLEMENT
-    }
-
-    @PostMapping(CLIENT_DELIVERY)
-    fun giveRatingAndReward(req: HttpServletRequest,
-                            @PathVariable Username: String,
-                            @PathVariable DeliveryId: String,
-                            @RequestParam Rating: Int,
-                            @RequestParam Reward: Float,
+    @PostMapping("/{username}/addresses")
+    fun addClientAddress(
+        req: HttpServletRequest,
+        @PathVariable Username: String,
+        @RequestBody addressInfo: AddressInputModel
     ) {
+        var addressDao = Address(Username, addressInfo.postalCode, addressInfo.address)
+        return clientMapper.addAddress(addressDao) //TODO: HANDLE CLIENT DOESNT EXIST
+    }
+
+    @GetMapping("/{username}/addresses/{addressId}")
+    fun getClientAddress(
+        req: HttpServletRequest,
+        @PathVariable username: String,
+        @PathVariable addressId: Int
+    ): Address {
+        return clientMapper.getAddress(username, addressId)
+    }
+
+    @DeleteMapping("/{username}/addresses/{addressId}")
+    fun removeClientAddress(
+        req: HttpServletRequest,
+        @PathVariable username: String,
+        @PathVariable addressId: Int
+    ) {
+        return clientMapper.removeAddress(username, addressId)
+    }
+
+    @GetMapping("/{username}/deliveries")
+    fun getClientDeliveries(req: HttpServletRequest, @PathVariable username: String): List<Delivery> {
+        return deliveryMapper.getClientDeliveries(username)
+    }
+
+    @PostMapping("/{username}/deliveries")
+    fun addClientDelivery(req: HttpServletRequest, @PathVariable username: String) {
         //TODO: IMPLEMENT
     }
 
-    @GetMapping(CLIENT_DELIVERY_TRANSITIONS)
-    fun getStateTransitions(req: HttpServletRequest, @PathVariable Username: String, @PathVariable DeliveryId: String) {
-        //TODO: IMPLEMENT
+    @GetMapping("/{username}/deliveries/{deliveryId}")
+    fun getClientDelivery(
+        req: HttpServletRequest,
+        @PathVariable username: String,
+        @PathVariable deliveryId: String
+    ): Delivery {
+        return deliveryMapper.read(deliveryId)
     }
 
+    @PostMapping("/{username}/deliveries/{deliveryId}")
+    fun giveRatingAndReward(
+        req: HttpServletRequest,
+        @PathVariable username: String,
+        @PathVariable deliveryId: Int,
+        @RequestBody ratingAndReward: RatingAndRewardInputModel
+    ) {
+        clientMapper.giveRatingAndReward(username, deliveryId, ratingAndReward.rating, ratingAndReward.reward)
+        //TODO: Handle wrong inputs
+    }
 
+    @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
+    fun getStateTransitions(
+        req: HttpServletRequest,
+        @PathVariable username: String,
+        @PathVariable deliveryId: Int
+    ): List<StateTransition> {
+        return clientMapper.getTransitions(deliveryId)
+        //TODO: Handle case when there are no transitions
+    }
 }
