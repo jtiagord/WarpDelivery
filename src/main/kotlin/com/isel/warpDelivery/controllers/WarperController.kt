@@ -7,7 +7,7 @@ import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.DAO.Warper
 import com.isel.warpDelivery.model.WarperList
 import com.isel.warpDelivery.model.WarperLocation
-import isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
+import com.isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -118,10 +118,9 @@ class WarperController(val warpers : Warpers,val activeWarpers : WarperList) {
             .ok()
             .body(warpers.getDeliveryTransitions(username))
 
-    @PostMapping("Warper")
-    fun addActiveWarper(@RequestBody warper : RequestActiveWarperInputModel?) : String{
+    @PostMapping("SetActive")
+    fun addActiveWarper(@RequestBody warper : RequestActiveWarperInputModel?) {
 
         activeWarpers.add(WarperLocation(warper!!.username,warper.currentLocation))
-        return "a"
     }
 }

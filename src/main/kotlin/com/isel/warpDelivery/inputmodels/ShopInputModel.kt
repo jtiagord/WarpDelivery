@@ -1,4 +1,4 @@
-package isel.warpDelivery.inputmodels
+package com.isel.warpDelivery.inputmodels
 
 import com.isel.warpDelivery.model.Location
 
