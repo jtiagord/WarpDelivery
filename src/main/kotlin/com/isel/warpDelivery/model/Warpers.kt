@@ -77,7 +77,7 @@ class Warpers(private val jdbi:Jdbi) {
         return jdbi.onDemand(DeliveryMapper::class.java).update(delivery)
     }
 
-    fun getDelivery(username: String, deliveryId: String): Delivery {
+    fun getDelivery(username: String, deliveryId: Int): Delivery {
         return jdbi.onDemand(DeliveryMapper::class.java).read(deliveryId)
     }
 

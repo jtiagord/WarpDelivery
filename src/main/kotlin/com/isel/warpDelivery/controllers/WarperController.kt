@@ -7,6 +7,7 @@ import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.DAO.Warper
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.dataAccess.mappers.StateMapper
 import com.isel.warpDelivery.dataAccess.mappers.VehicleMapper
 import com.isel.warpDelivery.dataAccess.mappers.WarperMapper
 import com.isel.warpDelivery.model.WarperList
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping(WARPERS_PATH)
 class WarperController(
     val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val vehicleMapper: VehicleMapper,
-    val warpers: Warpers, val activeWarpers: WarperList
+    val stateMapper: StateMapper,    val warpers: Warpers, val activeWarpers: WarperList
 ) {
 
     companion object {
@@ -49,8 +50,8 @@ class WarperController(
             warper.username, warper.firstname, warper.lastname, warper.phonenumber,
             warper.email, warper.password, WARPER_INACTIVE, emptyList()
         ) //TODO: HANDLE SQL ERRORS
-        val warper = warperMapper.create(warperDao) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
-        return ResponseEntity.status(201).body(warper)
+        val warperCreated = warperMapper.create(warperDao) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
+        return ResponseEntity.status(201).body(warperCreated)
     }
 
 
@@ -97,20 +98,24 @@ class WarperController(
         return ResponseEntity.status(204).build()
     }
 
-    //TODO: FIX METHODS BELOW
+
     //-------------------------------------------------------------------------------
 
     @GetMapping("/{username}/state")
-    fun getState(@PathVariable username: String) =
-        ResponseEntity
-            .ok()
-            .body(warpers.getState(username))
+    fun getState(@PathVariable username: String): ResponseEntity<Any> {
+        val state = stateMapper.read(username)
+        //TODO: FIX
+        return ResponseEntity.status(200).body(state)
+
+    }
+
 
     @PutMapping("/{username}/state")
-    fun updateState(@PathVariable state: Warper, @PathVariable username: String) =
-        ResponseEntity
-            .status(204)
-            .body(warpers.updateState(state))
+    fun updateState(@PathVariable state: Warper, @PathVariable username: String) {
+        //TODO: FIX
+    }
+
+
     //-------------------------------------------------------------------------------
 
     /*@GetMapping(WARPER_DELIVERIES)
@@ -123,19 +128,25 @@ class WarperController(
     fun addDelivery(@PathVariable delivery: Delivery, @PathVariable username: String) =
         ResponseEntity
             .status(201)
-            .body(warpers.addDelivery(delivery))
+            .body(warpers.addDelivery(delivery)) //TODO: FIX
 
     @GetMapping("/{username}/deliveries/{deliveryId}")
-    fun getDelivery(@PathVariable username: String, @PathVariable deliveryId: Int) =
-        ResponseEntity
-            .ok()
-            .body(warpers.getDelivery(username, deliveryId.toString()))
+    fun getDelivery(@PathVariable deliveryId: Int): ResponseEntity<Delivery> {
+        val delivery = deliveryMapper.read(deliveryId)
+        return ResponseEntity.status(200).body(delivery)
+    }
+
+    @GetMapping("/{username}/deliveries")
+    fun getDeliveries(@PathVariable username: String): ResponseEntity<List<Delivery>> {
+        val deliveries = deliveryMapper.getUserDeliveries(username)
+        return ResponseEntity.status(200).body(deliveries)
+    }
 
     @PutMapping("/{username}/deliveries/{deliveryId}")
     fun updateDelivery(@PathVariable username: String, @RequestBody delivery: Delivery) =
         ResponseEntity
             .status(204)
-            .body(warpers.updateDelivery(username, delivery))
+            .body(warpers.updateDelivery(username, delivery)) //TODO: FIX
 
     //-------------------------------------------------------------------------------
 

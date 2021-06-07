@@ -29,7 +29,7 @@ class DeliveryController(val deliveryMapper: DeliveryMapper) {
     }
 
     @GetMapping("/{deliveryId}")
-    fun getDelivery(req: HttpServletRequest, @RequestParam deliveryId: String) : Delivery {
+    fun getDelivery(req: HttpServletRequest, @RequestParam deliveryId: Int) : Delivery {
         return deliveryMapper.read(deliveryId)
     }
 }

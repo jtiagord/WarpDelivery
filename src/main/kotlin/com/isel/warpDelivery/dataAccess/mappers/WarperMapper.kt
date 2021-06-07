@@ -150,4 +150,14 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                 .execute()*/
         }
     }
+
+    fun getState(username: String): Any {
+        return jdbi.inTransaction<String, Exception> { handle ->
+
+            return@inTransaction handle.createQuery("SELECT state FROM $WARPER_TABLE WHERE username = :username")
+                .bind("username", username)
+                .mapTo(String::class.java)
+                .one()
+        }
+    }
 }

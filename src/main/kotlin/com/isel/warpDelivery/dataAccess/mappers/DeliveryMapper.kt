@@ -6,7 +6,7 @@ import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
 @Component
-class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
+class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
 
     companion object {
         const val DELIVERY_TABLE = "DELIVERY"
@@ -49,7 +49,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    override fun read(key: String): Delivery =
+    override fun read(key: Int): Delivery =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val delivery = handle.createQuery(
                 "SELECT deliveryid, clientid, warperid, " +
@@ -89,7 +89,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    override fun delete(key: String) {
+    override fun delete(key: Int) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $DELIVERY_TABLE " +
@@ -122,7 +122,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                 .execute()
         }
 
-    fun getClientDeliveries(username: String): List<Delivery> =
+    fun getUserDeliveries(username: String): List<Delivery> =
 
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             val deliveries = handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
