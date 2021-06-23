@@ -1,5 +1,6 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
+import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import org.jdbi.v3.core.Jdbi
@@ -148,12 +149,52 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
         jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
 
             return@inTransaction handle.createQuery(
-                "SELECT * FROM $TRANSITIONS_TABLE " +
+                "SELECT transitiondate, previousstate, nextstate FROM $TRANSITIONS_TABLE " +
                         "WHERE deliveryid = :deliveryId"
             )
                 .bind("deliveryId", deliveryId)
                 .mapTo(StateTransition::class.java)
                 .list()
         }
+
+    fun verifyWarper(userInfo: UserInfo, deliveryId: Int): Boolean =
+        jdbi.withHandle<String, Exception> { handle ->
+            val deliveryExists = handle.createQuery("select count(*) FROM $DELIVERY_TABLE where deliveryid = :id")
+                .bind("id", deliveryId)
+                .mapTo(Int::class.java)
+                .findFirst()
+                .get() == 1
+
+            if(!deliveryExists)
+                throw NoSuchElementException("Delivery $deliveryId does not exist")
+
+            handle.createQuery("select warperusername from $DELIVERY_TABLE where deliveryid = :id")
+                .bind("id", deliveryId)
+                .mapTo(String::class.java)
+                .findFirst()
+                .get()
+        }.compareTo(userInfo.name) == 0
+
+    fun verifyClient(userInfo: UserInfo, deliveryId: Int): Boolean =
+        jdbi.withHandle<String, Exception> { handle ->
+            val deliveryExists = handle.createQuery("select count(*) FROM $DELIVERY_TABLE where deliveryid = :id")
+                .bind("id", deliveryId)
+                .mapTo(Int::class.java)
+                .findFirst()
+                .get() == 1
+
+            if(!deliveryExists)
+                throw NoSuchElementException("Delivery $deliveryId does not exist")
+
+            handle.createQuery("select clientusername from $DELIVERY_TABLE where deliveryid = :id")
+                .bind("id", deliveryId)
+                .mapTo(String::class.java)
+                .findFirst()
+                .get()
+        }.compareTo(userInfo.name) == 0
+
+    fun verifyIfWarperOrClient(userInfo: UserInfo, deliveryId: Int) : Boolean{
+        return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId);
+    }
 }
 

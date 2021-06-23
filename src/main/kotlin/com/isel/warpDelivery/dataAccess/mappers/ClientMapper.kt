@@ -7,53 +7,75 @@ import org.springframework.stereotype.Component
 
 @Component
 class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
-    companion object{
+    companion object {
         const val USER_TABLE = "USERS"
         const val CLIENT_ADDRESSES_TABLE = "CLIENT_ADDRESS"
         const val DELIVERIES_TABLE = "DELIVERY"
     }
+
     override fun create(DAO: Client) {
         jdbi.useTransaction<Exception> { handle ->
-            handle.createUpdate("Insert Into $USER_TABLE" +
-                    "(username, firstname , lastname, phonenumber, password, email) values" +
-                    "(:username,:firstname,:lastname,:phonenumber,:password,:email)")
-                .bind("username"    , DAO.username)
-                .bind("firstname"   , DAO.firstname)
-                .bind("lastname"    , DAO.lastname)
-                .bind("phonenumber" , DAO.phonenumber)
-                .bind("password"    , DAO.password)
-                .bind("email"       , DAO.email)
+            handle.createUpdate(
+                "Insert Into $USER_TABLE" +
+                        "(username, firstname , lastname, phonenumber, password, email) values" +
+                        "(:username,:firstname,:lastname,:phonenumber,:password,:email)"
+            )
+                .bind("username", DAO.username)
+                .bind("firstname", DAO.firstname)
+                .bind("lastname", DAO.lastname)
+                .bind("phonenumber", DAO.phonenumber)
+                .bind("password", DAO.password)
+                .bind("email", DAO.email)
                 .execute()
 
-            for(address in DAO.addresses ){
-                handle.createUpdate("Insert Into $CLIENT_ADDRESSES_TABLE" +
-                        "(clientusername, postal_code, address) values" +
-                        "(:clientusername,:postal_code ,:address)")
-                    .bind("clientusername"    , DAO.username)
-                    .bind("postal_code"   ,     address.postalCode)
-                    .bind("address"       ,      address.address)
+            for (address in DAO.addresses) {
+                handle.createUpdate(
+                    "Insert Into $CLIENT_ADDRESSES_TABLE" +
+                            "(clientusername, postal_code, address) values" +
+                            "(:clientusername,:postal_code ,:address)"
+                )
+                    .bind("clientusername", DAO.username)
+                    .bind("postal_code", address.postalCode)
+                    .bind("address", address.address)
                     .execute()
             }
         }
     }
 
     override fun read(key: String): Client =
-        jdbi.inTransaction<Client ,Exception> { handle ->
+        jdbi.inTransaction<Client, Exception> { handle ->
+
+            val clientFound = handle.createQuery("SELECT username from $USER_TABLE where username = :username")
+                .bind("username", key)
+                .mapTo(String::class.java)
+                .findOne()
+
+            if (clientFound.isEmpty) throw UserNotFoundException("The user: $key doesn't exist")
+
             val client = handle.createQuery(
                 "SELECT username, firstname , lastname, phonenumber, password, email " +
                         "from $USER_TABLE " +
                         "where username = :username"
             )
-            .bind("username", key)
-            .mapTo(Client::class.java)
-            .one()
+                .bind("username", key)
+                .mapTo(Client::class.java)
+                .one()
 
-            val addresses = handle.createQuery("SELECT clientUsername , postal_code, address " +
-                    "from $CLIENT_ADDRESSES_TABLE " +
-                    "where clientUsername = :username"
-            ).bind("username", key).mapTo(Address::class.java).list()
+            val collectionSize =
+                handle.createQuery("SELECT count(*) from  $CLIENT_ADDRESSES_TABLE where clientUsername = :username")
+                    .bind("username", key)
+                    .mapTo(Int::class.java)
+                    .first()
 
-            client.addresses = addresses
+            if (collectionSize >= 0) {
+                val addresses = handle.createQuery(
+                    "SELECT clientUsername , postal_code, address " +
+                            "from $CLIENT_ADDRESSES_TABLE " +
+                            "where clientUsername = :username"
+                ).bind("username", key).mapTo(Address::class.java).list()
+
+                client.addresses = addresses
+            }
 
             return@inTransaction client
         }
@@ -74,23 +96,33 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
 
     override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
-            handle.createUpdate("DELETE from $USER_TABLE" +
+            handle.createUpdate(
+                "DELETE from $USER_TABLE" +
                         "where username = :username"
             )
-            .bind("username" , key)
-            .execute()
+                .bind("username", key)
+                .execute()
 
-            handle.createUpdate("DELETE from $CLIENT_ADDRESSES_TABLE" +
-                    "where clientUsername = :username"
+            handle.createUpdate(
+                "DELETE from $CLIENT_ADDRESSES_TABLE" +
+                        "where clientUsername = :username"
             )
-            .bind("username" , key)
-            .execute()
+                .bind("username", key)
+                .execute()
         }
 
     }
 
-    fun addAddress(address : Address){
+    fun addAddress(address: Address) {
         jdbi.useHandle<Exception> { handle ->
+
+            val clientFound = handle.createQuery("SELECT username from $USER_TABLE where username = :username")
+                .bind("username", address.clientUsername)
+                .mapTo(String::class.java)
+                .findOne()
+
+            if (clientFound.isEmpty) throw UserNotFoundException("The user: ${address.clientUsername} doesn't exist")
+
             handle.createUpdate(
                 "Insert Into $CLIENT_ADDRESSES_TABLE" +
                         "(clientusername, postal_code, address) values" +
@@ -105,15 +137,24 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
 
     fun removeAddress(username: String, addressId: Int) {
         jdbi.useHandle<Exception> { handle ->
+
+            val clientFound = handle.createQuery("SELECT username from $USER_TABLE where username = :username")
+                .bind("username", username)
+                .mapTo(String::class.java)
+                .findOne()
+
+            if (clientFound.isEmpty) throw UserNotFoundException("The user: $username doesn't exist")
+
             handle.createUpdate(
-                "DELETE FROM $CLIENT_ADDRESSES_TABLE WHERE addressid = :addressId")
+                "DELETE FROM $CLIENT_ADDRESSES_TABLE WHERE addressid = :addressId"
+            )
                 .bind("addressId", addressId)
                 .execute()
         }
     }
 
-    fun getAddress(username: String, addressId: Int) : Address =
-        jdbi.inTransaction<Address ,Exception> { handle ->
+    fun getAddress(username: String, addressId: Int): Address =
+        jdbi.inTransaction<Address, Exception> { handle ->
 
             return@inTransaction handle.createQuery(
                 "SELECT * FROM $CLIENT_ADDRESSES_TABLE " +
@@ -125,8 +166,8 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
                 .one()
         }
 
-    fun getAddresses(username: String) : List<Address> =
-        jdbi.inTransaction<List<Address> ,Exception> { handle ->
+    fun getAddresses(username: String): List<Address> =
+        jdbi.inTransaction<List<Address>, Exception> { handle ->
 
             return@inTransaction handle.createQuery(
                 "SELECT * FROM $CLIENT_ADDRESSES_TABLE " +
@@ -140,13 +181,28 @@ class ClientMapper(jdbi : Jdbi) : DataMapper<String, Client>(jdbi) {
     fun giveRatingAndReward(username: String, deliveryId: Int, rating: Int, reward: Float) {
         jdbi.useHandle<Exception> { handle ->
             handle.createUpdate(
-                "UPDATE $DELIVERIES_TABLE SET rating = :rating, reward = :reward WHERE deliveryid = :deliveryId")
+                "UPDATE $DELIVERIES_TABLE SET rating = :rating, reward = :reward WHERE deliveryid = :deliveryId"
+            )
                 .bind("rating", rating)
                 .bind("reward", reward)
                 .bind("deliveryId", deliveryId)
                 .execute()
         }
     }
+
+    fun validateUser(username: String, password: String): Boolean =
+        jdbi.withHandle<Boolean, Exception> { handle ->
+            handle.createQuery("select count(*) FROM $USER_TABLE where username = :username AND password = :password")
+                .bind("username", username)
+                .bind("password", password)
+                .mapTo(Int::class.java)
+                .findFirst()
+                .get() == 1
+        }
+
+    class UserNotFoundException(s: String) : Exception(s)
 }
+
+
 
 

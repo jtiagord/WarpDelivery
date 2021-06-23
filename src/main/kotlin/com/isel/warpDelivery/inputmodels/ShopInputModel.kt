@@ -4,7 +4,7 @@ import com.isel.warpDelivery.model.Location
 
 
 data class RequestDeliveryInputModel(
-    val storeID : Long,
+    val storeId : Long,
     val storeLocation : Location,
     val deliverySize : String,
     val deliveryLocation : Location,
