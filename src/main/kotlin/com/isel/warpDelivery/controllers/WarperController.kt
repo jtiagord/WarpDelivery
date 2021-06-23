@@ -1,7 +1,6 @@
 package com.isel.warpDelivery.controllers
 
-import com.isel.warpDelivery.common.*
-import com.isel.warpDelivery.model.Warpers
+import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
@@ -10,19 +9,22 @@ import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.dataAccess.mappers.StateMapper
 import com.isel.warpDelivery.dataAccess.mappers.VehicleMapper
 import com.isel.warpDelivery.dataAccess.mappers.WarperMapper
-import com.isel.warpDelivery.model.WarperList
-import com.isel.warpDelivery.model.WarperLocation
 import com.isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
 import com.isel.warpDelivery.inputmodels.VehicleInputModel
 import com.isel.warpDelivery.inputmodels.WarperInputModel
+import com.isel.warpDelivery.model.ActiveWarperRepository
+import com.isel.warpDelivery.model.WarperLocation
+import com.isel.warpDelivery.model.Warpers
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+
 
 @RestController
 @RequestMapping(WARPERS_PATH)
 class WarperController(
     val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val vehicleMapper: VehicleMapper,
-    val stateMapper: StateMapper,    val warpers: Warpers, val activeWarpers: WarperList
+    val stateMapper: StateMapper,    val warpers: Warpers, val activeWarpers: ActiveWarperRepository
 ) {
 
     companion object {
@@ -157,9 +159,15 @@ class WarperController(
     }
 
 
-    @PostMapping("SetActive")
-    fun addActiveWarper(@RequestBody warper: RequestActiveWarperInputModel?) {
+    /* ROUTING RELATED ENDPOINTS */
 
-        activeWarpers.add(WarperLocation(warper!!.username, warper.currentLocation))
+    @PostMapping("/SetActive")
+    fun addActiveWarper(@RequestBody warper: RequestActiveWarperInputModel){
+      activeWarpers.add(WarperLocation(warper.username, warper.location,warper.messageToken))
+    }
+
+    @PutMapping("/location")
+    fun updateWarperLocation(@RequestBody warper: RequestActiveWarperInputModel){
+        activeWarpers.updateLocation(warper.username,warper.location)
     }
 }

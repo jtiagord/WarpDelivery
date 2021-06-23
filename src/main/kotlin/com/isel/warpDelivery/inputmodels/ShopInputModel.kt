@@ -12,5 +12,6 @@ data class RequestDeliveryInputModel(
 
 data class RequestActiveWarperInputModel(
     val username : String,
-    val currentLocation : Location
+    val location : Location,
+    val messageToken: String
 )

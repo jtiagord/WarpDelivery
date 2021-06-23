@@ -1,4 +1,4 @@
-package routeAPI
+package com.isel.warpDelivery.routeAPI
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.isel.warpDelivery.model.Location

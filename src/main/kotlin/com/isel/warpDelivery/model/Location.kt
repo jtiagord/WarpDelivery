@@ -13,5 +13,7 @@ class Location (val latitude : Double, val longitude : Double){
             sin(lat1rad) * sin(lat2rad) +
                     cos(lat1rad) * cos(lat2rad) * cos(long1rad - long2rad)
         )*6371000
+
+
     }
 }

@@ -20,7 +20,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-
+	implementation("com.google.firebase:firebase-admin:7.3.0")
 	implementation("org.jdbi:jdbi3-core:3.18.1")
 	implementation("org.jdbi:jdbi3-kotlin:3.18.1")
 	implementation("org.postgresql:postgresql:42.2.19")
