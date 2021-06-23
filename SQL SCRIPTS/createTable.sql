@@ -9,9 +9,9 @@ CREATE TABLE USERS (
 	username varchar(50) PRIMARY KEY,
 	firstname varchar(50) NOT NULL,
 	lastname varchar(50) NOT NULL,
-	phonenumber varchar(50) NOT NULL,
+	phonenumber varchar(50) NOT NULL UNIQUE,
 	password varchar(50) NOT NULL,
-	email varchar(100) NOT NULL CHECK (email LIKE '%@%')
+	email varchar(100) NOT NULL CHECK (email LIKE '%@%') UNIQUE
 );
 
 CREATE TABLE WARPER (
@@ -23,7 +23,8 @@ CREATE TABLE WARPER (
 CREATE TABLE DELIVERY (
 	deliveryid serial PRIMARY KEY,
 	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
-	clientusername varchar(50) NOT NULL REFERENCES USERS(username) on delete cascade,
+	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
+	clientphone varchar(50),
 	state varchar(20) NOT NULL
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
 	purchasedate timestamp NOT NULL,

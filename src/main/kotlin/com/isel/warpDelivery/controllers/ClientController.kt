@@ -10,7 +10,10 @@ import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.inputmodels.AddressInputModel
 import com.isel.warpDelivery.inputmodels.ClientInputModel
 import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.lang.IllegalStateException
+import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
 @RestController
