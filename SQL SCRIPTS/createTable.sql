@@ -25,10 +25,12 @@ CREATE TABLE DELIVERY (
 	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	clientphone varchar(50),
+	storeid int NOT NULL REFERENCES STORE(storeid),
 	state varchar(20) NOT NULL
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
 	purchasedate timestamp NOT NULL,
 	deliverydate timestamp CHECK (deliverydate > purchasedate),
+	pickupdate point
 	rating int CHECK (rating >= 1 and rating <= 5),
 	price decimal(10,2) NOT NULL CHECK (price >= 0),
 	reward decimal(10,2) CHECK (reward >= 0),

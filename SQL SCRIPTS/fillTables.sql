@@ -22,11 +22,11 @@ INSERT INTO VEHICLE VALUES ('user3', 'Motociclo', 'AA-01-ZZ');
 INSERT INTO VEHICLE VALUES ('user3', 'Ligeiro Passageiros', 'BB-32-AS');
 
 --DELIVERIES
-INSERT INTO DELIVERY (warperusername, clientusername, clientphone, state, purchasedate, price, type)
-VALUES ('user3', 'user2', '923947365', 'Em distribuição', '2020-06-22 18:10:35', 17.02, 'pequeno porte');
+INSERT INTO DELIVERY (warperusername, clientusername, clientphone, state, purchasedate, pickuplocation, deliverylocation, price, type, storeid)
+VALUES ('user3', 'user2', '923947365', 'Em distribuição', '2020-06-22 18:10:35', point(192.343421, 1231231.31231), point(192.343421, 1231231.31231), 17.02, 'pequeno porte', 1);
 
-INSERT INTO DELIVERY (warperusername, clientusername, clientphone, state, purchasedate, price, type)
-VALUES ('user3', 'user1', '968488765', 'Em processamento', NOW(), 23.50, 'pequeno porte');
+INSERT INTO DELIVERY (warperusername, clientusername, clientphone, state, purchasedate,  pickuplocation, deliverylocation, price, type, storeid)
+VALUES ('user3', 'user1', '968488765', 'Em processamento', NOW(), point(192.343421, 1231231.31231), point(192.343421, 1231231.31231), 23.50, 'pequeno porte', 2);
 
 --DELIVERY STATE TRANSITIONS
 INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 18:20:33', 'Em processamento', 'Pronto para recolha');

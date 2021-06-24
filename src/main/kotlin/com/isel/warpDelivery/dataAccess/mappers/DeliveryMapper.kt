@@ -18,20 +18,20 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
         jdbi.useTransaction<Exception> { handle ->
 
             handle.createUpdate(
-                "Insert Into $DELIVERY_TABLE" +
-                        "(deliveryid, state , purchasedate, deliverydate, rating, price, type) values" +
-                        "(:id, :clientid, :warperid, :state, :purchasedate, :deliverydate, :rating, :price, :type)"
+                "Insert Into $DELIVERY_TABLE " +
+                        "(warperusername, clientusername, clientphone, state, purchasedate, price, type, storeid) " +
+                        "VALUES (:warperid, :clientid, :clientphone, :state, :purchasedate, :price, :type, :storeid)"
             )
-                .bind("id", DAO.deliveryId)
-                .bind("clientId", DAO.clientUsername)
-                .bind("warperId", DAO.warperUsername)
+                .bind("clientid", DAO.clientUsername)
+                .bind("warperid", DAO.warperUsername)
+                .bind("clientphone", DAO.clientPhoneNumber)
                 .bind("state", DAO.state)
-                .bind("purchase_date", DAO.purchaseDate)
-                .bind("delivery_date", DAO.deliveryDate)
-                .bind("rating", DAO.rating)
+                .bind("purchasedate", DAO.purchaseDate)
                 .bind("price", DAO.price)
                 .bind("type", DAO.type)
+                .bind("storeid", DAO.storeId)
                 .execute()
+
 
             for (transition in DAO.transitions!!) {
                 handle.createUpdate(
@@ -46,7 +46,6 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
                     .execute()
             }
 
-            handle.commit()
         }
     }
 
