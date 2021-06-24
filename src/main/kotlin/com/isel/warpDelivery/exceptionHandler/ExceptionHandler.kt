@@ -1,4 +1,4 @@
-package com.isel.warpDelivery
+package com.isel.warpDelivery.exceptionHandler
 
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ControllerAdvice

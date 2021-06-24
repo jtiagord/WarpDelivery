@@ -7,9 +7,11 @@ import com.isel.warpDelivery.dataAccess.DAO.Client
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.exceptionHandler.ProblemJsonModel
 import com.isel.warpDelivery.inputmodels.AddressInputModel
 import com.isel.warpDelivery.inputmodels.ClientInputModel
 import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
+import com.isel.warpDelivery.inputmodels.toAddress
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.lang.IllegalStateException
@@ -29,7 +31,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
             client.username, client.firstName, client.lastName, client.phoneNumber,
             client.email, client.password
         )
-        clientMapper.create(clientDao) //TODO: Handle SQL exceptions
+        clientMapper.create(clientDao)
     }
 
     @GetMapping
@@ -50,11 +52,11 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     @PostMapping("/{username}/addresses")
     fun addClientAddress(
         req: HttpServletRequest,
-        @PathVariable Username: String,
+        @PathVariable username: String,
         @RequestBody addressInfo: AddressInputModel
     ) {
-        var addressDao = Address(Username, addressInfo.postalCode, addressInfo.address)
-        return clientMapper.addAddress(addressDao) //TODO: HANDLE CLIENT DOESNT EXIST
+        var addressDao = addressInfo.toAddress(username)
+        return clientMapper.addAddress(addressDao)
     }
 
     @GetMapping("/{username}/addresses/{addressId}")
@@ -112,6 +114,27 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         @PathVariable deliveryId: Int
     ): List<StateTransition> {
         return deliveryMapper.getTransitions(deliveryId)
-        //TODO: Handle case when there are no transitions
     }
+
+    @ExceptionHandler(ClientMapper.UserAlreadyExistsException::class)
+    fun handleAlreadyExistsException(ex : Exception) = ResponseEntity
+        .status(400)
+        .contentType(ProblemJsonModel.MEDIA_TYPE)
+        .body(
+            ProblemJsonModel(
+            detail = ex.message,
+            type = URI("/probs/resource-already-exists")
+            )
+        )
+
+    @ExceptionHandler(ClientMapper.UserNotFoundException::class, ClientMapper.AddressNotFoundException::class )
+    fun handleNotFoundException(ex : Exception) = ResponseEntity
+        .status(404)
+        .contentType(ProblemJsonModel.MEDIA_TYPE)
+        .body(
+            ProblemJsonModel(
+                detail = ex.message,
+                type = URI("/probs/resource-doesnt-exists")
+            )
+        )
 }

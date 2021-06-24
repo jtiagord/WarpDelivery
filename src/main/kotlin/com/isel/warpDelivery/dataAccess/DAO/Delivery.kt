@@ -1,17 +1,22 @@
 package com.isel.warpDelivery.dataAccess.DAO
 
+import com.isel.warpDelivery.model.Location
 import java.sql.Timestamp
 
 class Delivery (val deliveryId : Int,
+                val warperUsername: String,
                 val clientUsername : String,
-                var warperUsername: String?,
+                val storeId: Long,
                 val state : String,
-                var storeId: Long,
-                var clientPhoneNumber: String,
+                val clientPhoneNumber: String,
                 val purchaseDate : Timestamp,
-                val deliveryDate : Timestamp?,
-                val rating : Int?,
-                val price : Float,
-                val reward: Float?,
+                var deliveryDate : Timestamp?,
+                var rating : Int?,
+                val pickupLocationLat: Double,
+                val pickupLocationLong: Double,
+                val deliverLocationLat: Double,
+                val deliverLocationLong: Double,
+                val deliveryAddress: String,
+                var reward: Float?,
                 val type : String,
-                var transitions : List<StateTransition>?)
+                val transitions : List<StateTransition>?)

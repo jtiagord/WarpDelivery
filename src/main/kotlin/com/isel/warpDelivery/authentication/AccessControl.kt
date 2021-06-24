@@ -1,6 +1,6 @@
 package com.isel.warpDelivery.authentication
 
-import com.isel.warpDelivery.UnauthorizedException
+import com.isel.warpDelivery.exceptionHandler.UnauthorizedException
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
