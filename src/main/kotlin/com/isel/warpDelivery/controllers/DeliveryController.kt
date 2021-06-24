@@ -22,7 +22,7 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val activeWarpers :
         req: HttpServletRequest,
         @PathVariable deliveryId: String,
         newState: String
-    ) {
+    ){
         return deliveryMapper.updateState(deliveryId, newState)
     }
 
@@ -42,7 +42,7 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val activeWarpers :
 
     @PostMapping
     fun requestDelivery(@RequestBody delivery : RequestDeliveryInputModel)  : Any  {
-        if(delivery.storeLocation.getDistance(delivery.deliveryLocation) > ShopController.MAX_DISTANCE_TO_STORE)
+        if(delivery.storeLocation.getDistance(delivery.deliveryLocation) > MAX_DISTANCE_TO_STORE)
             return ResponseEntity.badRequest().body("The distance from delivery and the store are too large")
 
         val closestWarper = activeWarpers.getClosest(delivery.storeLocation)
