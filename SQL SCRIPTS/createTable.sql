@@ -2,8 +2,8 @@ CREATE TABLE STORE (
 	storeid serial PRIMARY KEY,
 	name varchar(100) NOT NULL,
 	postalcode varchar(10) NOT NULL,
-	latitude double precision,
-	longitude double precision,
+	latitude double precision NOT NULL,
+	longitude double precision NOT NULL,
 	address varchar(100) NOT NULL
 );
 
@@ -17,8 +17,7 @@ CREATE TABLE USERS (
 );
 
 CREATE TABLE WARPER (
-	username varchar(50) PRIMARY KEY REFERENCES USERS(username) on delete cascade,
-	state varchar(50)
+	username varchar(50) PRIMARY KEY REFERENCES USERS(username) on delete cascade
 	--adicionar aqui a foto q ns como será ainda
 );
 
@@ -32,10 +31,10 @@ CREATE TABLE DELIVERY (
 	clientphone varchar(50),
 	purchasedate timestamp NOT NULL,
 	deliverdate timestamp CHECK (deliverdate > purchasedate),
-	pickupLatitude double precision,
-	pickupLongitude double precision,
-	deliverLatitude double precision,
-	deliverLongitude double precision,
+	pickupLatitude double precision NOT NULL,
+	pickupLongitude double precision NOT NULL,
+	deliverLatitude double precision NOT NULL,
+	deliverLongitude double precision NOT NULL,
 	deliverAddress varchar(100),
 	rating int CHECK (rating >= 1 and rating <= 5),
 	reward decimal(10,2) CHECK (reward >= 0),
@@ -64,8 +63,8 @@ CREATE TABLE STATE_TRANSITIONS (
 CREATE TABLE CLIENT_ADDRESS (
 	addressid serial,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
-	latitude double precision,
-	longitude double precision,
+	latitude double precision NOT NULL,
+	longitude double precision NOT NULL,
 	postal_code varchar(10) NOT NULL,
 	address varchar(100) NOT NULL,
 	PRIMARY KEY (addressid, clientusername)

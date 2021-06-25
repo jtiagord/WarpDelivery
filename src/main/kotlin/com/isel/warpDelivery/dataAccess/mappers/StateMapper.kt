@@ -26,15 +26,16 @@ class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         }
 
     override fun update(DAO: Warper) {
+
+        TODO("Not yet implemented")
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $USER_TABLE} " +
                         "set state=:state "+
                         "where username=:username"
             )
-                .bind("username", DAO.username)
-                .bind("state", DAO.state)
-                .execute()
+            .bind("username", DAO.username)
+            .execute()
         }
     }
 

@@ -9,8 +9,10 @@ import com.isel.warpDelivery.dataAccess.mappers.*
 import com.isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
 import com.isel.warpDelivery.inputmodels.VehicleInputModel
 import com.isel.warpDelivery.inputmodels.WarperInputModel
+import com.isel.warpDelivery.inputmodels.toDao
 import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.model.WarperLocation
+import com.isel.warpDelivery.outputmodels.WarperOutputModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -29,27 +31,16 @@ class WarperController(
 
 
 
-    //-------------------------------Warper related endpoints-------------------------
-    @GetMapping
-    fun getAllWarpers(): ResponseEntity<List<Warper>> {
-        val warpers = warperMapper.readAll()
-        return ResponseEntity.ok().body(warpers)
-    }
-
 
     @GetMapping("/{username}")
-    fun getWarper(@PathVariable username: String): ResponseEntity<Warper> {
-        val warper = warperMapper.read(username)
+    fun getWarper(@PathVariable username: String): ResponseEntity<WarperOutputModel> {
+        val warper = warperMapper.read(username).toOutputModel()
         return ResponseEntity.ok().body(warper)
     }
 
     @PostMapping
     fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Any> {
-        val warperDao = Warper(
-            warper.username, warper.firstname, warper.lastname, warper.phonenumber,
-            warper.email, warper.password, WARPER_INACTIVE, emptyList()
-        ) //TODO: HANDLE SQL ERRORS
-        val warperCreated = warperMapper.create(warperDao) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
+        val warperCreated = warperMapper.create(warper.toDao()) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
         return ResponseEntity.status(201).build()
     }
 
@@ -141,3 +132,5 @@ class WarperController(
         activeWarpers.updateLocation(warper.username,warper.location)
     }
 }
+
+
