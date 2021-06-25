@@ -29,8 +29,7 @@ INSERT INTO DELIVERY (deliveryid, warperusername, clientusername, storeid, state
 
 
 INSERT INTO DELIVERY (deliveryid , warperusername, clientusername, storeid, state, clientphone, purchasedate, deliverdate,
-					  pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, deliverLongitude,
-					  deliverAddress, rating, reward, type)
+					  pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
 					  VALUES (2,'user3', 'user1', 1, 'Pronto para recolha', '923947365', '2020-06-22 18:10:35', null,
 							  192.343421, 1231231.31231, 192.343421, 1231231.31231, 'Rua teste 123', null, null, 'pequena');
 

@@ -31,7 +31,7 @@ CREATE TABLE DELIVERY (
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
 	clientphone varchar(50),
 	purchasedate timestamp NOT NULL,
-	deliverdate timestamp CHECK (deliverydate > purchasedate),
+	deliverdate timestamp CHECK (deliverdate > purchasedate),
 	pickupLatitude double precision,
 	pickupLongitude double precision,
 	deliverLatitude double precision,
