@@ -52,7 +52,7 @@ class WarperController(
     }
 
     //-------------------------------------------------------------------------------
-
+/*
     @GetMapping("/{username}/vehicles/{vehicleRegistration}")
     fun getVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<Vehicle> {
         val vehicle = vehicleMapper.read(VehicleKey(username,vehicleRegistration))
@@ -65,15 +65,6 @@ class WarperController(
         return ResponseEntity.ok().body(vehicles)
     }
 
-    @PostMapping("/{username}/vehicles")
-    fun addVehicle(
-        @PathVariable username: String,
-        @RequestBody vehicle: VehicleInputModel
-    ): ResponseEntity<String> {
-        val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
-        vehicleMapper.create(vehicleDao)
-        return ResponseEntity.status(201).build()
-    }
 
     @DeleteMapping("/{username}/vehicles/{vehicleRegistration}")
     fun deleteVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<String>{
@@ -83,21 +74,17 @@ class WarperController(
 
 
     //-------------------------------------------------------------------------------
+*/
 
-    @GetMapping("/{username}/state")
-    fun getState(@PathVariable username: String): ResponseEntity<Any> {
-        val state = stateMapper.read(username)
-        //TODO: FIX
-        return ResponseEntity.status(200).body(state)
-
+    @PostMapping("/{username}/vehicles")
+    fun addVehicle(
+        @PathVariable username: String,
+        @RequestBody vehicle: VehicleInputModel
+    ): ResponseEntity<String> {
+        val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
+        vehicleMapper.create(vehicleDao)
+        return ResponseEntity.status(201).build()
     }
-
-
-    @PutMapping("/{username}/state")
-    fun updateState(@PathVariable state: Warper, @PathVariable username: String) {
-        //TODO: FIX
-    }
-
 
     @GetMapping("/{username}/deliveries/{deliveryId}")
     fun getDelivery(@PathVariable deliveryId: Long): ResponseEntity<Delivery> {
@@ -112,13 +99,15 @@ class WarperController(
     }
 
     //-------------------------------------------------------------------------------
-
+/*
     @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
     fun getDeliveryTransitions(@PathVariable deliveryId: Long): ResponseEntity<List<StateTransition>> {
         val transitions = deliveryMapper.getTransitions(deliveryId)
         return ResponseEntity.ok().body(transitions)
     }
 
+
+ */
 
     /* ROUTING RELATED ENDPOINTS */
 

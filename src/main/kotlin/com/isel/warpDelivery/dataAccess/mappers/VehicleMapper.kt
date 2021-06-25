@@ -18,15 +18,17 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
     override fun create(DAO: Vehicle) : VehicleKey =
         jdbi.withHandle<VehicleKey,Exception> { handle ->
 
+
             handle.createUpdate(
                 "Insert Into $VEHICLE_TABLE" +
                         "(username, vehicletype , vehicleregistration) values " +
                         "(:username,:vehicletype,:vehicleregistration)"
             )
-                .bind("username", DAO.username)
-                .bind("vehicletype", DAO.vehicleType)
-                .bind("vehicleregistration", DAO.vehicleRegistration)
-                .execute()
+            .bind("username", DAO.username)
+            .bind("vehicletype", DAO.vehicleType)
+            .bind("vehicleregistration", DAO.vehicleRegistration)
+            .execute()
+
 
             return@withHandle VehicleKey(DAO.username,DAO.vehicleRegistration)
         }

@@ -72,7 +72,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         req: HttpServletRequest,
         @PathVariable username: String,
         @PathVariable addressId: Long
-    ) {
+    ){
         return clientMapper.removeAddress(username, addressId)
     }
 

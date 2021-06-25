@@ -145,13 +145,13 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         jdbi.useTransaction<Exception> { handle ->
 
             handle.createUpdate(
-                "DELETE from $VEHICLE_TABLE" +
+                "DELETE from $VEHICLE_TABLE " +
                         "where username = :username"
             )
             .bind("username", key).execute()
 
             handle.createUpdate(
-                "DELETE from $WARPER_TABLE" +
+                "DELETE from $WARPER_TABLE " +
                         "where username = :username"
             )
             .bind("username", key).execute()
