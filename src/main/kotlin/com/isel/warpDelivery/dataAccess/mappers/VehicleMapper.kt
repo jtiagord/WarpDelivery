@@ -4,14 +4,19 @@ import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
+
+data class VehicleKey(
+    val userName : String,
+    val vehicleRegistration : String
+)
 @Component
-class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
+class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
     companion object {
         const val VEHICLE_TABLE = "VEHICLE"
     }
 
-    override fun create(DAO: Vehicle) {
-        jdbi.useTransaction<Exception> { handle ->
+    override fun create(DAO: Vehicle) : VehicleKey =
+        jdbi.withHandle<VehicleKey,Exception> { handle ->
 
             handle.createUpdate(
                 "Insert Into $VEHICLE_TABLE" +
@@ -22,10 +27,12 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
                 .bind("vehicletype", DAO.vehicleType)
                 .bind("vehicleregistration", DAO.vehicleRegistration)
                 .execute()
-        }
-    }
 
-    override fun read(key: String): Vehicle =
+            return@withHandle VehicleKey(DAO.username,DAO.vehicleRegistration)
+        }
+
+
+    override fun read(key: VehicleKey): Vehicle =
         jdbi.inTransaction<Vehicle, Exception> { handle ->
             val vehicle = handle.createQuery(
                 "SELECT *" +
@@ -33,10 +40,10 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
                         "where username = :username " +
                         "and vehicleregistration= :vehicleregistration"
             )
-                .bind("username", key[0])
-                .bind("vehicleregistration", key[1])
-                .mapTo(Vehicle::class.java)
-                .one()
+            .bind("username", key.userName)
+            .bind("vehicleregistration", key.vehicleRegistration)
+            .mapTo(Vehicle::class.java)
+            .one()
 
             return@inTransaction vehicle
     }
@@ -54,9 +61,10 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<String, Vehicle>(jdbi) {
         }
 
     override fun update(DAO: Vehicle) {
+        TODO()
     }
 
-    override fun delete(key: String) {
+    override fun delete(key: VehicleKey) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $VEHICLE_TABLE " +

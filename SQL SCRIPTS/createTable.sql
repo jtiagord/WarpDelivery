@@ -2,6 +2,8 @@ CREATE TABLE STORE (
 	storeid serial PRIMARY KEY,
 	name varchar(100) NOT NULL,
 	postalcode varchar(10) NOT NULL,
+	latitude double precision,
+	longitude double precision,
 	address varchar(100) NOT NULL
 );
 
@@ -29,12 +31,12 @@ CREATE TABLE DELIVERY (
 	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
 	clientphone varchar(50),
 	purchasedate timestamp NOT NULL,
-	deliverydate timestamp CHECK (deliverydate > purchasedate),
-	pickupLocationLat double precision,
-	pickupLocationLong double precision,
-	deliveryLocationLat double precision,
-	deliveryLocationLong double precision,
-	deliveryAddress varchar(100),
+	deliverdate timestamp CHECK (deliverydate > purchasedate),
+	pickupLatitude double precision,
+	pickupLongitude double precision,
+	deliverLatitude double precision,
+	deliverLongitude double precision,
+	deliverAddress varchar(100),
 	rating int CHECK (rating >= 1 and rating <= 5),
 	reward decimal(10,2) CHECK (reward >= 0),
 	type varchar(50) NOT NULL --pode vir a ser mudado
@@ -62,6 +64,8 @@ CREATE TABLE STATE_TRANSITIONS (
 CREATE TABLE CLIENT_ADDRESS (
 	addressid serial,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
+	latitude double precision,
+	longitude double precision,
 	postal_code varchar(10) NOT NULL,
 	address varchar(100) NOT NULL,
 	PRIMARY KEY (addressid, clientusername)

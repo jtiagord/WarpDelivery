@@ -13,10 +13,18 @@ data class ClientInputModel(
 
 data class AddressInputModel (
     val postalCode: String,
-    val address : String
+    val address : String,
+    val latitude: Double,
+    val longitude: Double
 )
 
-fun AddressInputModel.toAddress(username: String) = Address(username, this.postalCode, this.address)
+fun AddressInputModel.toAddress(username: String) = Address(
+    clientUsername = username,
+    postalCode = postalCode,
+    address=address,
+    latitude = latitude,
+    longitude =longitude
+)
 
 data class RatingAndRewardInputModel (
     val rating: Int,

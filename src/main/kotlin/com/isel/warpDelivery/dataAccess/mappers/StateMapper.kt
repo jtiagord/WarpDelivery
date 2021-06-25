@@ -9,7 +9,7 @@ class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
     companion object {
         const val USER_TABLE = "USER"
     }
-    override fun create(DAO: Warper) {
+    override fun create(DAO: Warper): String {
         TODO("Not yet implemented")
     }
 

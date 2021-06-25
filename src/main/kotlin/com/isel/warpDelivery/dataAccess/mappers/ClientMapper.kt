@@ -14,8 +14,8 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
         const val DELIVERIES_TABLE = "DELIVERY"
     }
 
-    override fun create(DAO: Client) {
-        jdbi.useTransaction<Exception> { handle ->
+    override fun create(DAO: Client) : String =
+        jdbi.inTransaction<String,Exception> { handle ->
 
             if (userExists(
                     DAO.username,
@@ -47,8 +47,10 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
                     .bind("address", address.address)
                     .execute()
             }
+            handle.commit()
+            return@inTransaction DAO.username
         }
-    }
+
 
     override fun read(key: String): Client =
         jdbi.inTransaction<Client, Exception> { handle ->
@@ -206,7 +208,7 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
                 .list()
         }
 
-    fun giveRatingAndReward(username: String, deliveryId: Int, rating: Int, reward: Float) {
+    fun giveRatingAndReward(username: String, deliveryId: Long, rating: Int, reward: Float) {
         jdbi.useHandle<Exception> { handle ->
             handle.createUpdate(
                 "UPDATE $DELIVERIES_TABLE SET rating = :rating, reward = :reward WHERE deliveryid = :deliveryId"

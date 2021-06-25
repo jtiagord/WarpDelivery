@@ -14,9 +14,9 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
         const val VEHICLE_TABLE = "VEHICLE"
     }
 
-    override fun create(DAO: Warper) {
+    override fun create(DAO: Warper): String =
         //TODO: ADD PHOTO
-        jdbi.useTransaction<Exception> { handle ->
+        jdbi.inTransaction<String, Exception> { handle ->
 
             handle.createUpdate(
                 "Insert Into $USER_TABLE " +
@@ -51,8 +51,9 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                     .bind("registration", vehicle.vehicleRegistration)
                     .execute()
             }
+            handle.commit()
+            return@inTransaction DAO.username
         }
-    }
 
     override fun read(key: String): Warper =
         jdbi.inTransaction<Warper, Exception> { handle ->

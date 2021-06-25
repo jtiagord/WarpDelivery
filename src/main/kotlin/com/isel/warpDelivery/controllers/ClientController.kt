@@ -14,7 +14,6 @@ import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
 import com.isel.warpDelivery.inputmodels.toAddress
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.lang.IllegalStateException
 import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
@@ -27,7 +26,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         req: HttpServletRequest,
         @RequestBody client: ClientInputModel
     ) {
-        var clientDao = Client(
+        val clientDao = Client(
             client.username, client.firstName, client.lastName, client.phoneNumber,
             client.email, client.password
         )
@@ -55,7 +54,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         @PathVariable username: String,
         @RequestBody addressInfo: AddressInputModel
     ) {
-        var addressDao = addressInfo.toAddress(username)
+        val addressDao = addressInfo.toAddress(username)
         return clientMapper.addAddress(addressDao)
     }
 
@@ -79,7 +78,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
 
     @GetMapping("/{username}/deliveries")
     fun getClientDeliveries(req: HttpServletRequest, @PathVariable username: String): List<Delivery> {
-        return deliveryMapper.getUserDeliveries(username)
+        return deliveryMapper.getDeliveriesByUsername(username)
     }
 
     @PostMapping("/{username}/deliveries")
@@ -91,7 +90,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun getClientDelivery(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable deliveryId: Int
+        @PathVariable deliveryId: Long
     ): Delivery {
         return deliveryMapper.read(deliveryId)
     }
@@ -100,7 +99,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun giveRatingAndReward(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable deliveryId: Int,
+        @PathVariable deliveryId: Long,
         @RequestBody ratingAndReward: RatingAndRewardInputModel
     ) {
         clientMapper.giveRatingAndReward(username, deliveryId, ratingAndReward.rating, ratingAndReward.reward)
@@ -111,7 +110,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun getStateTransitions(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable deliveryId: Int
+        @PathVariable deliveryId: Long
     ): List<StateTransition> {
         return deliveryMapper.getTransitions(deliveryId)
     }

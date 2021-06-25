@@ -7,49 +7,44 @@ import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
 @Component
-class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
+class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
 
     companion object {
         const val DELIVERY_TABLE = "DELIVERY"
         const val TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
-    override fun create(DAO: Delivery) {
-        jdbi.useTransaction<Exception> { handle ->
+    override fun create(DAO: Delivery) : Long=
+        jdbi.withHandle<Long,Exception> { handle ->
 
-            handle.createUpdate(
-                "Insert Into $DELIVERY_TABLE " +
-                        "(warperusername, clientusername, clientphone, state, purchasedate, price, type, storeid) " +
-                        "VALUES (:warperid, :clientid, :clientphone, :state, :purchasedate, :price, :type, :storeid)"
+            val delivery = handle.createUpdate(
+                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, purchasedate " +
+                        "pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, " +
+                        "deliverAddress, rating, reward, type) " +
+                        "VALUES " +
+                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, NOW(), "+
+                        ":pickupLatitude, :pickupLongitude, :deliverLatitiude, :deliverLongitude, :deliverAddress, :type)"
             )
-                .bind("clientid", DAO.clientUsername)
-                .bind("warperid", DAO.warperUsername)
-                .bind("clientphone", DAO.clientPhoneNumber)
-                .bind("state", DAO.state)
-                .bind("purchasedate", DAO.purchaseDate)
-                .bind("price", DAO.price)
-                .bind("type", DAO.type)
-                .bind("storeid", DAO.storeId)
-                .execute()
+            .bind("warperUsername", DAO.warperUsername)
+            .bind("clientUsername", DAO.clientUsername)
+            .bind("clientphone", DAO.clientPhone)
+            .bind("storeid", DAO.storeId)
+            .bind("state", DAO.state)
+            .bind("pickupLatitude", DAO.pickupLatitude)
+            .bind("pickupLongitude", DAO.pickupLongitude)
+            .bind("deliverLatitude", DAO.deliverLatitude)
+            .bind("deliveryLongitude", DAO.deliverLongitude)
+            .bind("deliverAddress", DAO.deliveryAddress)
+            .bind("type", DAO.type)
+            .executeAndReturnGeneratedKeys()
+            .mapTo(Delivery::class.java)
+            .one()
 
-
-            for (transition in DAO.transitions!!) {
-                handle.createUpdate(
-                    "Insert Into $TRANSITIONS_TABLE" +
-                            "(deliveryId, transitiondate, previous_state, next_state) values" +
-                            "(:id, :date, :prev_state, :next_state)"
-                )
-                    .bind("id", DAO.deliveryId)
-                    .bind("date", transition.transitionDate)
-                    .bind("prev_state", transition.previousState)
-                    .bind("next_state", transition.nextState)
-                    .execute()
-            }
-
+            return@withHandle delivery.deliveryId
         }
-    }
 
-    override fun read(key: Int): Delivery =
+
+    override fun read(key: Long): Delivery =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val delivery = handle.createQuery(
                 "SELECT deliveryid, clientid, warperid, " +
@@ -57,9 +52,9 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
             )
-                .bind("id", key)
-                .mapTo(Delivery::class.java)
-                .one()
+            .bind("id", key)
+            .mapTo(Delivery::class.java)
+            .one()
 
             val transitions = handle.createQuery(
                 "SELECT  deliveryid, transitiondate, previousstate, nextstate " +
@@ -89,7 +84,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
         }
     }
 
-    override fun delete(key: Int) {
+    override fun delete(key: Long) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $DELIVERY_TABLE " +
@@ -122,7 +117,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
                 .execute()
         }
 
-    fun getUserDeliveries(username: String): List<Delivery> =
+    fun getDeliveriesByUsername(username: String): List<Delivery> =
 
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             val deliveries = handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
@@ -130,21 +125,10 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
                 .mapTo(Delivery::class.java)
                 .list()
 
-            for (delivery in deliveries) {
-                val transitions = handle.createQuery(
-                    "SELECT  deliveryid, transitiondate, previousstate, nextstate " +
-                            "from $TRANSITIONS_TABLE " +
-                            "where deliveryid = :id"
-                ).bind("id", delivery.deliveryId).mapTo(StateTransition::class.java).list()
-
-                delivery.transitions = transitions
-            }
-            //TODO: Improve code
-
             return@inTransaction deliveries
         }
 
-    fun getTransitions(deliveryId: Int): List<StateTransition> =
+    fun getTransitions(deliveryId: Long): List<StateTransition> =
         jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
 
             return@inTransaction handle.createQuery(
@@ -193,7 +177,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Int, Delivery>(jdbi) {
         }.compareTo(userInfo.name) == 0
 
     fun verifyIfWarperOrClient(userInfo: UserInfo, deliveryId: Int) : Boolean{
-        return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId);
+        return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId)
     }
 }
 
