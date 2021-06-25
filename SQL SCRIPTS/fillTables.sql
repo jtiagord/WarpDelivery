@@ -8,11 +8,11 @@ INSERT INTO USERS VALUES ('user2', 'user', 'two', '923947365', 'password2', 'use
 INSERT INTO USERS VALUES ('user3', 'user', 'three', '917385375', 'password3', 'user3@email.com');
 
 --CLIENT ADDRESSES
-INSERT INTO CLIENT_ADDRESS (clientusername, postal_code, address)
-VALUES ('user1', '2343-097', 'CLIENT ADDRESS ONE');
+INSERT INTO CLIENT_ADDRESS (clientusername, latitude, longitude postal_code, address)
+VALUES ('user1', '2343-097', 192.149322, 13821.231321, 'CLIENT ADDRESS ONE');
 
-INSERT INTO CLIENT_ADDRESS (clientusername, postal_code, address)
-VALUES ('user2', '7503-034', 'CLIENT ADDRESS TWO');
+INSERT INTO CLIENT_ADDRESS (clientusername, latitude, longitude, postal_code, address)
+VALUES ('user2', '7503-034', 196.149322, 13841.231321, 'CLIENT ADDRESS TWO');
 
 --WARPERS
 INSERT INTO WARPER VALUES ('user3', 'inactive');

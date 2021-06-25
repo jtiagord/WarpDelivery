@@ -21,7 +21,7 @@ data class AddressInputModel (
 fun AddressInputModel.toAddress(username: String) = Address(
     clientUsername = username,
     postalCode = postalCode,
-    address=address,
+    address= address,
     latitude = latitude,
     longitude =longitude
 )

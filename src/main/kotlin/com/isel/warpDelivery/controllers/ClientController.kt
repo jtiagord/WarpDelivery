@@ -71,7 +71,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun removeClientAddress(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable addressId: Int
+        @PathVariable addressId: Long
     ) {
         return clientMapper.removeAddress(username, addressId)
     }
@@ -115,7 +115,10 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         return deliveryMapper.getTransitions(deliveryId)
     }
 
-    @ExceptionHandler(ClientMapper.UserAlreadyExistsException::class)
+    @ExceptionHandler(ClientMapper.UserAlreadyExistsException::class,
+        ClientMapper.PhoneAlreadyExistsException::class,
+        ClientMapper.EmailAlreadyExistsException::class
+    )
     fun handleAlreadyExistsException(ex : Exception) = ResponseEntity
         .status(400)
         .contentType(ProblemJsonModel.MEDIA_TYPE)
@@ -126,7 +129,8 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
             )
         )
 
-    @ExceptionHandler(ClientMapper.UserNotFoundException::class, ClientMapper.AddressNotFoundException::class )
+
+    @ExceptionHandler(ClientMapper.UserNotFoundException::class, ClientMapper.AddressNotFoundException::class)
     fun handleNotFoundException(ex : Exception) = ResponseEntity
         .status(404)
         .contentType(ProblemJsonModel.MEDIA_TYPE)
@@ -134,6 +138,17 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
             ProblemJsonModel(
                 detail = ex.message,
                 type = URI("/probs/resource-doesnt-exists")
+            )
+        )
+
+    @ExceptionHandler(ClientMapper.UserNotAllowedException::class)
+    fun handleNotAllowedException(ex : Exception) = ResponseEntity
+        .status(401)
+        .contentType(ProblemJsonModel.MEDIA_TYPE)
+        .body(
+            ProblemJsonModel(
+                detail = ex.message,
+                type = URI("/probs/user-has-no-permissions")
             )
         )
 }

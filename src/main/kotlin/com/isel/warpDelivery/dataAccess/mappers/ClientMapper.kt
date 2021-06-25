@@ -17,11 +17,22 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
     override fun create(DAO: Client) : String =
         jdbi.inTransaction<String,Exception> { handle ->
 
-            if (userExists(
-                    DAO.username,
-                    handle
-                )
-            ) throw UserAlreadyExistsException("The user ${DAO.username} already exists")
+            if (userExists(DAO.username, handle))
+                throw UserAlreadyExistsException("The user ${DAO.username} already exists")
+
+
+            if (emailExists(DAO.email, handle))
+                throw EmailAlreadyExistsException("The email ${DAO.email} is already registered")
+
+            if (phoneExists(DAO.phonenumber, handle))
+                throw PhoneAlreadyExistsException("The phone ${DAO.phonenumber} is already registered")
+
+            /*
+             if(emailOrPhoneExists(DAO.email, DAO.phonenumber, handle)){
+                 print("EXISTE CRL")
+             }
+
+             */
 
             handle.createUpdate(
                 "Insert Into $USER_TABLE" +
@@ -47,7 +58,6 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
                     .bind("address", address.address)
                     .execute()
             }
-            handle.commit()
             return@inTransaction DAO.username
         }
 
@@ -74,7 +84,7 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
 
             if (collectionSize >= 0) {
                 val addresses = handle.createQuery(
-                    "SELECT clientUsername , postal_code, address " +
+                    "SELECT clientUsername , latitude, longitude, postal_code, address " +
                             "from $CLIENT_ADDRESSES_TABLE " +
                             "where clientUsername = :username"
                 ).bind("username", key).mapTo(Address::class.java).list()
@@ -104,7 +114,7 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
 
                 if (collectionSize >= 0) {
                     val addresses = handle.createQuery(
-                        "SELECT clientUsername , postal_code, address " +
+                        "SELECT clientUsername, latitude, longitude, postal_code, address " +
                                 "from $CLIENT_ADDRESSES_TABLE " +
                                 "where clientUsername = :username"
                     ).bind("username", it.username).mapTo(Address::class.java).list()
@@ -159,10 +169,13 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
         }
     }
 
-    fun removeAddress(username: String, addressId: Int) {
+    fun removeAddress(username: String, addressId: Long) {
         jdbi.useHandle<Exception> { handle ->
 
-            if (!userExists(username, handle)) throw UserNotFoundException("The user: $username doesn't exist")
+            if (!userExists(username, handle))
+                throw UserNotFoundException("The user: $username doesn't exist")
+            if (!addressBelongsToUser(username, addressId, handle))
+                throw UserNotAllowedException("The user: $username doesn't have permissions to this address")
 
             handle.createUpdate(
                 "DELETE FROM $CLIENT_ADDRESSES_TABLE WHERE addressid = :addressId"
@@ -177,12 +190,15 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
 
             if (!userExists(username, handle)) throw UserNotFoundException("The user: $username doesn't exist")
 
-            val addressFound = handle.createQuery("SELECT addressid from $CLIENT_ADDRESSES_TABLE where addressid = :id")
+            val addressFound = handle.createQuery("SELECT addressid from $CLIENT_ADDRESSES_TABLE " +
+                    "where addressid = :id AND clientusername = :username" )
+
                 .bind("id", addressId)
+                .bind("username", username)
                 .mapTo(Long::class.java)
                 .findOne()
 
-            if (addressFound.isEmpty) throw AddressNotFoundException("The address: $addressId doesn't exist")
+            if (addressFound.isEmpty) throw AddressNotFoundException("The address: $addressId doesn't exist or doesn't belong to user $username")
 
             return@inTransaction handle.createQuery(
                 "SELECT * FROM $CLIENT_ADDRESSES_TABLE " +
@@ -210,6 +226,12 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
 
     fun giveRatingAndReward(username: String, deliveryId: Long, rating: Int, reward: Float) {
         jdbi.useHandle<Exception> { handle ->
+
+            if(userExists(username, handle))
+                throw UserNotFoundException("The user: $username doesn't exist")
+
+            if(deliveryBelongsToUser(username, deliveryId, handle))
+
             handle.createUpdate(
                 "UPDATE $DELIVERIES_TABLE SET rating = :rating, reward = :reward WHERE deliveryid = :deliveryId"
             )
@@ -220,6 +242,7 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
         }
     }
 
+    //Auxiliary verification methods
     fun validateUser(username: String, password: String): Boolean =
         jdbi.withHandle<Boolean, Exception> { handle ->
             handle.createQuery("select count(*) FROM $USER_TABLE where username = :username AND password = :password")
@@ -230,10 +253,6 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
                 .get() == 1
         }
 
-    class UserNotFoundException(s: String) : Exception(s)
-    class AddressNotFoundException(s: String) : Exception(s)
-    class UserAlreadyExistsException(s: String) : Exception(s)
-
     fun userExists(username: String, handle: Handle): Boolean {
         val clientFound = handle.createQuery("SELECT username from $USER_TABLE where username = :username")
             .bind("username", username)
@@ -242,6 +261,67 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
 
         return !clientFound.isEmpty
     }
+
+    fun emailExists(email: String, handle: Handle): Boolean {
+        val emailFound = handle.createQuery("SELECT email from $USER_TABLE where email = :email")
+            .bind("email", email)
+            .mapTo(String::class.java)
+            .findOne()
+
+        return !emailFound.isEmpty
+    }
+
+    //TODO: Implement
+    fun emailOrPhoneExists(email: String, phoneNumber: String, handle: Handle): Boolean {
+        val emailFound = handle.createQuery("SELECT email, phonenumber from $USER_TABLE where email = :email OR phonenumber = :phonenumber")
+            .bind("email", email)
+            .bind("phonenumber", phoneNumber)
+            .mapTo(String::class.java)
+            .findOne()
+
+        println(emailFound)
+
+        return !emailFound.isEmpty
+    }
+
+    fun phoneExists(phoneNumber: String, handle: Handle): Boolean {
+        val phoneFound = handle.createQuery("SELECT phonenumber from $USER_TABLE where phonenumber = :phoneNumber")
+            .bind("phoneNumber", phoneNumber)
+            .mapTo(String::class.java)
+            .findOne()
+
+        return !phoneFound.isEmpty
+    }
+
+    fun deliveryBelongsToUser(username: String, deliveryId: Long, handle: Handle): Boolean {
+
+        val expectedUser = handle.createQuery("SELECT clientusername from $DELIVERIES_TABLE " +
+                "WHERE deliveryid = :deliveryid")
+            .bind("deliveryid", deliveryId)
+            .mapTo(String::class.java)
+            .findOne()
+
+        return expectedUser.get() == username
+    }
+
+    fun addressBelongsToUser(username: String, addressId: Long, handle: Handle): Boolean {
+
+        val expectedUser = handle.createQuery("SELECT clientusername from $CLIENT_ADDRESSES_TABLE " +
+                "WHERE addressid = :addressid")
+            .bind("addressid", addressId)
+            .mapTo(String::class.java)
+            .findOne()
+
+        return expectedUser.get() == username
+    }
+
+    //Exceptions
+    class UserNotFoundException(s: String) : Exception(s)
+    class UserNotAllowedException(s: String) : Exception(s)
+    class AddressNotFoundException(s: String) : Exception(s)
+    class UserAlreadyExistsException(s: String) : Exception(s)
+    class PhoneAlreadyExistsException(s: String) : Exception(s)
+    class EmailAlreadyExistsException(s: String) : Exception(s)
 }
 
 
