@@ -20,21 +20,21 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         jdbi.withHandle<Long,Exception> { handle ->
 
             val delivery = handle.createUpdate(
-                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, purchasedate, " +
-                        ", deliverLatitude, deliverLongitude, deliverAddress, type) " +
+                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, " +
+                        "deliverLatitude, deliverLongitude, deliverAddress, type) " +
                         "VALUES " +
-                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, :timestamp"+
-                        " :deliverLatitiude, :deliverLongitude, :deliverAddress, :type)"
+                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, "+
+                        " :deliverLatitude, :deliverLongitude, :deliverAddress, :type)"
             )
             .bind("warperUsername", DAO.warperUsername)
             .bind("clientUsername", DAO.clientUsername)
             .bind("clientphone", DAO.clientPhone)
-            .bind("storeid", DAO.storeId)
+            .bind("storeId", DAO.storeId)
             .bind("state", DAO.state)
             .bind("deliverLatitude", DAO.deliverLatitude)
-            .bind("deliveryLongitude", DAO.deliverLongitude)
+            .bind("deliverLongitude", DAO.deliverLongitude)
             .bind("deliverAddress", DAO.deliverAddress)
-            .bind("type", DAO.type)
+            .bind("type", DAO.type.text)
             .executeAndReturnGeneratedKeys()
             .mapTo(Delivery::class.java)
             .one()

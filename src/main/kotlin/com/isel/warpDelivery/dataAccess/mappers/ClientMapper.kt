@@ -281,14 +281,18 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
     }
 
     fun getUsernameByPhone(phoneNumber: String) : String? =
-        jdbi.withHandle<String, Exception> { handle ->
+        jdbi.withHandle<String?, Exception> { handle ->
 
-            return@withHandle handle.createQuery(
+            val usernameOptional = handle.createQuery(
                 "SELECT username FROM $USER_TABLE where phonenumber = :phonenumber"
             )
                 .bind("phonenumber", phoneNumber)
                 .mapTo(String::class.java)
-                .one()
+                .findOne()
+
+            if(usernameOptional.isEmpty) return@withHandle null
+
+            return@withHandle usernameOptional.get()
         }
 
     //Auxiliary verification methods

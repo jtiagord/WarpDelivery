@@ -12,7 +12,7 @@ data class RequestDeliveryInputModel(
     val address : String,
     val deliveryLocation : Location
 ) {
-    fun toDelivery(warperUsername: String, clientUsername: String): Delivery {
+    fun toDelivery(warperUsername: String, clientUsername: String?): Delivery {
         return Delivery(null, warperUsername, clientUsername, storeId, "Delivering", userPhone, null,
         null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize, emptyList())
     }

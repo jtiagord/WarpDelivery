@@ -53,8 +53,10 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
         val closestWarper = activeWarpers.getClosest(storeLocation, delivery.deliverySize)
 
         if(closestWarper != null) {
+
             val username = clientMapper.getUsernameByPhone(delivery.userPhone)
-            deliveryMapper.create(delivery.toDelivery(closestWarper.username, username!!))
+
+            deliveryMapper.create(delivery.toDelivery(closestWarper.username, username))
             notificationSystem.sendNotification(closestWarper)
             return ResponseEntity.ok(closestWarper)
         }
