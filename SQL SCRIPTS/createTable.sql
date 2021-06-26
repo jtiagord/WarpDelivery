@@ -42,8 +42,7 @@ CREATE TABLE DELIVERY (
 
 CREATE TABLE VEHICLE (
 	username varchar(50) REFERENCES WARPER(username) on delete cascade,
-	vehicletype varchar(50) NOT NULL
-	vehicletype IN ('small', 'medium', 'large'),
+	vehicletype varchar(50) NOT NULL CHECK (vehicletype IN ('small', 'medium', 'large')),
 	vehicleregistration varchar(50) NOT NULL,
 	PRIMARY KEY (username, vehicleregistration)
 );
