@@ -27,23 +27,23 @@ CREATE TABLE DELIVERY (
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	storeid int NOT NULL REFERENCES STORE(storeid),
 	state varchar(20) NOT NULL
-	CHECK (state IN ('Em processamento', 'Pronto para recolha', 'Em distribuição', 'Entregue', 'Cancelada')),
+	CHECK (state IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
 	clientphone varchar(50),
-	purchasedate timestamp NOT NULL,
+	purchasedate timestamp NOT NULL DEFAULT NOW(),
 	deliverdate timestamp CHECK (deliverdate > purchasedate),
-	pickupLatitude double precision NOT NULL,
-	pickupLongitude double precision NOT NULL,
 	deliverLatitude double precision NOT NULL,
 	deliverLongitude double precision NOT NULL,
 	deliverAddress varchar(100),
 	rating int CHECK (rating >= 1 and rating <= 5),
 	reward decimal(10,2) CHECK (reward >= 0),
-	type varchar(50) NOT NULL --pode vir a ser mudado
+	type varchar(50) NOT NULL
+	CHECK (type IN ('small', 'medium', 'large'))
 );
 
 CREATE TABLE VEHICLE (
 	username varchar(50) REFERENCES WARPER(username) on delete cascade,
-	vehicletype varchar(50) NOT NULL,
+	vehicletype varchar(50) NOT NULL
+	vehicletype IN ('small', 'medium', 'large'),
 	vehicleregistration varchar(50) NOT NULL,
 	PRIMARY KEY (username, vehicleregistration)
 );
@@ -51,12 +51,9 @@ CREATE TABLE VEHICLE (
 CREATE TABLE STATE_TRANSITIONS (
 	deliveryid int REFERENCES DELIVERY(deliveryid) on delete cascade,
 	transitiondate timestamp,
-	previousstate varchar(20) NOT NULL CHECK (previousstate IN (
-		'Em processamento', 'Pronto para recolha',
-		'Em distribuição', 'Entregue', 'Cancelada')),
-	nextstate varchar(20) NOT NULL CHECK (nextstate IN (
-		'Em processamento', 'Pronto para recolha',
-		'Em distribuição', 'Entregue', 'Cancelada')), --convinha ver se ha melhor forma de fazer isto
+	previousstate varchar(20) NOT NULL CHECK (previousstate IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
+	nextstate varchar(20) NOT NULL CHECK (nextstate IN
+		('Looking for Warper','Delivering', 'Delivered', 'Canceled')),	--convinha ver se ha melhor forma de fazer isto
 	PRIMARY KEY (deliveryid, transitiondate)
 );
 

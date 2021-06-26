@@ -18,11 +18,10 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
     override fun create(DAO: Vehicle) : VehicleKey =
         jdbi.withHandle<VehicleKey,Exception> { handle ->
 
-
             handle.createUpdate(
                 "Insert Into $VEHICLE_TABLE" +
                         "(username, vehicletype , vehicleregistration) values " +
-                        "(:username,:vehicletype,:vehicleregistration)"
+                        "(:username,:vehicletype,:vehicleregistration) ON CONFLICT DO NOTHING"
             )
             .bind("username", DAO.username)
             .bind("vehicletype", DAO.vehicleType)
@@ -45,9 +44,9 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
             .bind("username", key.userName)
             .bind("vehicleregistration", key.vehicleRegistration)
             .mapTo(Vehicle::class.java)
-            .one()
+            .findOne()
 
-            return@inTransaction vehicle
+            return@inTransaction if (vehicle.isPresent) vehicle.get() else null
     }
 
     fun readAll(username:String): List<Vehicle> =
@@ -77,3 +76,5 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
         }
     }
 }
+
+class VehicleAlreadyExistsException(s: String) : Exception(s)

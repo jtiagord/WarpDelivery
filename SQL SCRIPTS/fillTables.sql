@@ -18,22 +18,22 @@ VALUES ('user2', 41.149322, 12.231321, '2343-097', 'CLIENT ADDRESS TWO');
 INSERT INTO WARPER VALUES ('user3');
 
 --WARPER VEHICLES
-INSERT INTO VEHICLE VALUES ('user3', 'Motociclo', 'AA-01-ZZ');
-INSERT INTO VEHICLE VALUES ('user3', 'Ligeiro Passageiros', 'BB-32-AS');
+INSERT INTO VEHICLE VALUES ('user3', 'small', 'AA-01-ZZ');
+INSERT INTO VEHICLE VALUES ('user3', 'medium', 'BB-32-AS');
 
 --DELIVERIES
-INSERT INTO DELIVERY (deliveryid, warperusername, clientusername, storeid, state, clientphone, purchasedate, deliverdate,
-					  pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
-					  VALUES (1,'user3', 'user2', 1, 'Em distribuição', '923947365', '2020-06-22 18:10:35', null,
-							  12.343421, 12.31231, 12.343421, 13.31231, 'Rua teste 123', null, null, 'pequena');
+INSERT INTO DELIVERY (deliveryid, warperusername, clientusername, storeid, state, clientphone, purchasedate, deliverdate
+                        , deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
+					  VALUES (1,'user3', 'user2', 1, 'Delivered', '923947365', '2020-06-22 18:10:35', null,
+							             12.343421, 13.31231, 'Rua teste 123', null, null, 'small');
 
 
 INSERT INTO DELIVERY (deliveryid , warperusername, clientusername, storeid, state, clientphone, purchasedate, deliverdate,
-					  pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
-					  VALUES (2,'user3', 'user1', 1, 'Pronto para recolha', '923947365', '2020-06-22 18:10:35', null,
-							  12.343421, 14.31231, 13.343421, 13.31231, 'Rua teste 123', null, null, 'pequena');
+                            deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
+					  VALUES (2,'user3', 'user1', 1, 'Canceled', '923947365', '2020-06-22 18:10:35', null,
+							         13.343421, 13.31231, 'Rua teste 123', null, null, 'small');
 
 
 --DELIVERY STATE TRANSITIONS
-INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 18:20:33', 'Em processamento', 'Pronto para recolha');
-INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 19:00:25', 'Pronto para recolha', 'Em distribuição');
+INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 18:20:33', 'Delivering', 'Delivered');
+INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 19:00:25', 'Delivering', 'Canceled');

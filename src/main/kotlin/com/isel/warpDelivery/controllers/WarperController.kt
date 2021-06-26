@@ -2,16 +2,11 @@ package com.isel.warpDelivery.controllers
 
 import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
-import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
-import com.isel.warpDelivery.dataAccess.DAO.Warper
 import com.isel.warpDelivery.dataAccess.mappers.*
-import com.isel.warpDelivery.inputmodels.RequestActiveWarperInputModel
-import com.isel.warpDelivery.inputmodels.VehicleInputModel
-import com.isel.warpDelivery.inputmodels.WarperInputModel
-import com.isel.warpDelivery.inputmodels.toDao
+import com.isel.warpDelivery.inputmodels.*
 import com.isel.warpDelivery.model.ActiveWarperRepository
-import com.isel.warpDelivery.model.WarperLocation
+import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -72,20 +67,28 @@ class WarperController(
         return ResponseEntity.status(204).build()
     }
 
+      @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
+    fun getDeliveryTransitions(@PathVariable deliveryId: Long): ResponseEntity<List<StateTransition>> {
+        val transitions = deliveryMapper.getTransitions(deliveryId)
+        return ResponseEntity.ok().body(transitions)
+    }
+
 
     //-------------------------------------------------------------------------------
 */
 
-    @PostMapping("/{username}/vehicles")
+    @PutMapping("/{username}/vehicles")
     fun addVehicle(
         @PathVariable username: String,
         @RequestBody vehicle: VehicleInputModel
     ): ResponseEntity<String> {
         val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
         vehicleMapper.create(vehicleDao)
-        return ResponseEntity.status(201).build()
+        return ResponseEntity.status(200).build()
     }
 
+
+    /// NEED TESTING STILL
     @GetMapping("/{username}/deliveries/{deliveryId}")
     fun getDelivery(@PathVariable deliveryId: Long): ResponseEntity<Delivery> {
         val delivery = deliveryMapper.read(deliveryId)
@@ -100,26 +103,38 @@ class WarperController(
 
     //-------------------------------------------------------------------------------
 /*
-    @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
-    fun getDeliveryTransitions(@PathVariable deliveryId: Long): ResponseEntity<List<StateTransition>> {
-        val transitions = deliveryMapper.getTransitions(deliveryId)
-        return ResponseEntity.ok().body(transitions)
-    }
-
 
  */
 
     /* ROUTING RELATED ENDPOINTS */
 
     @PostMapping("/SetActive")
-    fun addActiveWarper(@RequestBody warper: RequestActiveWarperInputModel){
-      activeWarpers.add(WarperLocation(warper.username, warper.location,warper.messageToken))
+    fun addActiveWarper(@RequestBody warper: ActiveWarperInputModel) : ResponseEntity<Any>{
+        val warperInfo = warperMapper.read(warper.username)
+
+        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warper.vehicleRegistration} ?:
+        return ResponseEntity.status(400).body("Vehicle not found")
+
+        val size = Size.fromText(warperVehicle.vehicleType)?:
+        return ResponseEntity.status(400).body("Vehicle not found")
+
+        activeWarpers.add(ActiveWarper(warper.username, warper.location, size ,warper.notificationToken))
+
+        return ResponseEntity.status(200).body("OK")
     }
 
     @PutMapping("/location")
-    fun updateWarperLocation(@RequestBody warper: RequestActiveWarperInputModel){
+    fun updateWarperLocation(@RequestBody warper: ActiveWarperInputModel){
         activeWarpers.updateLocation(warper.username,warper.location)
     }
+
+    @PutMapping("/SetInactive")
+    fun removeActiveWarper(@RequestBody warper: ActiveWarperInputModel){
+        activeWarpers.remove(warper.username)
+    }
+
+
+
 }
 
 

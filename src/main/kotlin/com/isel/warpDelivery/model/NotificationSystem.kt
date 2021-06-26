@@ -6,14 +6,14 @@ import com.google.firebase.messaging.Notification
 
 class NotificationSystem {
 
-    private fun sendNotification(warper : WarperLocation){
+    private fun sendNotification(warper : ActiveWarper){
         val message: Message = Message.builder()
             .putData("latitude", warper.location.latitude.toString())
             .putData("longitude", warper.location.latitude.toString())
             .setNotification(
                 Notification.builder()
                     .setTitle("New Delivery")
-                    .setBody("You have a new delivery to deliver")
+                    .setBody("You have a new delivery")
                     .build())
             .setToken(warper.token)
             .build()

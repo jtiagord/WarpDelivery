@@ -3,6 +3,7 @@ package com.isel.warpDelivery.dataAccess.mappers
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
+import com.isel.warpDelivery.model.Location
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -18,23 +19,20 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         jdbi.withHandle<Long,Exception> { handle ->
 
             val delivery = handle.createUpdate(
-                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, purchasedate " +
-                        "pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude, " +
-                        "deliverAddress, rating, reward, type) " +
+                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, purchasedate, " +
+                        ", deliverLatitude, deliverLongitude, deliverAddress, type) " +
                         "VALUES " +
-                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, NOW(), "+
-                        ":pickupLatitude, :pickupLongitude, :deliverLatitiude, :deliverLongitude, :deliverAddress, :type)"
+                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, :timestamp"+
+                        " :deliverLatitiude, :deliverLongitude, :deliverAddress, :type)"
             )
             .bind("warperUsername", DAO.warperUsername)
             .bind("clientUsername", DAO.clientUsername)
             .bind("clientphone", DAO.clientPhone)
             .bind("storeid", DAO.storeId)
             .bind("state", DAO.state)
-            .bind("pickupLatitude", DAO.pickupLatitude)
-            .bind("pickupLongitude", DAO.pickupLongitude)
             .bind("deliverLatitude", DAO.deliverLatitude)
             .bind("deliveryLongitude", DAO.deliverLongitude)
-            .bind("deliverAddress", DAO.deliveryAddress)
+            .bind("deliverAddress", DAO.deliverAddress)
             .bind("type", DAO.type)
             .executeAndReturnGeneratedKeys()
             .mapTo(Delivery::class.java)
@@ -46,15 +44,20 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
 
     override fun read(key: Long): Delivery =
         jdbi.inTransaction<Delivery, Exception> { handle ->
-            val delivery = handle.createQuery(
-                "SELECT deliveryid, clientid, warperid, " +
-                        "state, purchasedate, deliverydate, rating, price, type " +
+            val deliveryOpt = handle.createQuery(
+                "SELECT deliveryid, warperusername, clientusername, clientphone, storeid, state, purchasedate " +
+                        "pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude " +
+                        " deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
             )
             .bind("id", key)
             .mapTo(Delivery::class.java)
-            .one()
+            .findOne()
+
+            if(deliveryOpt.isEmpty) return@inTransaction null
+
+            val delivery = deliveryOpt.get()
 
             val transitions = handle.createQuery(
                 "SELECT  deliveryid, transitiondate, previousstate, nextstate " +
@@ -179,5 +182,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
     fun verifyIfWarperOrClient(userInfo: UserInfo, deliveryId: Int) : Boolean{
         return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId)
     }
+
+
 }
 

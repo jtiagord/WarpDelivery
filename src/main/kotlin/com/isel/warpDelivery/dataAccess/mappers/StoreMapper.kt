@@ -31,7 +31,7 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
         }
 
 
-    override fun read(key: Long): Store =
+    override fun read(key: Long): Store? =
         jdbi.inTransaction<Store, Exception> { handle ->
             val store = handle.createQuery(
                 "SELECT storeId, name, postal_code , address" +
@@ -39,9 +39,9 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
                         "where storeId = :storeId"
             )
                 .bind("storeId", key)
-                .mapTo(Store::class.java).one()
+                .mapTo(Store::class.java).findOne()
 
-            return@inTransaction store
+            return@inTransaction if(store.isPresent) store.get() else null
         }
 
     override fun update(DAO: Store) {

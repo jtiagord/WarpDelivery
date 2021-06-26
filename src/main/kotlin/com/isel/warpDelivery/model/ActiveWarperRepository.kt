@@ -2,14 +2,12 @@ package com.isel.warpDelivery.model
 
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.QueryDocumentSnapshot
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.Message
-import com.google.firebase.messaging.Notification
+import com.isel.warpDelivery.inputmodels.Size
 import com.isel.warpDelivery.routeAPI.RouteApi
 import org.springframework.stereotype.Component
 
 
-data class WarperLocation(val username : String, var location : Location, val token : String)
+data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
 
 
 
@@ -32,11 +30,11 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
             }
         }
         class DummyWarperLocation(var username: String? = null, var location : DummyLocation? = null,
-                                                                                            val token : String? = null){
-            fun toWarper() : WarperLocation?{
+                                  val deliverySize: Size?, val token : String? = null){
+            fun toWarper() : ActiveWarper?{
                 val location = this.location?.toLocation()
-                return if(username == null || location == null || token == null) null
-                else WarperLocation(username!!, location, token)
+                return if(username == null || location == null || token == null || deliverySize ==null) null
+                else ActiveWarper(username!!, location, deliverySize,token)
 
             }
         }
@@ -45,39 +43,42 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
     /**
      * Adds a warper to the list of searchable warpers
      * **/
-    fun add(warper : WarperLocation){
-        val result = db.collection(COLLECTION_NAME).document(warper.username).set(warper).get()
+    fun add(warper : ActiveWarper){
+        db.collection(COLLECTION_NAME).document(warper.username).set(warper).get()
     }
 
-    fun getClosest(location : Location) : WarperLocation?{
-        var closestWarperLocation : WarperLocation? = null
+    fun getClosest(location : Location,deliverySize: Size) : ActiveWarper?{
+        var closestActiveWarper : ActiveWarper? = null
         var closestDistance = Double.POSITIVE_INFINITY
 
-        val future = db.collection(COLLECTION_NAME).get()
-        val documents: List<QueryDocumentSnapshot> = future.get().documents
+        val future = db.collection(COLLECTION_NAME).whereEqualTo("deliverySize",deliverySize.text).get()
+        val documents = future.get().documents
         for (document in documents) {
             val warper =  document.toObject(DummyWarperLocation::class.java).toWarper() ?: continue
             val distance = warper.location.getDistance(location)
 
-            if(distance > MAX_DISTANCE) continue;
+            if(distance > MAX_DISTANCE) continue
 
             val routeDistance : Double = api.getRouteDistance(location, warper.location) ?: continue
 
             if(routeDistance < closestDistance) {
-                closestWarperLocation = warper
+                closestActiveWarper = warper
                 closestDistance = distance
             }
         }
 
-        return closestWarperLocation
+        return closestActiveWarper
     }
 
-
+    fun remove(username : String){
+        db.collection(COLLECTION_NAME).document(username)
+            .delete()
+    }
 
 
     fun updateLocation(username : String, location: Location){
         db.collection(COLLECTION_NAME).document(username)
-            .update("location", location);
+            .update("location", location)
     }
 
 }
