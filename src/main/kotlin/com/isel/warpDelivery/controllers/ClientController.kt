@@ -40,7 +40,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
 
     @GetMapping("/{username}")
     fun getClient(req: HttpServletRequest, @PathVariable username: String): Client {
-        return clientMapper.read(username) //TODO: Fix error when client doesn't exist
+        return clientMapper.read(username)
     }
 
     @GetMapping("/{username}/addresses")
@@ -56,15 +56,6 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     ) {
         val addressDao = addressInfo.toAddress(username)
         return clientMapper.addAddress(addressDao)
-    }
-
-    @GetMapping("/{username}/addresses/{addressId}")
-    fun getClientAddress(
-        req: HttpServletRequest,
-        @PathVariable username: String,
-        @PathVariable addressId: Int
-    ): Address {
-        return clientMapper.getAddress(username, addressId)
     }
 
     @DeleteMapping("/{username}/addresses/{addressId}")
@@ -103,7 +94,6 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         @RequestBody ratingAndReward: RatingAndRewardInputModel
     ) {
         clientMapper.giveRatingAndReward(username, deliveryId, ratingAndReward.rating, ratingAndReward.reward)
-        //TODO: Handle wrong inputs
     }
 
     @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
@@ -115,6 +105,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         return deliveryMapper.getTransitions(deliveryId)
     }
 
+    //Exception Handlers
     @ExceptionHandler(ClientMapper.UserAlreadyExistsException::class,
         ClientMapper.PhoneAlreadyExistsException::class,
         ClientMapper.EmailAlreadyExistsException::class

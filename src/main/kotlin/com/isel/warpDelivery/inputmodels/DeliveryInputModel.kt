@@ -6,11 +6,12 @@ import java.sql.Timestamp
 
 data class DeliveryInputModel(
     val storeId : Long,
-    val type : String,
+    val deliverySize : Size,
     val clientUsername: String,
     val clientPhoneNumber: String,
     val purchaseDate: Timestamp,
-    val price: Float,
+    val address : String,
+    val deliveryLocation : Location
 )
 
 

@@ -34,9 +34,9 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
     override fun read(key: Long): Store? =
         jdbi.inTransaction<Store, Exception> { handle ->
             val store = handle.createQuery(
-                "SELECT storeId, name, postal_code , address" +
-                        "from $STORE_TABLE" +
-                        "where storeId = :storeId"
+                "SELECT storeid, name, postalcode , address, latitude, longitude " +
+                        "from $STORE_TABLE " +
+                        "where storeid = :storeId"
             )
                 .bind("storeId", key)
                 .mapTo(Store::class.java).findOne()

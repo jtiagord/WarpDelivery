@@ -4,6 +4,7 @@ import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.model.Location
+import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -45,9 +46,8 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
     override fun read(key: Long): Delivery =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val deliveryOpt = handle.createQuery(
-                "SELECT deliveryid, warperusername, clientusername, clientphone, storeid, state, purchasedate " +
-                        "pickupLatitude, pickupLongitude, deliverLatitude, deliverLongitude " +
-                        " deliverAddress, rating, reward, type " +
+                "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
+                        "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
             )
@@ -55,7 +55,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
             .mapTo(Delivery::class.java)
             .findOne()
 
-            if(deliveryOpt.isEmpty) return@inTransaction null
+            if(deliveryOpt.isEmpty) throw DeliveryNotFoundException("The delivery: $key doesn't exist")
 
             val delivery = deliveryOpt.get()
 
@@ -81,7 +81,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
             )
                 .bind("deliveryid", DAO.deliveryId)
                 .bind("state", DAO.state)
-                .bind("deliverydate", DAO.deliveryDate)
+                .bind("deliverydate", DAO.deliverDate)
                 .bind("rating", DAO.rating)
                 .execute()
         }
@@ -101,19 +101,34 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
     fun readAll(): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
-                "SELECT deliveryid,clientusername,warperusername,state " +
+                "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
+                        "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE "
             )
                 .mapTo(Delivery::class.java)
                 .list()
         }
 
-    fun updateState(key: String, state: String) =
+    fun updateState(key: Long, state: String) =
         jdbi.useTransaction<Exception> { handle ->
+
+            val deliveryOpt = handle.createQuery(
+                "SELECT deliveryid " +
+                        "from $DELIVERY_TABLE " +
+                        "where deliveryid = :id"
+            )
+                .bind("id", key)
+                .mapTo(Long::class.java)
+                .findOne()
+
+            println(state)
+
+            if(deliveryOpt.isEmpty) throw DeliveryNotFoundException("The delivery: $key doesn't exist")
+
             handle.createUpdate(
                 "UPDATE $DELIVERY_TABLE " +
-                        "SET state = :state" +
-                        "where deliveryid = :deliveryid"
+                        "SET state = :state " +
+                        "WHERE deliveryid = :deliveryid"
             )
                 .bind("state", state)
                 .bind("deliveryid", key)
@@ -183,6 +198,8 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId)
     }
 
+    //Exceptions
+    class DeliveryNotFoundException(s: String) : Exception(s)
 
 }
 

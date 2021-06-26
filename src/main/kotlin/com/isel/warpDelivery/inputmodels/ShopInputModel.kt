@@ -1,5 +1,6 @@
 package com.isel.warpDelivery.inputmodels
 
+import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.model.Location
 
 
@@ -8,8 +9,13 @@ data class RequestDeliveryInputModel(
     val userPhone : String,
     val deliverySize : Size,
     val address : String,
-    val deliveryLocation : Location,
-)
+    val deliveryLocation : Location
+) {
+    fun toDelivery(warperUsername: String, clientUsername: String): Delivery {
+        return Delivery(null, warperUsername, clientUsername, storeId, "Delivering", userPhone, null,
+        null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize, emptyList())
+    }
+}
 
 enum class Size(val text: String) {
     SMALL("small"), MEDIUM("medium"), LARGE("large");
