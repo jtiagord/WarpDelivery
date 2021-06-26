@@ -1,5 +1,5 @@
 CREATE TABLE STORE (
-	storeid serial PRIMARY KEY,
+	storeid bigserial PRIMARY KEY,
 	name varchar(100) NOT NULL,
 	postalcode varchar(10) NOT NULL,
 	latitude double precision NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE WARPER (
 );
 
 CREATE TABLE DELIVERY (
-	deliveryid serial PRIMARY KEY,
+	deliveryid bigserial PRIMARY KEY,
 	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	storeid int NOT NULL REFERENCES STORE(storeid),
@@ -57,7 +57,7 @@ CREATE TABLE STATE_TRANSITIONS (
 );
 
 CREATE TABLE CLIENT_ADDRESS (
-	addressid serial,
+	addressid bigserial,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	latitude double precision NOT NULL,
 	longitude double precision NOT NULL,

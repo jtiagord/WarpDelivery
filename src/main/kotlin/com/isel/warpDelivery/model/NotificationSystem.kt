@@ -3,10 +3,12 @@ package com.isel.warpDelivery.model
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.Notification
+import org.springframework.stereotype.Component
 
+@Component
 class NotificationSystem {
 
-    private fun sendNotification(warper : ActiveWarper){
+    fun sendNotification(warper : ActiveWarper){
         val message: Message = Message.builder()
             .putData("latitude", warper.location.latitude.toString())
             .putData("longitude", warper.location.latitude.toString())

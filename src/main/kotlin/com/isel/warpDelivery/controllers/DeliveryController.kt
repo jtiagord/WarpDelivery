@@ -10,6 +10,7 @@ import com.isel.warpDelivery.exceptionHandler.ProblemJsonModel
 import com.isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.Location
+import com.isel.warpDelivery.model.NotificationSystem
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -18,7 +19,7 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping(DELIVERIES_PATH)
 class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : StoreMapper,
-                         val clientMapper: ClientMapper, val activeWarpers: ActiveWarperRepository) {
+                         val clientMapper: ClientMapper, val activeWarpers: ActiveWarperRepository,val notificationSystem: NotificationSystem) {
 
     companion object{
         const val MAX_DISTANCE_TO_STORE = 30000
@@ -39,7 +40,7 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
     }
 
     @PostMapping
-    fun requestDelivery(@RequestBody delivery : RequestDeliveryInputModel) : ResponseEntity<Any>  {
+    fun requestDelivery(@RequestBody delivery : RequestDeliveryInputModel)  : ResponseEntity<Any> {
 
         val store = storeMapper.read(delivery.storeId) ?: return ResponseEntity.badRequest().
             body("The store doesn't exist")
@@ -51,15 +52,13 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
 
         val closestWarper = activeWarpers.getClosest(storeLocation, delivery.deliverySize)
 
-
         if(closestWarper != null) {
-            println("found")
             val username = clientMapper.getUsernameByPhone(delivery.userPhone)
             deliveryMapper.create(delivery.toDelivery(closestWarper.username, username!!))
+            notificationSystem.sendNotification(closestWarper)
             return ResponseEntity.ok(closestWarper)
         }
-
-        return ResponseEntity.notFound().build()
+        return  ResponseEntity.notFound().build()
     }
 
     //Exception Handlers

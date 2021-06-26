@@ -87,7 +87,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
             return@inTransaction DAO.username
         }
 
-    override fun read(key: String): Warper =
+    override fun read(key: String): Warper? =
         jdbi.inTransaction<Warper, Exception> { handle ->
             val warperOpt = handle.createQuery(
                 "SELECT $USER_TABLE.username, firstname , lastname, phonenumber, email, password " +
@@ -99,11 +99,8 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
             .findOne()
 
 
-            if(warperOpt.isEmpty){
-                throw WarperNotFoundException("Warper not found")
-            }
 
-            val warper = warperOpt.get()
+            val warper = if(warperOpt.isPresent) warperOpt.get() else return@inTransaction null
 
             val vehicles = handle.createQuery(
                 "SELECT  username , vehicleType, vehicleRegistration " +

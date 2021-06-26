@@ -15,11 +15,11 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
         jdbi.inTransaction<Long,Exception> { handle ->
             val store = handle.createUpdate(
                 "Insert Into $STORE_TABLE" +
-                        "(name, postal_code, address,latitude,longitude) values" +
+                        "(name, postalcode, address,latitude,longitude) values" +
                         "(:name, :postalcode, :address,:latitude,:longitude)"
             )
             .bind("name", DAO.name)
-            .bind("postalcode", DAO.postalCode)
+            .bind("postalcode", DAO.postalcode)
             .bind("address", DAO.address)
             .bind("latitude", DAO.latitude)
             .bind("longitude", DAO.longitude)

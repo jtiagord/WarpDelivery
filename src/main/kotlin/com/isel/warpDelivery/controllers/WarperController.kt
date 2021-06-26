@@ -5,38 +5,43 @@ import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.mappers.*
 import com.isel.warpDelivery.inputmodels.*
-import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.model.ActiveWarper
+import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 
 
 @RestController
 @RequestMapping(WARPERS_PATH)
 class WarperController(
     val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val vehicleMapper: VehicleMapper,
-    val stateMapper: StateMapper, val activeWarpers: ActiveWarperRepository
-) {
+    val activeWarpers: ActiveWarperRepository
+)
+{
+    var logger: Logger = LoggerFactory.getLogger(WarperController::class.java)
 
     companion object {
         const val WARPER_INACTIVE = "INACTIVE"
         const val WARPER_ACTIVE = "ACTIVE"
-    }
+}
 
 
 
 
     @GetMapping("/{username}")
     fun getWarper(@PathVariable username: String): ResponseEntity<WarperOutputModel> {
-        val warper = warperMapper.read(username).toOutputModel()
-        return ResponseEntity.ok().body(warper)
+        val warper = warperMapper.read(username) ?: throw WarperNotFoundException("Warper Not Found")
+        return ResponseEntity.ok().body(warper.toOutputModel())
     }
 
     @PostMapping
     fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Any> {
         val warperCreated = warperMapper.create(warper.toDao()) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
-        return ResponseEntity.status(201).build()
+        return ResponseEntity.created(URI("$WARPERS_PATH/$warperCreated")).build()
     }
 
 
@@ -110,9 +115,10 @@ class WarperController(
 
     @PostMapping("/SetActive")
     fun addActiveWarper(@RequestBody warper: ActiveWarperInputModel) : ResponseEntity<Any>{
-        val warperInfo = warperMapper.read(warper.username)
+        logger.info(warper.toString())
+        val warperInfo = warperMapper.read(warper.username) ?: throw WarperNotFoundException("Warper doesn't exist")
 
-        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warper.vehicleRegistration} ?:
+        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warper.vehicle} ?:
         return ResponseEntity.status(400).body("Vehicle not found")
 
         val size = Size.fromText(warperVehicle.vehicleType)?:

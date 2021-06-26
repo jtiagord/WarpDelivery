@@ -1,6 +1,7 @@
 package com.isel.warpDelivery.inputmodels
 
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.DAO.Store
 import com.isel.warpDelivery.model.Location
 
 
@@ -34,7 +35,16 @@ enum class Size(val text: String) {
 
 data class ActiveWarperInputModel(
     val username : String,
-    val vehicleRegistration : String,
+    val vehicle : String,
     val location : Location,
     val notificationToken: String
 )
+
+data class StoreInputModel (
+    val name : String,
+    val postalcode : String,
+    val address : String,
+    val location:  Location
+)
+
+fun StoreInputModel.toDao(): Store = Store(null,name,postalcode,address,location.latitude,location.longitude)
