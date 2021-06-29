@@ -7,11 +7,13 @@ import com.isel.warpDelivery.dataAccess.DAO.Client
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.StateTransition
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
+import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.exceptionHandler.ProblemJsonModel
 import com.isel.warpDelivery.inputmodels.AddressInputModel
 import com.isel.warpDelivery.inputmodels.ClientInputModel
 import com.isel.warpDelivery.inputmodels.RatingAndRewardInputModel
 import com.isel.warpDelivery.inputmodels.toAddress
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -40,7 +42,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
 
     @GetMapping("/{username}")
     fun getClient(req: HttpServletRequest, @PathVariable username: String): Client {
-        return clientMapper.read(username)
+        return clientMapper.read(username) ?: throw ApiException("User ${username} not found", HttpStatus.NOT_FOUND)
     }
 
     @GetMapping("/{username}/addresses")
@@ -83,7 +85,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
         @PathVariable username: String,
         @PathVariable deliveryId: Long
     ): Delivery {
-        return deliveryMapper.read(deliveryId)
+        return deliveryMapper.read(deliveryId) ?: throw ApiException("The delivery: $deliveryId doesn't exist", HttpStatus.NOT_FOUND)
     }
 
     @PostMapping("/{username}/deliveries/{deliveryId}")

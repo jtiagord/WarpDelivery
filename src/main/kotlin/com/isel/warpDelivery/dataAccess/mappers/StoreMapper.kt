@@ -1,6 +1,7 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.dataAccess.DAO.Store
+import com.isel.warpDelivery.errorHandling.ApiException
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -24,8 +25,8 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
             .bind("latitude", DAO.latitude)
             .bind("longitude", DAO.longitude)
             .executeAndReturnGeneratedKeys()
-                .mapTo(Store::class.java)
-                .one()
+            .mapTo(Store::class.java)
+            .one()
 
             return@inTransaction store.storeId
         }

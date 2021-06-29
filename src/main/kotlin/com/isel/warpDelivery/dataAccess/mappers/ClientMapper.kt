@@ -80,19 +80,22 @@ class ClientMapper(jdbi: Jdbi) : DataMapper<String, Client>(jdbi) {
         }
 
 
-    override fun read(key: String): Client =
+    override fun read(key: String): Client? =
         jdbi.inTransaction<Client, Exception> { handle ->
 
-            if (!userExists(key, handle)) throw UserNotFoundException("The user: $key doesn't exist")
-
-            val client = handle.createQuery(
+            val clientOpt = handle.createQuery(
                 "SELECT username, firstname , lastname, phonenumber, password, email " +
                         "from $USER_TABLE " +
                         "where username = :username"
             )
                 .bind("username", key)
                 .mapTo(Client::class.java)
-                .one()
+                .findOne()
+
+            if(clientOpt.isEmpty) return@inTransaction null
+
+
+            val client = clientOpt.get()
 
             val collectionSize =
                 handle.createQuery("SELECT count(*) from  $CLIENT_ADDRESSES_TABLE where clientUsername = :username")

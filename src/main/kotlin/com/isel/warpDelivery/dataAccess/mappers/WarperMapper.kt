@@ -2,6 +2,7 @@ package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.DAO.Warper
+import com.isel.warpDelivery.errorHandling.ApiException
 import org.apache.commons.lang3.exception.ExceptionContext
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
@@ -40,15 +41,15 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
             if(!optional.isEmpty){
                 val userVerification = optional.get()
                 if(userVerification.username == DAO.username){
-                    throw ClientMapper.UserAlreadyExistsException("User Already Exists")
+                    throw ApiException("User Already Exists")
                 }
 
                 if(userVerification.email == DAO.email){
-                    throw ClientMapper.UserAlreadyExistsException("Email already Exists")
+                    throw ApiException("Email already Exists")
                 }
 
                 if(userVerification.phonenumber == DAO.phonenumber){
-                    throw ClientMapper.UserAlreadyExistsException("Phone Number Already Exists")
+                    throw ApiException("Phone Number Already Exists")
                 }
             }
 

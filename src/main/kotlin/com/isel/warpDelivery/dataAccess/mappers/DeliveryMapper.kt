@@ -43,7 +43,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         }
 
 
-    override fun read(key: Long): Delivery =
+    override fun read(key: Long): Delivery? =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val deliveryOpt = handle.createQuery(
                 "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
@@ -55,7 +55,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
             .mapTo(Delivery::class.java)
             .findOne()
 
-            if(deliveryOpt.isEmpty) throw DeliveryNotFoundException("The delivery: $key doesn't exist")
+            if(deliveryOpt.isEmpty) return@inTransaction null
 
             val delivery = deliveryOpt.get()
 

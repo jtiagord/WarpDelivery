@@ -16,13 +16,14 @@ import java.net.URI
 @RestController
 @RequestMapping(STORE_PATH)
 class StoreController(val storeMapper : StoreMapper){
-
-
     @PostMapping
-    fun addWarper(@RequestBody store: StoreInputModel): ResponseEntity<Any> {
+    fun addStore(@RequestBody store: StoreInputModel): ResponseEntity<Any> {
         val storeCreated = storeMapper.create(store.toDao())
         return ResponseEntity.created(URI("${STORE_PATH}/$storeCreated")).build()
     }
 }
+
+
+
 
 

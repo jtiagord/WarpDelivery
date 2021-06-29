@@ -4,12 +4,15 @@ import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.dataAccess.DAO.Vehicle
 import com.isel.warpDelivery.dataAccess.mappers.*
+import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.*
 import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
@@ -32,15 +35,17 @@ class WarperController(
 
 
 
+
+
     @GetMapping("/{username}")
-    fun getWarper(@PathVariable username: String): ResponseEntity<WarperOutputModel> {
-        val warper = warperMapper.read(username) ?: throw WarperNotFoundException("Warper Not Found")
-        return ResponseEntity.ok().body(warper.toOutputModel())
+    fun getWarper(@PathVariable username: String): WarperOutputModel {
+        val warper = warperMapper.read(username) ?: throw ApiException("Warper Not Found",HttpStatus.NOT_FOUND)
+        return warper.toOutputModel()
     }
 
     @PostMapping
     fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Any> {
-        val warperCreated = warperMapper.create(warper.toDao()) //TODO: NOTHING IS BEING RETURNED, CHANGE RESPONSE BODY OR FIX
+        val warperCreated = warperMapper.create(warper.toDao())
         return ResponseEntity.created(URI("$WARPERS_PATH/$warperCreated")).build()
     }
 
@@ -116,17 +121,16 @@ class WarperController(
     @PostMapping("/SetActive")
     fun addActiveWarper(@RequestBody warper: ActiveWarperInputModel) : ResponseEntity<Any>{
         logger.info(warper.toString())
-        val warperInfo = warperMapper.read(warper.username) ?: throw WarperNotFoundException("Warper doesn't exist")
+        val warperInfo = warperMapper.read(warper.username) ?: throw ApiException("Warper doesn't exist",HttpStatus.NOT_FOUND)
 
         val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warper.vehicle} ?:
-        return ResponseEntity.status(400).body("Vehicle not found")
+        throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
-        val size = Size.fromText(warperVehicle.vehicleType)?:
-        return ResponseEntity.status(400).body("Vehicle not found")
+        val size = Size.fromText(warperVehicle.vehicleType)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
         activeWarpers.add(ActiveWarper(warper.username, warper.location, size ,warper.notificationToken))
 
-        return ResponseEntity.status(200).body("OK")
+        return ResponseEntity.status(200).build()
     }
 
     @PutMapping("/location")

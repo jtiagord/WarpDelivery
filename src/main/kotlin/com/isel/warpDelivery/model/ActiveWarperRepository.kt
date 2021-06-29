@@ -68,7 +68,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
                 closestDistance = distance
             }
         }
-
+        if(closestActiveWarper != null ) remove(closestActiveWarper.username)
         return closestActiveWarper
     }
 
