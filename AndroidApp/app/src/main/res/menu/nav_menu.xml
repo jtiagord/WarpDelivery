@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:title="Tracking"
+        android:id="@+id/ic_location"
+        android:icon="@drawable/ic_location"
+    />
+
+    <item
+        android:title="Notifications"
+        android:id="@+id/ic_notifications"
+        android:icon="@drawable/ic_notification"
+    />
+
+    <item
+        android:title="History"
+        android:id="@+id/ic_history"
+        android:icon="@drawable/ic_history"
+    />
+
+    <item
+        android:title="User"
+        android:id="@+id/ic_user"
+        android:icon="@drawable/ic_user"
+    />
+</menu>
