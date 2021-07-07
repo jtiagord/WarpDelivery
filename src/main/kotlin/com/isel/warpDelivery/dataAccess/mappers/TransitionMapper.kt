@@ -1,8 +1,5 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.dataAccess.DAO.StateTransition
-import org.jdbi.v3.core.Jdbi
-import org.springframework.stereotype.Component
 /*
 @Component
 class TransitionMapper(jdbi: Jdbi) : DataMapper<List<String>, StateTransition>(jdbi) {

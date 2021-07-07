@@ -1,10 +1,8 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.authentication.UserInfo
-import com.isel.warpDelivery.dataAccess.DAO.Delivery
-import com.isel.warpDelivery.dataAccess.DAO.StateTransition
-import com.isel.warpDelivery.model.Location
-import org.jdbi.v3.core.Handle
+import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.StateTransition
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -174,7 +172,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .mapTo(String::class.java)
                 .findFirst()
                 .get()
-        }.compareTo(userInfo.name) == 0
+        }.compareTo(userInfo.id) == 0
 
     fun verifyClient(userInfo: UserInfo, deliveryId: Int): Boolean =
         jdbi.withHandle<String, Exception> { handle ->
@@ -192,7 +190,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .mapTo(String::class.java)
                 .findFirst()
                 .get()
-        }.compareTo(userInfo.name) == 0
+        }.compareTo(userInfo.id) == 0
 
     fun verifyIfWarperOrClient(userInfo: UserInfo, deliveryId: Int) : Boolean{
         return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId)

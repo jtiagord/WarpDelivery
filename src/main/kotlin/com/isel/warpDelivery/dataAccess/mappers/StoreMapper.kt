@@ -1,7 +1,6 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.dataAccess.DAO.Store
-import com.isel.warpDelivery.errorHandling.ApiException
+import com.isel.warpDelivery.dataAccess.dataClasses.Store
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 

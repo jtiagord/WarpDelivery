@@ -2,20 +2,17 @@ package com.isel.warpDelivery.controllers
 
 import com.isel.warpDelivery.common.*
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
-import com.isel.warpDelivery.dataAccess.DAO.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
 import com.isel.warpDelivery.dataAccess.mappers.ClientMapper
 import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.dataAccess.mappers.StoreMapper
 import com.isel.warpDelivery.errorHandling.ApiException
-import com.isel.warpDelivery.exceptionHandler.ProblemJsonModel
 import com.isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.model.NotificationSystem
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
 @RestController

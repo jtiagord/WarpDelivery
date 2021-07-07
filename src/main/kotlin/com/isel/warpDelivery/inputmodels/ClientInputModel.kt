@@ -1,6 +1,6 @@
 package com.isel.warpDelivery.inputmodels
 
-import com.isel.warpDelivery.dataAccess.DAO.Address
+import com.isel.warpDelivery.dataAccess.dataClasses.Address
 
 data class ClientInputModel(
     val username : String,

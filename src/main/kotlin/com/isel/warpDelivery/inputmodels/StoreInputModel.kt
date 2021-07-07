@@ -1,7 +1,7 @@
 package com.isel.warpDelivery.inputmodels
 
-import com.isel.warpDelivery.dataAccess.DAO.Delivery
-import com.isel.warpDelivery.dataAccess.DAO.Store
+import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.Store
 import com.isel.warpDelivery.model.Location
 
 

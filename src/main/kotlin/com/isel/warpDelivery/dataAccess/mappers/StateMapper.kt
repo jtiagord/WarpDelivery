@@ -1,6 +1,6 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.dataAccess.DAO.Warper
+import com.isel.warpDelivery.dataAccess.dataClasses.Warper
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
@@ -27,7 +27,7 @@ class StateMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
 
     override fun update(DAO: Warper) {
 
-        TODO("Not yet implemented")
+        //TODO("Not yet implemented")
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $USER_TABLE} " +

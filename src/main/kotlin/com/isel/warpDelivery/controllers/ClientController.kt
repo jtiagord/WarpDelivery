@@ -2,10 +2,10 @@ package com.isel.warpDelivery.controllers
 
 import com.isel.warpDelivery.dataAccess.mappers.ClientMapper
 import com.isel.warpDelivery.common.*
-import com.isel.warpDelivery.dataAccess.DAO.Address
-import com.isel.warpDelivery.dataAccess.DAO.Client
-import com.isel.warpDelivery.dataAccess.DAO.Delivery
-import com.isel.warpDelivery.dataAccess.DAO.StateTransition
+import com.isel.warpDelivery.dataAccess.dataClasses.Address
+import com.isel.warpDelivery.dataAccess.dataClasses.Client
+import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.StateTransition
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.exceptionHandler.ProblemJsonModel
