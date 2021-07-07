@@ -1,4 +1,3 @@
-
 package com.isel.warpDelivery.authentication
 
 import com.auth0.jwt.JWT
