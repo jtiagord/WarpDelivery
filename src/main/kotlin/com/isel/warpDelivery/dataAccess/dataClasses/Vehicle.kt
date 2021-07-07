@@ -1,4 +1,4 @@
-package com.isel.warpDelivery.dataAccess.DAO
+package com.isel.warpDelivery.dataAccess.dataClasses
 
 import com.isel.warpDelivery.outputmodels.VehicleOutputModel
 

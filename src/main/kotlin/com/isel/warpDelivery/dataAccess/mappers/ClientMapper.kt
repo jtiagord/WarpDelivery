@@ -1,7 +1,7 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.dataAccess.DAO.Address
-import com.isel.warpDelivery.dataAccess.DAO.Client
+import com.isel.warpDelivery.dataAccess.dataClasses.Address
+import com.isel.warpDelivery.dataAccess.dataClasses.Client
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component

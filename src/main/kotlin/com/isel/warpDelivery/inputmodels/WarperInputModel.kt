@@ -1,7 +1,7 @@
 package com.isel.warpDelivery.inputmodels
 
-import com.isel.warpDelivery.dataAccess.DAO.Vehicle
-import com.isel.warpDelivery.dataAccess.DAO.Warper
+import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
+import com.isel.warpDelivery.dataAccess.dataClasses.Warper
 
 data class WarperInputModel(
     val username : String,
@@ -11,6 +11,11 @@ data class WarperInputModel(
     val email : String,
     val password :String,
     val vehicles : List<VehicleInputModel> = emptyList()
+)
+
+data class WarperLoginInputModel(
+    val username: String,
+    val password: String
 )
 
 data class VehicleInputModel(

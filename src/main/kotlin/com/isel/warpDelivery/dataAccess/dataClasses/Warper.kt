@@ -1,5 +1,6 @@
-package com.isel.warpDelivery.dataAccess.DAO
+package com.isel.warpDelivery.dataAccess.dataClasses
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
 
 class Warper (val username : String,
@@ -7,6 +8,7 @@ class Warper (val username : String,
               val lastname : String,
               val phonenumber : String,
               val email : String,
+              @JsonIgnore
               val password :String?,
               var vehicles : List<Vehicle> = emptyList()){
 

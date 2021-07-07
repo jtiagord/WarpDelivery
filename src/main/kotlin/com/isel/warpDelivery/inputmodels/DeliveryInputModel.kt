@@ -1,6 +1,5 @@
 package com.isel.warpDelivery.inputmodels
 
-import com.isel.warpDelivery.dataAccess.DAO.Delivery
 import com.isel.warpDelivery.model.Location
 import java.sql.Timestamp
 

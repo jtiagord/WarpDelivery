@@ -1,6 +1,6 @@
 package com.isel.warpDelivery.dataAccess.mappers
 
-import com.isel.warpDelivery.dataAccess.DAO.Vehicle
+import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
 import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
