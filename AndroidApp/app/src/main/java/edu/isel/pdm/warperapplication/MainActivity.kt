@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         StrictMode.setThreadPolicy(policy)
         setContentView(R.layout.activity_main)
 
-        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this));
+        getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
 
         //initMap()
         val locationFragment = LocationFragment()
@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeCurrentFragment(fragment: Fragment){
+        supportActionBar?.setDisplayShowTitleEnabled(true)
+        supportActionBar?.setTitle(fragment.id)
         supportFragmentManager.beginTransaction().apply {
             replace(R.id.fl_wrapper, fragment)
             commit()
@@ -69,18 +71,18 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        val permissionsToRequest = ArrayList<String>();
-        var i = 0;
+        val permissionsToRequest = ArrayList<String>()
+        var i = 0
         while (i < grantResults.size) {
-            permissionsToRequest.add(permissions[i]);
-            i++;
+            permissionsToRequest.add(permissions[i])
+            i++
         }
         if (permissionsToRequest.size > 0) {
             ActivityCompat.requestPermissions(
                 this,
                 permissionsToRequest.toTypedArray(),
                 REQUEST_PERMISSIONS_REQUEST_CODE
-            );
+            )
         }
     }
 }

@@ -1,24 +1,22 @@
 package edu.isel.pdm.warperapplication.view.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.DeliveriesAdapter
-import edu.isel.pdm.warperapplication.web.ApiInterface
-import edu.isel.pdm.warperapplication.web.Delivery
-import edu.isel.pdm.warperapplication.web.ServiceBuilder
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import edu.isel.pdm.warperapplication.viewModels.HistoryViewModel
 
 class HistoryFragment : Fragment() {
+
+    private val viewModel : HistoryViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -27,31 +25,26 @@ class HistoryFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_history, container, false)
         val recyclerView = rootView.findViewById<RecyclerView>(R.id.recyclerView)
-
-        val request = ServiceBuilder.buildService(ApiInterface::class.java)
-        val call = request.getWarperDeliveries("user1")
+        val refreshButton = rootView.findViewById<FloatingActionButton>(R.id.refreshButton)
 
 
-        call.enqueue(object : Callback<List<Delivery>> {
-            override fun onResponse(call: Call<List<Delivery>>, response: Response<List<Delivery>>) {
+        refreshButton.setOnClickListener {
+            viewModel.getDeliveries()
+        }
 
 
-                if (response.isSuccessful){
-                    recyclerView.apply {
-                        setHasFixedSize(true)
-                        layoutManager = LinearLayoutManager(activity)
-                        adapter = DeliveriesAdapter(response.body()!!)
-                    }
-                }
-            }
-            override fun onFailure(call: Call<List<Delivery>>, t: Throwable) {
-                Log.v("HISTORY", t.message!!)
-                throw t
-                Toast.makeText(activity, "${t.message}", Toast.LENGTH_LONG).show()
-            }
+        viewModel.deliveries.observe(viewLifecycleOwner, {
+            updateDeliveries(recyclerView)
         })
 
         return rootView
     }
 
+    private fun updateDeliveries(view: RecyclerView){
+        view.apply {
+            setHasFixedSize(true)
+            layoutManager = LinearLayoutManager(activity)
+            adapter = DeliveriesAdapter(viewModel.deliveries.value!!)
+        }
+    }
 }

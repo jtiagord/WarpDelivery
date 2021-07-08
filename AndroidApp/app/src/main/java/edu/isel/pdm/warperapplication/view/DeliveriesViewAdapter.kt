@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import edu.isel.pdm.warperapplication.R
-import edu.isel.pdm.warperapplication.web.Delivery
+import edu.isel.pdm.warperapplication.web.entities.Delivery
 
 class DeliveriesAdapter(private val deliveries: List<Delivery>): RecyclerView.Adapter<DeliveriesViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeliveriesViewHolder {

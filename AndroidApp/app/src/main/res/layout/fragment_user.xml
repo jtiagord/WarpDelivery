@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     tools:context=".view.fragments.UserFragment">
 
-    <RelativeLayout
+
+
+    <TextView
+        android:id="@+id/UserInfoText"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
-            android:text="User" />
-    </RelativeLayout>
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:text="User" />
+
+
 </FrameLayout>

@@ -1,4 +1,4 @@
-package edu.isel.pdm.warperapplication.web
+package edu.isel.pdm.warperapplication.web.entities
 
 data class Delivery (
     val deliveryId : Long?,
