@@ -1,34 +1,28 @@
 package edu.isel.pdm.warperapplication.viewModels
 
-import android.util.Log
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import edu.isel.pdm.warperapplication.web.ApiInterface
+import edu.isel.pdm.warperapplication.WarperApplication
 import edu.isel.pdm.warperapplication.web.entities.Delivery
-import edu.isel.pdm.warperapplication.web.ServiceBuilder
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
-class HistoryViewModel : ViewModel(){
+
+class HistoryViewModel(app: Application) : AndroidViewModel(app){
+
+    private val app: WarperApplication by lazy {
+        getApplication<WarperApplication>()
+    }
 
     var deliveries = MutableLiveData<List<Delivery>>()
 
-    private val request = ServiceBuilder.buildService(ApiInterface::class.java)
-    private val call = request.getWarperDeliveries("user1")
-
-    fun getDeliveries() {
-
-        call.clone().enqueue(object : Callback<List<Delivery>> {
-            override fun onResponse(call: Call<List<Delivery>>, response: Response<List<Delivery>>) {
-                if (response.isSuccessful){
-                    deliveries.postValue(response.body())
-                }
+    fun getDeliveries(){
+        app.getDeliveries(app.getCurrentUser(),
+            onSuccess = {
+                deliveries.postValue(it)
+            },
+            onFailure = {
+                deliveries.postValue(null)
             }
-            override fun onFailure(call: Call<List<Delivery>>, t: Throwable) {
-                Log.e("HISTORY", t.message!!)
-            }
-        })
+        )
     }
-
 }

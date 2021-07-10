@@ -4,20 +4,17 @@
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="swipe_left_for_register">Swipe Left to Register</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
     <string name="username">Username</string>
-    <string name="swipe_right_for_login">Swipe Right for Login</string>
+    <string name="swipe_right_for_login">Swipe Right to Login</string>
     <string name="register">Register</string>
     <string name="re_type_password">Re-type Password</string>
     <string name="first_name">First Name</string>
     <string name="last_name">Last Name</string>
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="username_hint">Your username</string>
-    <string name="email_hint">Your email</string>
-    <string name="phone_hint">Your phone number</string>
+    <string name="username_hint">Username</string>
+    <string name="email_hint">Email</string>
+    <string name="phone_hint">Phone number</string>
     <string name="refresh">Refresh</string>
 </resources>

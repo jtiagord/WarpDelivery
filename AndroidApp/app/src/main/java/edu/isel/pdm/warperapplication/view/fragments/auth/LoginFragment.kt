@@ -1,5 +1,6 @@
 package edu.isel.pdm.warperapplication.view.fragments.auth
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,10 +10,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import edu.isel.pdm.warperapplication.R
+import edu.isel.pdm.warperapplication.view.activities.MainActivity
+import edu.isel.pdm.warperapplication.viewModels.LoginViewModel
 
 
 class LoginFragment : Fragment() {
+
+    private val viewModel: LoginViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,6 +30,16 @@ class LoginFragment : Fragment() {
         val loginButton = rootView.findViewById<Button>(R.id.btn_login)
         val usernameInput = rootView.findViewById<EditText>(R.id.et_username)
         val passwordInput = rootView.findViewById<EditText>(R.id.et_password)
+
+        viewModel.loginStatus.observe(viewLifecycleOwner, {
+            if (it){
+                val intent = Intent(activity, MainActivity::class.java)
+                this.startActivity(intent)
+            } else {
+                Toast.makeText(activity, "Invalid username / password combo", Toast.LENGTH_LONG)
+                    .show()
+            }
+        })
 
         loginButton.setOnClickListener {
             if(checkInputs(listOf(usernameInput, passwordInput))){
@@ -40,6 +56,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun login(username: String, password: String){
+        viewModel.tryLogin(username, password)
         Log.v("LOGIN", "LOGGING IN")
     }
 

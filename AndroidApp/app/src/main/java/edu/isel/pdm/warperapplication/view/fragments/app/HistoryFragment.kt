@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.DeliveriesAdapter
 import edu.isel.pdm.warperapplication.viewModels.HistoryViewModel
+import edu.isel.pdm.warperapplication.web.entities.Delivery
 
 class HistoryFragment : Fragment() {
 
@@ -33,17 +35,22 @@ class HistoryFragment : Fragment() {
 
 
         viewModel.deliveries.observe(viewLifecycleOwner, {
-            updateDeliveries(recyclerView)
+            updateDeliveries(recyclerView, it)
         })
 
         return rootView
     }
 
-    private fun updateDeliveries(view: RecyclerView){
+    private fun updateDeliveries(view: RecyclerView, deliveries: List<Delivery>?){
+        if(deliveries == null){
+            Toast.makeText(activity, "Error updating deliveries", Toast.LENGTH_LONG).show()
+            return
+        }
+
         view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
-            adapter = DeliveriesAdapter(viewModel.deliveries.value!!)
+            adapter = DeliveriesAdapter(deliveries)
         }
     }
 }

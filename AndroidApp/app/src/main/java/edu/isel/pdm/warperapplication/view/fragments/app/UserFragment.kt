@@ -12,7 +12,7 @@ import edu.isel.pdm.warperapplication.viewModels.UserViewModel
 
 class UserFragment : Fragment() {
 
-    val viewModel : UserViewModel by viewModels()
+    private val viewModel : UserViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -21,21 +21,23 @@ class UserFragment : Fragment() {
         // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_user, container, false)
         val userTextView = rootView.findViewById<TextView>(R.id.UserInfoText)
-        viewModel.user.observe(viewLifecycleOwner, {
+
+        viewModel.userInfo.observe(viewLifecycleOwner, {
             displayUserInfo(userTextView)
         })
-        viewModel.getUserInfo()
 
+        //TODO: Place this where it belongs
+        viewModel.getUserInfo()
         return rootView
     }
 
 
     private fun displayUserInfo(textView: TextView){
         val userInfo: String = "" +
-                "First Name: ${viewModel.user.value!!.firstname}\n" +
-                "Last Name: ${viewModel.user.value!!.lastname}\n" +
-                "Email: ${viewModel.user.value!!.email}\n" +
-                "Phone Number: ${viewModel.user.value!!.phonenumber}\n"
+                "First Name: ${viewModel.userInfo.value!!.firstname}\n" +
+                "Last Name: ${viewModel.userInfo.value!!.lastname}\n" +
+                "Email: ${viewModel.userInfo.value!!.email}\n" +
+                "Phone Number: ${viewModel.userInfo.value!!.phonenumber}\n"
 
         textView.text = userInfo
         textView.invalidate()
