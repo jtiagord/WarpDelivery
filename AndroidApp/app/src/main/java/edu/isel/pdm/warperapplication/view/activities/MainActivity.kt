@@ -1,4 +1,4 @@
-package edu.isel.pdm.warperapplication
+package edu.isel.pdm.warperapplication.view.activities
 
 import android.os.Bundle
 import android.os.StrictMode
@@ -6,10 +6,11 @@ import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import edu.isel.pdm.warperapplication.view.fragments.HistoryFragment
-import edu.isel.pdm.warperapplication.view.fragments.LocationFragment
-import edu.isel.pdm.warperapplication.view.fragments.NotificationsFragment
-import edu.isel.pdm.warperapplication.view.fragments.UserFragment
+import edu.isel.pdm.warperapplication.R
+import edu.isel.pdm.warperapplication.view.fragments.app.HistoryFragment
+import edu.isel.pdm.warperapplication.view.fragments.app.LocationFragment
+import edu.isel.pdm.warperapplication.view.fragments.app.NotificationsFragment
+import edu.isel.pdm.warperapplication.view.fragments.app.UserFragment
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration.getInstance
@@ -71,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         val permissionsToRequest = ArrayList<String>()
         var i = 0
         while (i < grantResults.size) {

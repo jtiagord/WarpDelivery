@@ -1,4 +1,4 @@
-package edu.isel.pdm.warperapplication.view.fragments
+package edu.isel.pdm.warperapplication.view.fragments.app
 
 import android.app.Application
 

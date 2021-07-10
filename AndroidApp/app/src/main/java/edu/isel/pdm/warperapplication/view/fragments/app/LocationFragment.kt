@@ -1,4 +1,4 @@
-package edu.isel.pdm.warperapplication.view.fragments
+package edu.isel.pdm.warperapplication.view.fragments.app
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -31,14 +31,14 @@ class LocationFragment : Fragment() {
 
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val map: MapView = rootView.findViewById(R.id.map)
-        var mapController = map.controller;
+        val mapController = map.controller
         initMap(map)
 
 
 
-        mapController.setZoom(15);
-        var startPoint = GeoPoint(48.13, -1.63);
-        mapController.setCenter(startPoint);
+        mapController.setZoom(15)
+        val startPoint = GeoPoint(48.13, -1.63)
+        mapController.setCenter(startPoint)
         map.invalidate()
 
         // Inflate the layout for this fragment
@@ -47,7 +47,7 @@ class LocationFragment : Fragment() {
 
     fun initMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setMultiTouchControls(true);
+        map.setMultiTouchControls(true)
     }
 
     fun getAndDrawRoute(map: MapView, mapController: MapController){
