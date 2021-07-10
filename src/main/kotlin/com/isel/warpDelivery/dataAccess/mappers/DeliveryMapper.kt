@@ -133,15 +133,24 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .execute()
         }
 
-    fun getDeliveriesByUsername(username: String): List<Delivery> =
+    fun getDeliveriesByClientUsername(username: String): List<Delivery> =
 
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
-            val deliveries = handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
+
+            return@inTransaction handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
                 .bind("username", username)
                 .mapTo(Delivery::class.java)
                 .list()
+        }
 
-            return@inTransaction deliveries
+    fun getDeliveriesByWarperUsername(username: String): List<Delivery> =
+
+        jdbi.inTransaction<List<Delivery>, Exception> { handle ->
+
+            return@inTransaction handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE warperusername = :username")
+                .bind("username", username)
+                .mapTo(Delivery::class.java)
+                .list()
         }
 
     fun getTransitions(deliveryId: Long): List<StateTransition> =

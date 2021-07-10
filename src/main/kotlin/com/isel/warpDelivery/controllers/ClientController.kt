@@ -71,7 +71,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
 
     @GetMapping("/{username}/deliveries")
     fun getClientDeliveries(req: HttpServletRequest, @PathVariable username: String): List<Delivery> {
-        return deliveryMapper.getDeliveriesByUsername(username)
+        return deliveryMapper.getDeliveriesByClientUsername(username)
     }
 
     @PostMapping("/{username}/deliveries")

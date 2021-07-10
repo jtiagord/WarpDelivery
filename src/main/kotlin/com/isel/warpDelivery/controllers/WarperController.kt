@@ -125,7 +125,7 @@ class WarperController(
 
     @GetMapping("/{username}/deliveries")
     fun getDeliveries(@PathVariable username: String): ResponseEntity<List<Delivery>> {
-        val deliveries = deliveryMapper.getDeliveriesByUsername(username)
+        val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username)
         return ResponseEntity.status(200).body(deliveries)
     }
 
