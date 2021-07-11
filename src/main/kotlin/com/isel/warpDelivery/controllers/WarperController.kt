@@ -2,6 +2,8 @@ package com.isel.warpDelivery.controllers
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.isel.warpDelivery.authentication.USER_ATTRIBUTE_KEY
+import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.authentication.WarperResource
 import com.isel.warpDelivery.common.ISSUER
 import com.isel.warpDelivery.common.KeyPair
@@ -14,14 +16,17 @@ import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.*
 import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.ActiveWarperRepository
+import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -142,28 +147,32 @@ class WarperController(
     /* ROUTING RELATED ENDPOINTS */
     @WarperResource
     @PostMapping("/SetActive")
-    fun addActiveWarper(@RequestBody warper: ActiveWarperInputModel) : ResponseEntity<Any>{
-        logger.info(warper.toString())
-        val warperInfo = warperMapper.read(warper.username) ?: throw ApiException("Warper doesn't exist",HttpStatus.NOT_FOUND)
+    fun addActiveWarper(req: HttpServletRequest, @RequestBody warperReq: ActiveWarperInputModel) : ResponseEntity<Any>{
+        val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warperInfo = warperMapper.read(warper.id) ?: throw ApiException("Warper doesn't exist",HttpStatus.NOT_FOUND)
 
-        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warper.vehicle} ?:
+        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warperReq.vehicle} ?:
         throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
         val size = Size.fromText(warperVehicle.vehicleType)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
-        activeWarpers.add(ActiveWarper(warper.username, warper.location, size ,warper.notificationToken))
+        activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size ,warperReq.notificationToken))
 
         return ResponseEntity.status(200).build()
     }
 
+    @WarperResource
     @PutMapping("/location")
-    fun updateWarperLocation(@RequestBody warper: ActiveWarperInputModel){
-        activeWarpers.updateLocation(warper.username,warper.location)
+    fun updateWarperLocation(req: HttpServletRequest, @RequestBody location: Location){
+        val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        activeWarpers.updateLocation(warper.id,location)
     }
 
+    @WarperResource
     @PutMapping("/SetInactive")
-    fun removeActiveWarper(@RequestBody warper: ActiveWarperInputModel){
-        activeWarpers.remove(warper.username)
+    fun removeActiveWarper(req: HttpServletRequest){
+        val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        activeWarpers.remove(warper.id)
     }
 
 

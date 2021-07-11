@@ -33,7 +33,6 @@ enum class Size(val text: String) {
 }
 
 data class ActiveWarperInputModel(
-    val username : String,
     val vehicle : String,
     val location : Location,
     val notificationToken: String
