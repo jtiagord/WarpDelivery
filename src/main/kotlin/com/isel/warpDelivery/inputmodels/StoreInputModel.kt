@@ -6,13 +6,12 @@ import com.isel.warpDelivery.model.Location
 
 
 data class RequestDeliveryInputModel(
-    val storeId : Long,
     val userPhone : String,
     val deliverySize : Size,
     val address : String,
     val deliveryLocation : Location
 ) {
-    fun toDelivery(warperUsername: String, clientUsername: String?): Delivery {
+    fun toDelivery(warperUsername: String, clientUsername: String?,storeId : String): Delivery {
         return Delivery(null, warperUsername, clientUsername, storeId, "Delivering", userPhone, null,
         null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize, emptyList())
     }
@@ -47,4 +46,5 @@ data class StoreInputModel (
     val location:  Location
 )
 
-fun StoreInputModel.toDao(): Store = Store(null,name,postalcode,address,location.latitude,location.longitude)
+fun StoreInputModel.toDao(ApiKey : String): Store =
+    Store(null,name,postalcode,address,location.latitude,location.longitude,ApiKey)

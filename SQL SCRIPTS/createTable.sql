@@ -1,10 +1,19 @@
+
+CREATE OR REPLACE FUNCTION generate_id() RETURNS char(32) AS $$
+        BEGIN
+                RETURN replace(gen_random_uuid ()::text,'-','');
+        END;
+$$ LANGUAGE plpgsql;
+
+
 CREATE TABLE STORE (
-	storeid bigserial PRIMARY KEY,
+	storeid char(32) PRIMARY KEY DEFAULT generate_id(),
 	name varchar(100) NOT NULL,
 	postalcode varchar(10) NOT NULL,
 	latitude double precision NOT NULL,
 	longitude double precision NOT NULL,
-	address varchar(100) NOT NULL
+	address varchar(100) NOT NULL,
+	apiKey char(32) UNIQUE NOT NULL
 );
 
 CREATE TABLE USERS (
@@ -12,7 +21,7 @@ CREATE TABLE USERS (
 	firstname varchar(50) NOT NULL,
 	lastname varchar(50) NOT NULL,
 	phonenumber varchar(50) NOT NULL UNIQUE,
-	password varchar(50) NOT NULL,
+	password varchar(100) NOT NULL,
 	email varchar(100) NOT NULL CHECK (email LIKE '%@%') UNIQUE
 );
 
@@ -22,10 +31,10 @@ CREATE TABLE WARPER (
 );
 
 CREATE TABLE DELIVERY (
-	deliveryid bigserial PRIMARY KEY,
+	deliveryid char(32) PRIMARY KEY DEFAULT generate_id(),
 	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
 	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
-	storeid int NOT NULL REFERENCES STORE(storeid),
+	storeid char(32) NOT NULL REFERENCES STORE(storeid),
 	state varchar(20) NOT NULL
 	CHECK (state IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
 	clientphone varchar(50),
@@ -48,7 +57,7 @@ CREATE TABLE VEHICLE (
 );
 
 CREATE TABLE STATE_TRANSITIONS (
-	deliveryid int REFERENCES DELIVERY(deliveryid) on delete cascade,
+	deliveryid char(32) REFERENCES DELIVERY(deliveryid) on delete cascade,
 	transitiondate timestamp,
 	previousstate varchar(20) NOT NULL CHECK (previousstate IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
 	nextstate varchar(20) NOT NULL CHECK (nextstate IN

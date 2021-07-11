@@ -83,7 +83,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun getClientDelivery(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable deliveryId: Long
+        @PathVariable deliveryId: String
     ): Delivery {
         return deliveryMapper.read(deliveryId) ?: throw ApiException("The delivery: $deliveryId doesn't exist", HttpStatus.NOT_FOUND)
     }
@@ -102,7 +102,7 @@ class ClientController(val clientMapper: ClientMapper, val deliveryMapper: Deliv
     fun getStateTransitions(
         req: HttpServletRequest,
         @PathVariable username: String,
-        @PathVariable deliveryId: Long
+        @PathVariable deliveryId: String
     ): List<StateTransition> {
         return deliveryMapper.getTransitions(deliveryId)
     }

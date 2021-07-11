@@ -3,10 +3,10 @@ package com.isel.warpDelivery.dataAccess.dataClasses
 import com.isel.warpDelivery.inputmodels.Size
 import java.sql.Timestamp
 
-class Delivery (val deliveryId : Long?,
+class Delivery (val deliveryId : String?,
                 val warperUsername: String?,
                 val clientUsername : String?,
-                val storeId: Long,
+                val storeId: String,
                 val state : String,
                 val clientPhone: String,
                 val purchaseDate : Timestamp?,

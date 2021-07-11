@@ -5,41 +5,42 @@ import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
 @Component
-class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
+class StoreMapper(jdbi: Jdbi) : DataMapper<String, Store>(jdbi) {
 
     companion object {
         const val STORE_TABLE = "STORE"
     }
 
-    override fun create(DAO: Store): Long =
-        jdbi.inTransaction<Long,Exception> { handle ->
+    override fun create(DAO: Store): String =
+        jdbi.inTransaction<String,Exception> { handle ->
             val store = handle.createUpdate(
                 "Insert Into $STORE_TABLE" +
-                        "(name, postalcode, address,latitude,longitude) values" +
-                        "(:name, :postalcode, :address,:latitude,:longitude)"
+                        "(name, postalcode, address,latitude,longitude, apiKey) values" +
+                        "(:name, :postalcode, :address,:latitude,:longitude, :apiKey)"
             )
             .bind("name", DAO.name)
             .bind("postalcode", DAO.postalcode)
             .bind("address", DAO.address)
             .bind("latitude", DAO.latitude)
             .bind("longitude", DAO.longitude)
+            .bind("apiKey", DAO.ApiKey)
             .executeAndReturnGeneratedKeys()
             .mapTo(Store::class.java)
             .one()
 
             return@inTransaction store.storeId
-        }
+    }
 
 
-    override fun read(key: Long): Store? =
+    override fun read(key: String): Store? =
         jdbi.inTransaction<Store, Exception> { handle ->
             val store = handle.createQuery(
-                "SELECT storeid, name, postalcode , address, latitude, longitude " +
+                "SELECT * " +
                         "from $STORE_TABLE " +
                         "where storeid = :storeId"
             )
-                .bind("storeId", key)
-                .mapTo(Store::class.java).findOne()
+            .bind("storeId", key)
+            .mapTo(Store::class.java).findOne()
 
             return@inTransaction if(store.isPresent) store.get() else null
         }
@@ -48,7 +49,23 @@ class StoreMapper(jdbi: Jdbi) : DataMapper<Long, Store>(jdbi) {
         TODO("Not yet implemented")
     }
 
-    override fun delete(key: Long) {
+    override fun delete(key: String) {
         TODO("Not yet implemented")
     }
+
+
+    fun getStoreByApiKey(apiKey : String) : Store? =
+        jdbi.withHandle<Store, Exception>{ handle ->
+            val store = handle.createQuery(
+                "SELECT * " +
+                    "from $STORE_TABLE " +
+                    "where apiKey = :apiKey"
+            )
+            .bind("apiKey",apiKey)
+            .mapTo(Store::class.java)
+            .findFirst()
+
+            return@withHandle if(store.isEmpty) null else store.get()
+        }
+
 }

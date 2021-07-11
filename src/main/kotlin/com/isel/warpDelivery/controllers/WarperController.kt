@@ -2,9 +2,11 @@ package com.isel.warpDelivery.controllers
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.isel.warpDelivery.authentication.WarperResource
 import com.isel.warpDelivery.common.ISSUER
 import com.isel.warpDelivery.common.KeyPair
 import com.isel.warpDelivery.common.WARPERS_PATH
+import com.isel.warpDelivery.common.encodePassword
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
 import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
 import com.isel.warpDelivery.dataAccess.mappers.*
@@ -45,6 +47,7 @@ class WarperController(
 
     @PostMapping
     fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Any> {
+        warper.password = encodePassword(warper.password)
         val warperCreated = warperMapper.create(warper.toDao())
         return ResponseEntity.created(URI("$WARPERS_PATH/$warperCreated")).build()
     }
@@ -53,9 +56,16 @@ class WarperController(
     @PostMapping("/Login")
     fun login(@RequestBody warperCredentials : WarperLoginInputModel): Map<String,String>{
 
-        val warper= warperMapper.read(warperCredentials.username)
-        if(warper == null || warper.password != warperCredentials.password)
+        val warper = warperMapper.read(warperCredentials.username) ?:
             throw ApiException("Invalid Credentials" , HttpStatus.UNAUTHORIZED)
+
+        val (salt, password) = warper.password.split(":")
+
+        val encodedPasswordInput = encodePassword(warperCredentials.password,salt)
+
+        if(password != encodedPasswordInput)
+            throw ApiException("Invalid Credentials" , HttpStatus.UNAUTHORIZED)
+
         val token = JWT.create().withIssuer(ISSUER)
             .withClaim("id", warperCredentials.username)
             .withClaim("usertype", "WARPER")
@@ -118,7 +128,7 @@ class WarperController(
 
     /// NEED TESTING STILL
     @GetMapping("/{username}/deliveries/{deliveryId}")
-    fun getDelivery(@PathVariable deliveryId: Long): ResponseEntity<Delivery> {
+    fun getDelivery(@PathVariable deliveryId: String): ResponseEntity<Delivery> {
         val delivery = deliveryMapper.read(deliveryId)
         return ResponseEntity.status(200).body(delivery)
     }
@@ -129,13 +139,8 @@ class WarperController(
         return ResponseEntity.status(200).body(deliveries)
     }
 
-    //-------------------------------------------------------------------------------
-/*
-
- */
-
     /* ROUTING RELATED ENDPOINTS */
-
+    @WarperResource
     @PostMapping("/SetActive")
     fun addActiveWarper(@RequestBody warper: ActiveWarperInputModel) : ResponseEntity<Any>{
         logger.info(warper.toString())

@@ -7,15 +7,15 @@ import org.jdbi.v3.core.Jdbi
 import org.springframework.stereotype.Component
 
 @Component
-class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
+class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
 
     companion object {
         const val DELIVERY_TABLE = "DELIVERY"
         const val TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
-    override fun create(DAO: Delivery) : Long=
-        jdbi.withHandle<Long,Exception> { handle ->
+    override fun create(DAO: Delivery) : String=
+        jdbi.withHandle<String,Exception> { handle ->
 
             val delivery = handle.createUpdate(
                 "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, " +
@@ -41,7 +41,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         }
 
 
-    override fun read(key: Long): Delivery? =
+    override fun read(key: String): Delivery? =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val deliveryOpt = handle.createQuery(
                 "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
@@ -85,7 +85,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
         }
     }
 
-    override fun delete(key: Long) {
+    override fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $DELIVERY_TABLE " +
@@ -107,7 +107,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .list()
         }
 
-    fun updateState(key: Long, state: String) =
+    fun updateState(key: String, state: String) =
         jdbi.useTransaction<Exception> { handle ->
 
             val deliveryOpt = handle.createQuery(
@@ -116,7 +116,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                         "where deliveryid = :id"
             )
                 .bind("id", key)
-                .mapTo(Long::class.java)
+                .mapTo(String::class.java)
                 .findOne()
 
             println(state)
@@ -153,7 +153,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .list()
         }
 
-    fun getTransitions(deliveryId: Long): List<StateTransition> =
+    fun getTransitions(deliveryId: String): List<StateTransition> =
         jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->
 
             return@inTransaction handle.createQuery(
@@ -165,7 +165,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .list()
         }
 
-    fun verifyWarper(userInfo: UserInfo, deliveryId: Int): Boolean =
+    fun verifyWarper(userInfo: UserInfo, deliveryId: String): Boolean =
         jdbi.withHandle<String, Exception> { handle ->
             val deliveryExists = handle.createQuery("select count(*) FROM $DELIVERY_TABLE where deliveryid = :id")
                 .bind("id", deliveryId)
@@ -183,7 +183,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .get()
         }.compareTo(userInfo.id) == 0
 
-    fun verifyClient(userInfo: UserInfo, deliveryId: Int): Boolean =
+    fun verifyClient(userInfo: UserInfo, deliveryId: String): Boolean =
         jdbi.withHandle<String, Exception> { handle ->
             val deliveryExists = handle.createQuery("select count(*) FROM $DELIVERY_TABLE where deliveryid = :id")
                 .bind("id", deliveryId)
@@ -201,9 +201,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<Long, Delivery>(jdbi) {
                 .get()
         }.compareTo(userInfo.id) == 0
 
-    fun verifyIfWarperOrClient(userInfo: UserInfo, deliveryId: Int) : Boolean{
-        return verifyClient(userInfo, deliveryId) || verifyWarper(userInfo, deliveryId)
-    }
+
 
     //Exceptions
     class DeliveryNotFoundException(s: String) : Exception(s)

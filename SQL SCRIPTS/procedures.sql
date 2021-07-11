@@ -20,3 +20,10 @@ REFERENCING NEW TABLE AS inserted OLD TABLE AS prev
 FOR EACH ROW
 WHEN (OLD.state IS DISTINCT FROM NEW.state)
 EXECUTE PROCEDURE addStateTransition();
+
+
+CREATE OR REPLACE FUNCTION generate_id() RETURNS char(32) AS $$
+        BEGIN
+                RETURN replace(gen_random_uuid ()::text,'-','');
+        END;
+$$ LANGUAGE plpgsql;

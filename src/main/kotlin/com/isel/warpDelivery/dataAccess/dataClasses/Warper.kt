@@ -9,7 +9,7 @@ class Warper (val username : String,
               val phonenumber : String,
               val email : String,
               @JsonIgnore
-              val password :String?,
+              val password :String,
               var vehicles : List<Vehicle> = emptyList()){
 
     fun toOutputModel(): WarperOutputModel = WarperOutputModel(

@@ -1,5 +1,8 @@
 package com.isel.warpDelivery.controllers
 
+import com.isel.warpDelivery.authentication.StoreResource
+import com.isel.warpDelivery.authentication.USER_ATTRIBUTE_KEY
+import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.common.*
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
@@ -34,15 +37,17 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
     }
 
     @GetMapping("/{deliveryId}")
-    fun getDelivery(req: HttpServletRequest, @PathVariable deliveryId: Long) : Delivery {
+    fun getDelivery(req: HttpServletRequest, @PathVariable deliveryId: String) : Delivery {
         return deliveryMapper.read(deliveryId) ?:
             throw ApiException("The delivery: $deliveryId doesn't exist", HttpStatus.NOT_FOUND)
     }
 
+    @StoreResource
     @PostMapping
-    fun requestDelivery(@RequestBody delivery : RequestDeliveryInputModel)  : ActiveWarper {
+    fun requestDelivery(req: HttpServletRequest, @RequestBody delivery : RequestDeliveryInputModel)  : ActiveWarper {
 
-        val store = storeMapper.read(delivery.storeId) ?: throw ApiException("Store doesn't exist")
+        val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val store = storeMapper.read(storeInfo.id) ?: throw ApiException("Store doesn't exist")
 
         val storeLocation = Location(store.latitude, store.longitude)
 
@@ -52,10 +57,8 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
         val closestWarper = activeWarpers.getClosest(storeLocation, delivery.deliverySize)
 
         if(closestWarper != null) {
-
             val username = clientMapper.getUsernameByPhone(delivery.userPhone)
-
-            deliveryMapper.create(delivery.toDelivery(closestWarper.username, username))
+            deliveryMapper.create(delivery.toDelivery(closestWarper.username, username, store.storeId!!))
             notificationSystem.sendNotification(closestWarper)
             return closestWarper
         }

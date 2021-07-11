@@ -12,14 +12,20 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
+import java.util.*
 
 @RestController
 @RequestMapping(STORE_PATH)
 class StoreController(val storeMapper : StoreMapper){
+
     @PostMapping
     fun addStore(@RequestBody store: StoreInputModel): ResponseEntity<Any> {
-        val storeCreated = storeMapper.create(store.toDao())
-        return ResponseEntity.created(URI("${STORE_PATH}/$storeCreated")).build()
+        val uuid = UUID.randomUUID().toString()
+        val apiKey = uuid.replace("-","")
+        val storeDao = store.toDao(apiKey)
+        val storeCreated = storeMapper.create(storeDao)
+
+        return ResponseEntity.created(URI("${STORE_PATH}/$storeCreated")).body(mapOf("apiKey" to apiKey))
     }
 }
 

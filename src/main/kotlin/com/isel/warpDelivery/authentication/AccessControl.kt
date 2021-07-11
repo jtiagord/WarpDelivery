@@ -1,37 +1,35 @@
 package com.isel.warpDelivery.authentication
 
 import com.isel.warpDelivery.exceptionHandler.UnauthorizedException
+import org.slf4j.LoggerFactory
 import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @Target(AnnotationTarget.FUNCTION)
-annotation class ProtectedResource
+annotation class WarperResource
+
+@Target(AnnotationTarget.FUNCTION)
+annotation class StoreResource
 
 
 class AccessControlInterceptor : HandlerInterceptor {
 
-    private enum class AccessLevel { PROTECTED, PUBLIC }
-
-    private fun getAccessLevel(handlerMethod: HandlerMethod?): AccessLevel {
-        val isProtected: Boolean = handlerMethod?.hasMethodAnnotation(ProtectedResource::class.java) ?: false
-
-        return when {
-            handlerMethod == null -> AccessLevel.PUBLIC
-            isProtected -> AccessLevel.PROTECTED
-            else -> AccessLevel.PUBLIC
-        }
-    }
+    val logger = LoggerFactory.getLogger(AccessControlInterceptor::class.java)
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-        val routeHandler = handler as? HandlerMethod
+        if(handler !is HandlerMethod) return true
         val userInfo = request.getAttribute(USER_ATTRIBUTE_KEY) as? UserInfo
 
-        val accessLevel = getAccessLevel(routeHandler)
+        val isWarperResource = handler.hasMethodAnnotation(WarperResource::class.java)
+        val isStoreResource = handler.hasMethodAnnotation(StoreResource::class.java)
+
+
         return when {
-            accessLevel == AccessLevel.PUBLIC -> true
-            accessLevel == AccessLevel.PROTECTED && userInfo != null -> true
+            isWarperResource && userInfo?.type == USERTYPE.WARPER -> true
+            isStoreResource && userInfo?.type == USERTYPE.STORE -> true
+            !isWarperResource && !isStoreResource -> true
             else -> {
                 throw UnauthorizedException()
             }
