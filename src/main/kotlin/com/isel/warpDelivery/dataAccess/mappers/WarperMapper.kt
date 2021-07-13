@@ -78,8 +78,8 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
                             "(:username, :type ,:registration)"
                 )
                 .bind("username", DAO.username)
-                .bind("type", vehicle.vehicleType)
-                .bind("registration", vehicle.vehicleRegistration)
+                .bind("type", vehicle.type)
+                .bind("registration", vehicle.registration)
                 .execute()
             }
             return@inTransaction DAO.username
@@ -101,7 +101,7 @@ class WarperMapper(jdbi: Jdbi) : DataMapper<String, Warper>(jdbi) {
             val warper = if(warperOpt.isPresent) warperOpt.get() else return@inTransaction null
 
             val vehicles = handle.createQuery(
-                "SELECT  username , vehicleType, vehicleRegistration " +
+                "SELECT  username , vehicleType AS type, vehicleRegistration AS registration " +
                     "from $VEHICLE_TABLE " +
                     "where username = :username"
             )

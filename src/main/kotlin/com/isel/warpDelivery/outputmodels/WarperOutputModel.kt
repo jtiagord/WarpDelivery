@@ -1,6 +1,5 @@
 package com.isel.warpDelivery.outputmodels
 
-import com.isel.warpDelivery.inputmodels.VehicleInputModel
 
 data class WarperOutputModel(
     val username : String,

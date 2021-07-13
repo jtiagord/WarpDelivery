@@ -20,7 +20,6 @@ import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.http.HttpRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -89,6 +88,12 @@ class WarperController(
         return ResponseEntity.status(204).build()
     }
 
+    @GetMapping("/{username}/vehicles")
+    fun getVehicles(@PathVariable username: String): ResponseEntity<List<Vehicle>> {
+        val vehicles = vehicleMapper.readAll(username)
+        return ResponseEntity.ok().body(vehicles)
+    }
+
     //-------------------------------------------------------------------------------
 /*
     @GetMapping("/{username}/vehicles/{vehicleRegistration}")
@@ -97,11 +102,7 @@ class WarperController(
         return ResponseEntity.ok().body(vehicle)
     }
 
-    @GetMapping("/{username}/vehicles")
-    fun getVehicles(@PathVariable username: String): ResponseEntity<List<Vehicle>> {
-        val vehicles = vehicleMapper.readAll(username)
-        return ResponseEntity.ok().body(vehicles)
-    }
+
 
 
     @DeleteMapping("/{username}/vehicles/{vehicleRegistration}")
@@ -151,10 +152,10 @@ class WarperController(
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val warperInfo = warperMapper.read(warper.id) ?: throw ApiException("Warper doesn't exist",HttpStatus.NOT_FOUND)
 
-        val warperVehicle = warperInfo.vehicles.find { it.vehicleRegistration == warperReq.vehicle} ?:
+        val warperVehicle = warperInfo.vehicles.find { it.registration == warperReq.vehicle} ?:
         throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
-        val size = Size.fromText(warperVehicle.vehicleType)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
+        val size = Size.fromText(warperVehicle.type)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
         activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size ,warperReq.notificationToken))
 

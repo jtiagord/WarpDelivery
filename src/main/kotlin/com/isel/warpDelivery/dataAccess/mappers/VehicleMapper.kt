@@ -24,19 +24,19 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
                         "(:username,:vehicletype,:vehicleregistration) ON CONFLICT DO NOTHING"
             )
             .bind("username", DAO.username)
-            .bind("vehicletype", DAO.vehicleType)
-            .bind("vehicleregistration", DAO.vehicleRegistration)
+            .bind("vehicletype", DAO.type)
+            .bind("vehicleregistration", DAO.registration)
             .execute()
 
 
-            return@withHandle VehicleKey(DAO.username,DAO.vehicleRegistration)
+            return@withHandle VehicleKey(DAO.username,DAO.registration)
         }
 
 
     override fun read(key: VehicleKey): Vehicle =
         jdbi.inTransaction<Vehicle, Exception> { handle ->
             val vehicle = handle.createQuery(
-                "SELECT *" +
+                "SELECT username, vehicletype AS type, vehicleRegistration as registration " +
                         "from $VEHICLE_TABLE " +
                         "where username = :username " +
                         "and vehicleregistration= :vehicleregistration"
@@ -52,7 +52,7 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
     fun readAll(username:String): List<Vehicle> =
         jdbi.inTransaction<List<Vehicle>, Exception> { handle ->
             return@inTransaction handle.createQuery(
-                "SELECT * " +
+                "SELECT username, vehicletype AS type, vehicleRegistration as registration " +
                         "from $VEHICLE_TABLE " +
                         "where username = :username"
             )

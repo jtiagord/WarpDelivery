@@ -1,4 +1,4 @@
-package edu.isel.pdm.warperapplication.view
+package edu.isel.pdm.warperapplication.view.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -23,6 +23,7 @@ class DeliveriesAdapter(private val deliveries: List<Delivery>): RecyclerView.Ad
     }
 }
 
+//TODO: Improve aspect
 class DeliveriesViewHolder(itemView : View): RecyclerView.ViewHolder(itemView){
     private val client: TextView = itemView.findViewById(R.id.client_username)
     private val deliveryDate: TextView = itemView.findViewById(R.id.delivery_date)

@@ -2,6 +2,7 @@ package edu.isel.pdm.warperapplication
 
 import android.app.Application
 import edu.isel.pdm.warperapplication.web.entities.Delivery
+import edu.isel.pdm.warperapplication.web.entities.Vehicle
 import edu.isel.pdm.warperapplication.web.entities.Warper
 
 
@@ -11,8 +12,10 @@ class WarperApplication : Application() {
     }
 
     fun tryLogin(
-        username: String, password: String,
-        onSuccess: (Boolean) -> Unit, onFailure: () -> Unit
+        username: String,
+        password: String,
+        onSuccess: (Boolean) -> Unit,
+        onFailure: () -> Unit
     ) {
         return repository.tryLogin(username, password, onSuccess, onFailure)
     }
@@ -20,11 +23,11 @@ class WarperApplication : Application() {
     fun tryRegister(
         username: String, password: String, fName: String, lName: String,
         email: String, phone: String,
-        onSuccess: (Boolean) -> Unit, onFailure: () -> Unit
+        onSuccess: (Boolean) -> Unit,
+        onFailure: () -> Unit
     ) {
         return repository.tryRegister(
-            username, password, fName, lName, email, phone, onSuccess,
-            onFailure
+            username, password, fName, lName, email, phone, onSuccess, onFailure
         )
     }
 
@@ -44,7 +47,24 @@ class WarperApplication : Application() {
         return repository.getUserInfo(username, onSuccess, onFailure)
     }
 
-    fun getCurrentUser() : String{
+    fun getVehicles(
+        username: String,
+        onSuccess: (List<Vehicle>) -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.getVehicles(username, onSuccess, onFailure)
+    }
+
+    fun getCurrentUser(): String {
         return repository.getCurrentUser()
+    }
+
+    fun tryAddVehicle(
+        username: String,
+        vehicle: Vehicle,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.tryAddVehicle(username, vehicle, onSuccess, onFailure)
     }
 }

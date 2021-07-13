@@ -46,7 +46,7 @@ class LoginFragment : Fragment() {
 
                 val username = usernameInput.text.toString()
                 val password = passwordInput.text.toString()
-                login(username, password)
+                tryLogin(username, password)
             } else {
                 Log.v("LOGIN", "NULL INPUTS")
                 Toast.makeText(context, "Please fill in all the fields", Toast.LENGTH_LONG).show()
@@ -55,7 +55,7 @@ class LoginFragment : Fragment() {
         return rootView
     }
 
-    private fun login(username: String, password: String){
+    private fun tryLogin(username: String, password: String){
         viewModel.tryLogin(username, password)
         Log.v("LOGIN", "LOGGING IN")
     }
