@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.fragment.app.viewModels
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.UserViewModel
+import edu.isel.pdm.warperapplication.web.entities.Warper
 
 class UserFragment : Fragment() {
 
@@ -18,7 +19,6 @@ class UserFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
         val rootView = inflater.inflate(R.layout.fragment_user, container, false)
         val userTextView = rootView.findViewById<TextView>(R.id.username_value)
         val fNameTextView = rootView.findViewById<TextView>(R.id.first_name_value)
@@ -27,9 +27,14 @@ class UserFragment : Fragment() {
         val phoneTextView = rootView.findViewById<TextView>(R.id.phone_value)
 
         viewModel.userInfo.observe(viewLifecycleOwner, {
-            displayUserInfo(
-                userTextView, fNameTextView, lNameTextView, emailTextView, phoneTextView
-            )
+            val warper = viewModel.userInfo.value
+
+            if(warper != null) {
+                displayUserInfo(
+                    userTextView, fNameTextView, lNameTextView, emailTextView, phoneTextView, warper
+                )
+            }
+
         })
 
         //TODO: Place this where it belongs
@@ -40,12 +45,12 @@ class UserFragment : Fragment() {
 
     private fun displayUserInfo(
         user: TextView, fName: TextView, lName: TextView, email: TextView,
-        phone: TextView
+        phone: TextView, warper: Warper
     ) {
-        user.text = viewModel.userInfo.value!!.username
-        fName.text = viewModel.userInfo.value!!.firstname
-        lName.text = viewModel.userInfo.value!!.lastname
-        email.text = viewModel.userInfo.value!!.email
-        phone.text = viewModel.userInfo.value!!.phonenumber
+        user.text = warper.username
+        fName.text = warper.firstname
+        lName.text = warper.lastname
+        email.text = warper.email
+        phone.text = warper.phonenumber
     }
 }
