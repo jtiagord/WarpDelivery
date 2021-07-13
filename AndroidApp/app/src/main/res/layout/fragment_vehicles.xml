@@ -25,7 +25,7 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
             android:layout_marginBottom="2dp"
-            android:contentDescription="@string/add"
+            android:contentDescription="@string/add_vehicle"
             android:src="@drawable/ic_add" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton

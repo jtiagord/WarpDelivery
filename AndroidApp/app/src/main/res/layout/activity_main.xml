@@ -6,25 +6,10 @@
     android:layout_width="match_parent"
     tools:context=".view.activities.MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:fadingEdge="vertical"
-        android:fadingEdgeLength="30dp"
-        android:gravity="top"
-        app:popupTheme="@style/Theme.WarperApplication.PopupOverlay"
-        app:title="WarpDelivery"
-        app:titleTextColor="#CDBAEF" />
-
-
-
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/fl_wrapper"
-        android:layout_below="@+id/toolbar"
         android:layout_above="@id/bottom_navigation">
 
 

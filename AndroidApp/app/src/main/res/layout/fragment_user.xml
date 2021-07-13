@@ -6,13 +6,117 @@
     tools:context=".view.fragments.app.UserFragment">
 
 
+    <LinearLayout
+        android:layout_gravity="top|start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/UserInfoText"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"
-        android:text="User" />
+        <TextView
+            android:id="@+id/username_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/username" />
+
+        <TextView
+            android:id="@+id/username_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/first_name_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/first_name" />
+
+        <TextView
+            android:id="@+id/first_name_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/last_name_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/last_name" />
+
+        <TextView
+            android:id="@+id/last_name_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/email_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="20dp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/email_address" />
+
+        <TextView
+            android:id="@+id/email_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/phone_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="16dp"
+            android:layout_marginStart="16dp"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:text="@string/phone_number" />
+
+        <TextView
+            android:id="@+id/phone_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="16dp"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+
+
+
 
 
 </FrameLayout>

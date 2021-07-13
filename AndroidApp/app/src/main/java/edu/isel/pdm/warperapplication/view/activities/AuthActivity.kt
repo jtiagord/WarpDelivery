@@ -16,7 +16,6 @@ import edu.isel.pdm.warperapplication.view.fragments.auth.RegisterFragment
 
 class AuthActivity : AppCompatActivity() {
 
-    //TODO: Disable history
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_auth)
