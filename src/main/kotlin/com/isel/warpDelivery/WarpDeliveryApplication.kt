@@ -85,12 +85,8 @@ class ApiConfig : WebMvcConfigurer {
 }
 
 fun main(args: Array<String>) {
-
-	/**FIREBASE INITIALIZATION**/
-	val file: File = ResourceUtils.getFile("classpath:static/firestoreService.json")
-	val serviceAccount = FileInputStream(file)
 	val options: FirebaseOptions = FirebaseOptions.builder()
-		.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+		.setCredentials(GoogleCredentials.getApplicationDefault())
 		.build()
 	FirebaseApp.initializeApp(options)
 	/** END OF FIREBASE INITIALIZATION**/

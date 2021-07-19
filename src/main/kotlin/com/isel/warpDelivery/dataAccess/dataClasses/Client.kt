@@ -7,5 +7,3 @@ class Client(   val username : String,
                 val email : String,
                 val password : String?,
                 var addresses : List<Address> = emptyList())
-{
-}

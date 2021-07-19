@@ -16,6 +16,10 @@ repositories {
 }
 
 dependencies {
+
+	implementation(platform("com.google.cloud:libraries-bom:20.8.0"))
+
+	compile("com.google.cloud:google-cloud-pubsub")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")

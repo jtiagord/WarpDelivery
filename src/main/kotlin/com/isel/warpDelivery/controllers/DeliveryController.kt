@@ -11,11 +11,14 @@ import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.dataAccess.mappers.StoreMapper
 import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.RequestDeliveryInputModel
-import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.model.NotificationSystem
+import com.isel.warpDelivery.pubSub.DeliveryMessage
+import com.isel.warpDelivery.pubSub.WarperPublisher.publishDelivery
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.net.URI
 import javax.servlet.http.HttpServletRequest
 
 @RestController
@@ -44,27 +47,30 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
 
     @StoreResource
     @PostMapping
-    fun requestDelivery(req: HttpServletRequest, @RequestBody delivery : RequestDeliveryInputModel)  : ActiveWarper {
+    fun requestDelivery(req: HttpServletRequest, @RequestBody deliveryRequest : RequestDeliveryInputModel)  : ResponseEntity<Any> {
 
         val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+
         val store = storeMapper.read(storeInfo.id) ?: throw ApiException("Store doesn't exist")
 
         val storeLocation = Location(store.latitude, store.longitude)
 
-        if(storeLocation.getDistance(delivery.deliveryLocation) > MAX_DISTANCE_TO_STORE)
+        if(storeLocation.getDistance(deliveryRequest.deliveryLocation) > MAX_DISTANCE_TO_STORE)
             throw ApiException("The distance from delivery and the store are too large")
 
-        val closestWarper = activeWarpers.getClosest(storeLocation, delivery.deliverySize)
+        //val closestWarper = activeWarpers.getClosest(storeLocation, delivery.deliverySize)
+        val username = clientMapper.getUsernameByPhone(deliveryRequest.userPhone)
+        val delivery= deliveryRequest.toDelivery(null, username, store.storeId!!)
+        val deliveryId =  deliveryMapper.create(delivery)
 
-        if(closestWarper != null) {
-            val username = clientMapper.getUsernameByPhone(delivery.userPhone)
-            deliveryMapper.create(delivery.toDelivery(closestWarper.username, username, store.storeId!!))
-            notificationSystem.sendNotification(closestWarper)
-            return closestWarper
-        }
-        else {
-            throw ApiException("No warper was found")
-        }
+        val messageToPublish =
+            DeliveryMessage(storeLocation,store.address,store.storeId,
+                deliveryRequest.deliveryLocation,deliveryRequest.address,deliveryRequest.deliverySize.text)
+
+        publishDelivery(messageToPublish)
+
+
+        return ResponseEntity.created(URI("${DELIVERIES_PATH}/${deliveryId}")).build()
     }
 
 

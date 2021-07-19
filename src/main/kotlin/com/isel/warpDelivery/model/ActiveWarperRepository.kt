@@ -7,6 +7,7 @@ import com.isel.warpDelivery.routeAPI.RouteApi
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import org.springframework.web.servlet.function.ServerResponse.async
 
 
 data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
@@ -53,7 +54,11 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         var closestActiveWarper : ActiveWarper? = null
         var closestDistance = Double.POSITIVE_INFINITY
 
-        val future = db.collection(COLLECTION_NAME).whereEqualTo("deliverySize",deliverySize).get()
+        val future = db.collection(COLLECTION_NAME)
+            .whereEqualTo("deliverySize",deliverySize)
+            .whereGreaterThan("latitude",location.latitude-1)
+            .whereLessThan("latitude",location.latitude+1)
+            .get()
         val documents = future.get().documents
         for (document in documents) {
             val warper =  document.toObject(DummyWarperLocation::class.java).toWarper() ?: continue
@@ -71,6 +76,8 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         if(closestActiveWarper != null ) remove(closestActiveWarper.username)
         return closestActiveWarper
     }
+
+
 
     fun remove(username : String){
         db.collection(COLLECTION_NAME).document(username)
