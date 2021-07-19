@@ -1,10 +1,10 @@
 package edu.isel.pdm.warperapplication.web.entities
 
 data class Delivery (
-    val deliveryId : Long?,
+    val deliveryId : String?,
     val warperUsername: String?,
     val clientUsername : String?,
-    val storeId: Long,
+    val storeId: String,
     val state : String,
     val clientPhone: String,
     val purchaseDate : String?,

@@ -7,10 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import edu.isel.pdm.warperapplication.R
-import edu.isel.pdm.warperapplication.view.fragments.app.HistoryFragment
-import edu.isel.pdm.warperapplication.view.fragments.app.LocationFragment
-import edu.isel.pdm.warperapplication.view.fragments.app.NotificationsFragment
-import edu.isel.pdm.warperapplication.view.fragments.app.UserFragment
+import edu.isel.pdm.warperapplication.view.fragments.app.*
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.config.Configuration.getInstance
@@ -24,34 +21,35 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        //TODO: Change after map testing
         val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
         setContentView(R.layout.activity_main)
 
         getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
 
-        //initMap()
         val locationFragment = LocationFragment()
         val notificationsFragment = NotificationsFragment()
         val historyFragment = HistoryFragment()
         val userFragment = UserFragment()
+        val vehiclesFragment = VehiclesFragment()
 
-
-        makeCurrentFragment(userFragment)
+        makeCurrentFragment(locationFragment)
         val bottomNavigation = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
             R.id.bottom_navigation
         )
+
         bottomNavigation.setOnNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.ic_location -> makeCurrentFragment(locationFragment)
                 R.id.ic_notifications -> makeCurrentFragment(notificationsFragment)
                 R.id.ic_history -> makeCurrentFragment(historyFragment)
                 R.id.ic_user -> makeCurrentFragment(userFragment)
+                R.id.ic_vehicles -> makeCurrentFragment(vehiclesFragment)
             }
             true
         }
-
-
     }
 
     private fun makeCurrentFragment(fragment: Fragment){
@@ -62,10 +60,6 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
     }
-
-
-
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

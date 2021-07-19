@@ -29,6 +29,6 @@ fun WarperInputModel.toDao(): Warper {
         email = email, password=password,vehicles = vehiclesDao
     )
 }
-fun VehicleInputModel.toDao(username: String)  : Vehicle = Vehicle(vehicleRegistration = this.registration,
-    vehicleType =  type, username = username)
+fun VehicleInputModel.toDao(username: String)  : Vehicle = Vehicle(registration = this.registration,
+    type =  type, username = username)
 

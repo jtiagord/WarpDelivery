@@ -41,7 +41,7 @@ class AppRepository(val app: Application) {
 
             override fun onFailure(call: Call<LoginToken>, t: Throwable) {
                 onFailure()
-                Log.v("REPO", "Connection error")
+                Log.v("LOGIN", t.message!!)
             }
         })
     }
@@ -60,7 +60,7 @@ class AppRepository(val app: Application) {
                     password = pw
                     onSuccess(true)
                 } else {
-                    Log.v("REPO", response.errorBody()!!.string())
+                    Log.v("REGISTER", response.errorBody()!!.string())
                     onSuccess(false)
                     //TODO: Return reason why it failed
                 }
@@ -68,7 +68,7 @@ class AppRepository(val app: Application) {
 
             override fun onFailure(call: Call<Unit>, t: Throwable) {
                 onFailure()
-                Log.v("REPO", "Connection error")
+                Log.v("REGISTER", t.message!!)
             }
         })
     }
@@ -99,6 +99,36 @@ class AppRepository(val app: Application) {
             override fun onFailure(call: Call<Warper>, t: Throwable) {
                 onFailure()
                 Log.e("USER", t.message!!)
+            }
+        })
+    }
+
+    fun getVehicles(username: String, onSuccess: (List<Vehicle>) -> Unit, onFailure: () -> Unit) {
+        val call = request.getWarperVehicles(username)
+        call.clone().enqueue(object : Callback<List<Vehicle>> {
+            override fun onResponse(call: Call<List<Vehicle>>, response: Response<List<Vehicle>>) {
+                if (response.isSuccessful){
+                    onSuccess(response.body()!!)
+                }
+            }
+            override fun onFailure(call: Call<List<Vehicle>>, t: Throwable) {
+                onFailure()
+                Log.e("VEHICLE", t.message!!)
+            }
+        })
+    }
+
+    fun tryAddVehicle(username: String, vehicle: Vehicle, onSuccess: () -> Unit, onFailure: () -> Unit){
+        val call = request.tryAddVehicle(username, vehicle)
+        call.clone().enqueue(object : Callback<Unit> {
+            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                if (response.isSuccessful){
+                    onSuccess()
+                }
+            }
+            override fun onFailure(call: Call<Unit>, t: Throwable) {
+                onFailure()
+                Log.e("VEHICLE", t.message!!)
             }
         })
     }

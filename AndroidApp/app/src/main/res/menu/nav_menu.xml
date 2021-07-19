@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:title="Tracking"
+        android:title="@string/tracking"
         android:id="@+id/ic_location"
         android:icon="@drawable/ic_location"
     />
 
     <item
-        android:title="Notifications"
+        android:title="@string/notifications"
         android:id="@+id/ic_notifications"
         android:icon="@drawable/ic_notification"
     />
 
     <item
-        android:title="History"
+        android:title="@string/history"
         android:id="@+id/ic_history"
         android:icon="@drawable/ic_history"
     />
 
     <item
-        android:title="User"
+        android:title="@string/user"
         android:id="@+id/ic_user"
         android:icon="@drawable/ic_user"
     />
+
+    <item
+        android:title="@string/vehicles"
+        android:id="@+id/ic_vehicles"
+        android:icon="@drawable/ic_vehicle"
+        />
 </menu>

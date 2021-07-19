@@ -7,14 +7,22 @@
     <string name="swipe_left_for_register">Swipe Left to Register</string>
     <string name="login">Login</string>
     <string name="password">Password</string>
-    <string name="username">Username</string>
     <string name="swipe_right_for_login">Swipe Right to Login</string>
     <string name="register">Register</string>
     <string name="re_type_password">Re-type Password</string>
-    <string name="first_name">First Name</string>
-    <string name="last_name">Last Name</string>
     <string name="username_hint">Username</string>
     <string name="email_hint">Email</string>
     <string name="phone_hint">Phone number</string>
     <string name="refresh">Refresh</string>
+    <string name="vehicles">Vehicles</string>
+    <string name="user">User</string>
+    <string name="history">History</string>
+    <string name="notifications">Notifications</string>
+    <string name="tracking">Tracking</string>
+    <string name="add_vehicle">Add Vehicle</string>
+    <string name="username">Username</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="email_address">Email Address</string>
+    <string name="phone_number">Phone Number</string>
 </resources>
