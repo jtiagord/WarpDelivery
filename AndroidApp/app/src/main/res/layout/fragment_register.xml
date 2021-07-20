@@ -18,85 +18,158 @@
         android:layout_marginBottom="5dp"
         android:layout_marginTop="60dp"/>
 
+    <TextView
+        android:id="@+id/tv_username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/username"
+        android:textStyle="bold"
+        android:scrollbars="vertical"
+        android:textSize="16sp" />
+
     <EditText
         android:id="@+id/et_username"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/username_hint"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
+        android:scrollbars="vertical"
         android:inputType="textPersonName"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:scrollbars="vertical"
+        android:text="@string/email_address"
+        android:textStyle="bold"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/et_email"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/email_hint"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
         android:inputType="textEmailAddress"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_firstName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/first_name"
+        android:textStyle="bold"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/et_firstName"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/first_name"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
         android:inputType="textPersonName"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_lastName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/username"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
     <EditText
         android:id="@+id/et_lastName"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/last_name"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
         android:inputType="textPersonName"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/phone_number"
+        android:textStyle="bold"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/et_phone"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/phone_hint"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
         android:inputType="phone"
         android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/password"
+        android:textStyle="bold"
+        android:textSize="16sp" />
 
     <EditText
         android:id="@+id/et_password"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:hint="@string/password"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="10dp"
-        android:padding="15dp"
         android:inputType="textPassword"
         android:textSize="15sp" />
 
-    <EditText
-        android:id="@+id/et_repassword"
+    <TextView
+        android:id="@+id/tv_repassword"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="10dp"
+        android:text="@string/re_type_password"
+        android:textStyle="bold"
+        android:textSize="16sp" />
+
+    <EditText
+        android:id="@+id/et_rePassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:hint="@string/re_type_password"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
-        android:padding="15dp"
         android:inputType="textPassword"
         android:textSize="15sp" />
 

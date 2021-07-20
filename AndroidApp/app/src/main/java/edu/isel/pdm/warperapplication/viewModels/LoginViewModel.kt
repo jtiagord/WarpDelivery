@@ -16,10 +16,10 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
     fun tryLogin(user: String, password: String) {
         app.tryLogin(user, password,
             onSuccess = {
-            loginStatus.postValue(it)
-        },
-            onFailure ={
-            loginStatus.postValue(false)
-        })
+                loginStatus.postValue(it)
+            },
+            onFailure = {
+                loginStatus.postValue(false)
+            })
     }
 }

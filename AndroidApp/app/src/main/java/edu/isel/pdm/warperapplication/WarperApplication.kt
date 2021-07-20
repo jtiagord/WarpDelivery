@@ -11,6 +11,14 @@ class WarperApplication : Application() {
         AppRepository(this)
     }
 
+    fun initFirestore(
+        onSubscriptionError: (Exception) -> Unit,
+        onStateChanged: (Map<String, Any>) -> Unit
+    )
+    {
+        repository.initFirestore(onSubscriptionError, onStateChanged)
+    }
+
     fun tryLogin(
         username: String,
         password: String,

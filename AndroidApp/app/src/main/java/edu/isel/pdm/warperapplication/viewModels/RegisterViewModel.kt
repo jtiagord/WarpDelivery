@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import edu.isel.pdm.warperapplication.WarperApplication
 
-class RegisterViewModel(app : Application) : AndroidViewModel(app){
+class RegisterViewModel(app: Application) : AndroidViewModel(app) {
 
     val registerStatus = MutableLiveData<Boolean>()
 
@@ -13,13 +13,15 @@ class RegisterViewModel(app : Application) : AndroidViewModel(app){
         getApplication<WarperApplication>()
     }
 
-    fun tryRegister(user: String, password: String, fName: String, lName: String, email: String,
-    phone: String) {
+    fun tryRegister(
+        user: String, password: String, fName: String, lName: String, email: String,
+        phone: String
+    ) {
         app.tryRegister(user, password, fName, lName, email, phone,
             onSuccess = {
                 registerStatus.postValue(it)
             },
-            onFailure ={
+            onFailure = {
                 registerStatus.postValue(false)
             })
     }

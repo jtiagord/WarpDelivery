@@ -2,12 +2,18 @@ package edu.isel.pdm.warperapplication
 
 import android.app.Application
 import android.util.Log
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import edu.isel.pdm.warperapplication.web.ApiInterface
 import edu.isel.pdm.warperapplication.web.ServiceBuilder
 import edu.isel.pdm.warperapplication.web.entities.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
+private const val WARPERS_COLLECTION = "DELIVERINGWARPERS"
 
 class AppRepository(val app: Application) {
 
@@ -16,6 +22,37 @@ class AppRepository(val app: Application) {
     var token: String? = null
 
     private val request = ServiceBuilder.buildService(ApiInterface::class.java)
+    private val firestore = Firebase.firestore
+
+    lateinit var docRef: DocumentReference
+
+    fun initFirestore(
+        onSubscriptionError: (Exception) -> Unit,
+        onStateChanged: (Map<String, Any>) -> Unit
+    )
+    {
+        docRef = firestore.collection(WARPERS_COLLECTION).document(username!!)
+        docRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                onSubscriptionError(e)
+                Log.w("FIRESTORE", "Listen failed.", e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                onStateChanged(snapshot.data!!)
+                Log.d("FIRESTORE", "Current data: ${snapshot.data}")
+            } else {
+                Log.d("FIRESTORE", "Current data: null")
+            }
+        }
+    }
+
+    fun updateMapInfo(data: MutableMap<String, Any>) {
+        val deliveryLoc = data["deliveryLoc"]
+        val pickupLoc = data["pickupLoc"]
+        val warperLoc = data["warperLoc"]
+    }
 
     fun getCurrentUser(): String{
         return username!!
@@ -35,7 +72,7 @@ class AppRepository(val app: Application) {
                     onSuccess(true)
                 } else {
                     onSuccess(false)
-                    Log.v("REPO", "Failed login")
+                    Log.v("LOGIN", "Failed login")
                 }
             }
 

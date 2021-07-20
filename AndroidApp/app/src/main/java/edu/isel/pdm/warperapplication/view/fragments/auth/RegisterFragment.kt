@@ -32,7 +32,7 @@ class RegisterFragment : Fragment() {
         val emailInput = rootView.findViewById<EditText>(R.id.et_email)
         val phoneInput = rootView.findViewById<EditText>(R.id.et_phone)
         val passwordInput = rootView.findViewById<EditText>(R.id.et_password)
-        val passwordReInput = rootView.findViewById<EditText>(R.id.et_repassword)
+        val passwordReInput = rootView.findViewById<EditText>(R.id.et_rePassword)
 
         viewModel.registerStatus.observe(viewLifecycleOwner, {
             if (it){
@@ -96,4 +96,5 @@ class RegisterFragment : Fragment() {
         viewModel.tryRegister(username, password, fName, lName, email, phone)
     }
 
+    //TODO: Add support for scrolling
 }
