@@ -92,8 +92,13 @@ class ActiveWarperRepository{
         }}.get()
 
         if(closestActiveWarper != null) {
-            db.collection(ACTIVE_WARPERS).document(closestActiveWarper!!.username).delete().get()
-            db.collection(ACTIVE_DELIVERIES).document(closestActiveWarper!!.username).create(closestActiveWarper!!).get()
+            try {
+                db.collection(ACTIVE_WARPERS).document(closestActiveWarper!!.username).delete().get()
+                db.collection(ACTIVE_DELIVERIES).document(closestActiveWarper!!.username).create(closestActiveWarper!!)
+                    .get()
+            }catch(e : Exception){
+
+            }
         }
 
 
