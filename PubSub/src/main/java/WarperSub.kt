@@ -1,6 +1,4 @@
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.auth.oauth2.GoogleCredentials
-import utils.DeliveryMessage
 import com.google.cloud.pubsub.v1.AckReplyConsumer
 import com.google.cloud.pubsub.v1.MessageReceiver
 import com.google.cloud.pubsub.v1.Subscriber
@@ -9,10 +7,9 @@ import com.google.firebase.FirebaseOptions
 import com.google.gson.Gson
 import com.google.pubsub.v1.ProjectSubscriptionName
 import com.google.pubsub.v1.PubsubMessage
-import utils.ActiveWarper
 import utils.ActiveWarperRepository
 import utils.Size
-import kotlin.system.measureTimeMillis
+import utils.sendNotification
 
 lateinit var warperRepository : ActiveWarperRepository
 
@@ -35,16 +32,22 @@ fun subscribeAsyncExample(projectId: String?, subscriptionId: String?) {
     val receiver = MessageReceiver { message: PubsubMessage, consumer: AckReplyConsumer ->
         val data =  message.data.toStringUtf8()
         val deliveryMessage = parseData(data)
-        var warper = warperRepository
-                .getClosest(deliveryMessage.storeLocation,
-                    Size.fromText(deliveryMessage.deliverySize)?:Size.SMALL)
+        val warper = warperRepository
+                                .getClosest(deliveryMessage.storeLocation,
+                                Size.fromText(deliveryMessage.deliverySize)!!)
 
+        if(warper != null){
+            warperRepository.setWarperForDelivery(warper,deliveryMessage.getDelivery())
+            sendNotification(warper)
+        }else{
+            warperRepository.setPendingDelivery(deliveryMessage.getDelivery())
+        }
 
         println("WARPER FOUND : ${warper?.username?:"NOT FOUND"}")
 
         consumer.ack()
     }
-    var subscriber: Subscriber =
+    val subscriber: Subscriber =
         Subscriber.newBuilder(subscriptionName, receiver).build()
 
     // Start the subscriber.

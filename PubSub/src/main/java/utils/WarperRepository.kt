@@ -1,11 +1,17 @@
 package utils
 
+import ActiveWarper
+import DeliveringWarper
+import Delivery
+import Location
+import com.google.cloud.Timestamp
 import kotlinx.coroutines.*
 import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.SetOptions
 import com.google.firebase.cloud.FirestoreClient
+import java.util.*
+import kotlin.collections.ArrayList
 
-
-data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
 
 enum class Size(val text: String) {
     SMALL("small"), MEDIUM("medium"), LARGE("large");
@@ -29,7 +35,8 @@ class ActiveWarperRepository{
     private val db : Firestore  = FirestoreClient.getFirestore()
     companion object{
         private const val ACTIVE_WARPERS = "WARPERS"
-        private const val ACTIVE_DELIVERIES = "ACTIVEDELIVERIES"
+        private const val DELIVERING_WARPERS = "DELIVERINGWARPERS"
+        private const val PENDING_DELIVERIES = "PENDING_DELIVERIES"
 
         //JUST WRAPPER CLASSES SO WE CAN USE document.toObject WITHOUT HAVING NULLABLE PROBLEMS IN OTHER PLACES
         class DummyLocation(var latitude : Double? = null , var longitude : Double? = null){
@@ -49,12 +56,6 @@ class ActiveWarperRepository{
         }
     }
 
-    /**
-     * Adds a warper to the list of searchable warpers
-     * **/
-    fun add(warper : ActiveWarper){
-        db.collection(ACTIVE_WARPERS).document(warper.username).set(warper).get()
-    }
 
 
 
@@ -62,8 +63,6 @@ class ActiveWarperRepository{
         var closestActiveWarper: ActiveWarper? = null
         var closestDistance = Double.POSITIVE_INFINITY
 
-
-        db.runTransaction {
         val queryRef = db.collection(ACTIVE_WARPERS)
         val future = queryRef.get()
         val documents = future.get().documents
@@ -89,21 +88,22 @@ class ActiveWarperRepository{
                 closestActiveWarper = routeDistance.first
                 closestDistance = routeDistance.second!!
             }
-        }}.get()
-
-        if(closestActiveWarper != null) {
-            try {
-                db.collection(ACTIVE_WARPERS).document(closestActiveWarper!!.username).delete().get()
-                db.collection(ACTIVE_DELIVERIES).document(closestActiveWarper!!.username).create(closestActiveWarper!!)
-                    .get()
-            }catch(e : Exception){
-
-            }
         }
 
-
-        //if(closestActiveWarper != null ) remove(closestActiveWarper.username)
         return closestActiveWarper
+    }
+
+    fun setWarperForDelivery(warper : ActiveWarper, delivery : Delivery){
+        val deliveringWarper = DeliveringWarper(warper, delivery)
+        db.collection(ACTIVE_WARPERS).document(warper.username).delete().get()
+        db.collection(DELIVERING_WARPERS).document(warper.username).create(deliveringWarper).get()
+    }
+
+    fun setPendingDelivery(delivery : Delivery){
+        val batch = db.batch()
+        db.collection(PENDING_DELIVERIES).document(delivery.id).set(delivery)
+        db.collection(PENDING_DELIVERIES).document(delivery.id).update("timestamp",Timestamp.now())
+        batch.commit()
     }
 
 
@@ -115,6 +115,8 @@ class ActiveWarperRepository{
 
 
     fun updateLocation(username : String, location: Location){
+        db.collection(ACTIVE_WARPERS).document(username)
+            .update("location", location)
         db.collection(ACTIVE_WARPERS).document(username)
             .update("location", location)
     }

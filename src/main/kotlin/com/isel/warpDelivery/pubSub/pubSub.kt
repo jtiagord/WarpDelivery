@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit
 
 
 class DeliveryMessage (
+    val deliveryId: String,
     val storeLocation : Location,
     val storeAddress : String,
     val storeId : String,

@@ -29,6 +29,7 @@ dependencies {
 	implementation("org.jdbi:jdbi3-kotlin:3.18.1")
 	implementation("org.postgresql:postgresql:42.2.19")
 	implementation("com.auth0:java-jwt:3.18.1")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

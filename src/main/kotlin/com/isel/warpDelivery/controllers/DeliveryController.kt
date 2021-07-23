@@ -64,7 +64,7 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
         val deliveryId =  deliveryMapper.create(delivery)
 
         val messageToPublish =
-            DeliveryMessage(storeLocation,store.address,store.storeId,
+            DeliveryMessage(deliveryId,storeLocation,store.address,store.storeId,
                 deliveryRequest.deliveryLocation,deliveryRequest.address,deliveryRequest.deliverySize.text)
 
         publishDelivery(messageToPublish)

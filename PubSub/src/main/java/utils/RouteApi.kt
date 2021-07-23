@@ -1,5 +1,6 @@
 package utils
 
+import Location
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.net.HttpURLConnection
 import java.net.URL
@@ -11,8 +12,7 @@ class RouteApi{
             "http://router.project-osrm.org/route/v1/driving/"
     }
 
-
-    suspend fun getRouteDistance(from : Location, to : Location) : Double?{
+    fun getRouteDistance(from : Location, to : Location) : Double?{
         val url = URL("$API_URL${from.longitude},${from.latitude};${to.longitude},${to.latitude}")
         val stb = StringBuilder()
 
@@ -23,9 +23,6 @@ class RouteApi{
                 }
             }
         }
-
-
-
         return extractDistanceFromJsonString(stb.toString())
     }
 
