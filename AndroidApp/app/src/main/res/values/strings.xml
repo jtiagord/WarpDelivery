@@ -25,4 +25,9 @@
     <string name="last_name">Last Name</string>
     <string name="email_address">Email Address</string>
     <string name="phone_number">Phone Number</string>
+    <string name="delivery_item_client">Client: %s</string>
+    <string name="delivery_item_date">Date: %s</string>
+    <string name="delivery_item_rating">Rating: %o</string>
+    <string name="delivery_item_reward">Reward: %.2f</string>
+    <string name="delivery_item_state">State: %s</string>
 </resources>
