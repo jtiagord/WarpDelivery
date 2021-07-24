@@ -1,17 +1,30 @@
 package com.isel.warpDelivery.model
 
 import com.google.cloud.firestore.Firestore
-import com.google.cloud.firestore.QueryDocumentSnapshot
+import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.Size
 import com.isel.warpDelivery.routeAPI.RouteApi
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import org.springframework.web.servlet.function.ServerResponse.async
 
 
 data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
 
+data class Delivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
+class DeliveringWarper(val username : String, val location : Location,val token : String,
+                       val delivery : Delivery){
+    constructor(warper : ActiveWarper , delivery : Delivery)
+            : this(warper.username, warper.location,warper.token,delivery)
+
+}
 
 
 const val MAX_DISTANCE = 15000 //in meters
@@ -22,15 +35,35 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
     val logger : Logger = LoggerFactory.getLogger(ActiveWarperRepository::class.java)
 
     companion object{
-        private const val COLLECTION_NAME = "WARPERS"
+        private const val DELIVERING_WARPERS = "DELIVERINGWARPERS"
+        private const val PENDING_DELIVERIES = "PENDING_DELIVERIES"
+        private const val ACTIVE_WARPERS = "WARPERS"
 
-        //JUST WRAPPER CLASSES SO WE CAN USE document.toObject WITHOUT HAVING NULLABLE PROBLEMS IN OTHER PLACES
+
+
+        /**
+         * JUST WRAPPER CLASSES SO WE CAN USE document.toObject WITHOUT HAVING NULLABLE PROBLEMS IN OTHER PLACES
+         * **/
         class DummyLocation(var latitude : Double? = null , var longitude : Double? = null){
             fun toLocation() : Location?{
                 //TRANSFORM TO VAL
                 return if(latitude == null || longitude == null) null else Location(latitude!!,longitude!!)
             }
         }
+
+        class DummyDelivery(val id : String? = null, val size : Size? = null,
+                            val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null) {
+
+            fun toDelivery() : Delivery? {
+                val pickUpLocation = this.pickUpLocation?.toLocation()
+                val deliveryLocation = this.deliveryLocation?.toLocation()
+
+                return if (id == null || size == null || pickUpLocation == null || deliveryLocation == null) null
+                else Delivery(id, size, pickUpLocation, deliveryLocation)
+            }
+
+        }
+
         class DummyWarperLocation(var username: String? = null, var location : DummyLocation? = null,
                                   val deliverySize: Size? = null, val token : String? = null){
             fun toWarper() : ActiveWarper?{
@@ -40,46 +73,125 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
 
             }
         }
+
+        class DummyDeliveringWarper(val username : String?=null, val location : DummyLocation? = null,
+                                    val token : String? = null, val delivery : DummyDelivery? = null){
+
+            fun toDeliveringWarper() : DeliveringWarper?{
+                val location = this.location?.toLocation()
+                val delivery = this.delivery?.toDelivery()
+                return if(username == null || token == null || location == null || delivery == null) null
+                else DeliveringWarper(username, location,token,delivery)
+            }
+
+        }
     }
 
     /**
-     * Adds a warper to the list of searchable warpers
+     * Adds a warper to the list of searchable warpers/
+     * if there is a pending delivery in range it will assign the oldest one
      * **/
     fun add(warper : ActiveWarper){
-        db.collection(COLLECTION_NAME).document(warper.username).set(warper).get()
+
+
+        val queryRef = db.collection(PENDING_DELIVERIES).whereEqualTo("size",warper.deliverySize)
+            .orderBy("timestamp")
+        val warperRef = db.collection(ACTIVE_WARPERS).document(warper.username)
+
+        val warperDeliveryRef = db.collection(DELIVERING_WARPERS).document(warper.username)
+
+        if(warperDeliveryRef.get().get().exists())
+            throw ApiException("The warper ${warper.username} is already delivering", HttpStatus.BAD_REQUEST)
+
+        async{
+            db.runTransaction { transaction ->
+                val docs = transaction.get(queryRef).get().documents
+                for(document in docs){
+                    val delivery = document.toObject(DummyDelivery::class.java).toDelivery()?:continue
+                    if(delivery.pickUpLocation.getDistance(warper.location) <= MAX_DISTANCE){
+                        transaction.delete(document.reference)
+                        transaction.delete(warperRef)
+                        transaction.create(warperDeliveryRef,DeliveringWarper(warper,delivery))
+                        return@runTransaction
+                    }
+                }
+                transaction.set(warperRef,warper)
+            }.get()
+        }
     }
 
-    fun getClosest(location : Location,deliverySize: Size) : ActiveWarper?{
-        var closestActiveWarper : ActiveWarper? = null
+    /**
+     * Gets the closest warper to the location
+     */
+    fun getClosest(location : Location,deliverySize: Size) : ActiveWarper? {
+        var closestActiveWarper: ActiveWarper? = null
         var closestDistance = Double.POSITIVE_INFINITY
 
-        val future = db.collection(COLLECTION_NAME).whereEqualTo("deliverySize",deliverySize).get()
+        val queryRef = db.collection(ACTIVE_WARPERS)
+        val future = queryRef.get()
         val documents = future.get().documents
-        for (document in documents) {
-            val warper =  document.toObject(DummyWarperLocation::class.java).toWarper() ?: continue
-            val distance = warper.location.getDistance(location)
-            if(distance > MAX_DISTANCE) continue
+        val distanceList : List<Pair<ActiveWarper,Double?>>
 
-            val routeDistance : Double = api.getRouteDistance(location, warper.location) ?: continue
+        //Make every request to the routing api asynchronously and wait for it
+        runBlocking {
+            val list = ArrayList<Deferred<Pair<ActiveWarper, Double?>>>()
+            for (document in documents) {
+                val warper = document.toObject(DummyWarperLocation::class.java).toWarper() ?: continue
 
-            if(routeDistance < closestDistance) {
-                logger
-                closestActiveWarper = warper
-                closestDistance = distance
+                val distance = warper.location.getDistance(location)
+
+                if (distance > MAX_DISTANCE) continue
+
+                list.add(async { Pair(warper,api.getRouteDistance(location, warper.location)) })
+            }
+            distanceList = list.awaitAll()
+        }
+
+        for(routeDistance in distanceList){
+            if(routeDistance.second?:continue < closestDistance) {
+                closestActiveWarper = routeDistance.first
+                closestDistance = routeDistance.second!!
             }
         }
-        if(closestActiveWarper != null ) remove(closestActiveWarper.username)
+
         return closestActiveWarper
     }
 
+    /**
+     * Changes a warper from looking for delivery to already delivering
+     */
+    private fun setWarperForDelivery(warper : ActiveWarper, delivery : Delivery){
+        val deliveringWarper = DeliveringWarper(warper, delivery)
+        db.collection(ACTIVE_WARPERS).document(warper.username).delete().get()
+        db.collection(DELIVERING_WARPERS).document(warper.username).create(deliveringWarper).get()
+    }
+
+    /**
+     * Removes a warper from delivering
+     */
+    fun removeActiveWarper(warperName : String) : DeliveringWarper?{
+        val deliveringWarperRef = db.collection(DELIVERING_WARPERS).document(warperName)
+
+        val deliveringWarper = deliveringWarperRef.get().get()
+            deliveringWarperRef.delete()
+
+        return if(deliveringWarper.exists())
+            deliveringWarper.toObject(DummyDeliveringWarper::class.java)?.toDeliveringWarper()
+        else null
+    }
+
+
+
     fun remove(username : String){
-        db.collection(COLLECTION_NAME).document(username)
+        db.collection(ACTIVE_WARPERS).document(username)
             .delete()
     }
 
 
     fun updateLocation(username : String, location: Location){
-        db.collection(COLLECTION_NAME).document(username)
+        db.collection(ACTIVE_WARPERS).document(username)
+            .update("location", location)
+        db.collection(DELIVERING_WARPERS).document(username)
             .update("location", location)
     }
 

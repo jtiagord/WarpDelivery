@@ -163,6 +163,14 @@ class WarperController(
     }
 
     @WarperResource
+    @PostMapping("/confirmDelivery")
+    fun confirmDelivery(req: HttpServletRequest){
+        val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        activeWarpers.removeActiveWarper(warper.id)
+        //TODO ADD SQL CHANGE TRANSITION
+    }
+
+    @WarperResource
     @PutMapping("/location")
     fun updateWarperLocation(req: HttpServletRequest, @RequestBody location: Location){
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo

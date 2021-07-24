@@ -16,6 +16,10 @@ repositories {
 }
 
 dependencies {
+
+	implementation(platform("com.google.cloud:libraries-bom:20.8.0"))
+
+	compile("com.google.cloud:google-cloud-pubsub")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -25,6 +29,7 @@ dependencies {
 	implementation("org.jdbi:jdbi3-kotlin:3.18.1")
 	implementation("org.postgresql:postgresql:42.2.19")
 	implementation("com.auth0:java-jwt:3.18.1")
+	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
