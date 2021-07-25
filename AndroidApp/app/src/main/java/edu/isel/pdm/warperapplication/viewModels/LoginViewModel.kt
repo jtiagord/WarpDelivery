@@ -16,7 +16,12 @@ class LoginViewModel(app: Application) : AndroidViewModel(app) {
     fun tryLogin(user: String, password: String) {
         app.tryLogin(user, password,
             onSuccess = {
-                loginStatus.postValue(it)
+                if(it != null){
+                    loginStatus.postValue(true)
+                }else {
+                    loginStatus.postValue(false)
+                }
+
             },
             onFailure = {
                 loginStatus.postValue(false)

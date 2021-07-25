@@ -7,7 +7,7 @@
 
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
         android:orientation="vertical">
@@ -169,6 +169,23 @@
             android:layout_marginTop="3dp"
             android:scrollbars="vertical"
             android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="25dp"
+            android:layout_gravity="center">
+
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/logout"/>
+
+        </LinearLayout>
+
     </LinearLayout>
+
+
 
 </FrameLayout>

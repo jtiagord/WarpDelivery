@@ -30,4 +30,8 @@ class UserViewModel(app: Application) : AndroidViewModel(app) {
             })
     }
 
+    fun logout() {
+        app.logout()
+    }
+
 }

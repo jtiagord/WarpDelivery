@@ -22,7 +22,7 @@ class WarperApplication : Application() {
     fun tryLogin(
         username: String,
         password: String,
-        onSuccess: (Boolean) -> Unit,
+        onSuccess: (String?) -> Unit,
         onFailure: () -> Unit
     ) {
         return repository.tryLogin(username, password, onSuccess, onFailure)
@@ -74,5 +74,9 @@ class WarperApplication : Application() {
         onFailure: () -> Unit
     ) {
         return repository.tryAddVehicle(username, vehicle, onSuccess, onFailure)
+    }
+
+    fun logout(){
+        return repository.logout()
     }
 }

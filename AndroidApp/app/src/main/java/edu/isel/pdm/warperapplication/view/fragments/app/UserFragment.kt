@@ -1,32 +1,36 @@
 package edu.isel.pdm.warperapplication.view.fragments.app
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.text.InputType
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.fragment.app.viewModels
 import edu.isel.pdm.warperapplication.R
+import edu.isel.pdm.warperapplication.view.activities.AuthActivity
+import edu.isel.pdm.warperapplication.view.activities.MainActivity
 import edu.isel.pdm.warperapplication.viewModels.UserViewModel
 import edu.isel.pdm.warperapplication.web.entities.Warper
 
 class UserFragment : Fragment() {
 
+    data class EditUserOptions (
+        val inputType: Int,
+        val text: String,
+    )
     companion object {
         val inputsMap = initInputsMap()
 
-        private fun initInputsMap(): HashMap<Int, Pair<Int, String>> {
-            val map = HashMap<Int, Pair<Int, String>>()
-            map[R.id.ib_fName] = Pair(InputType.TYPE_CLASS_TEXT, "First Name")
-            map[R.id.ib_lName] = Pair(InputType.TYPE_CLASS_TEXT, "Last Name")
-            map[R.id.ib_email] = Pair(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, "Email")
-            map[R.id.ib_phone] = Pair(InputType.TYPE_CLASS_PHONE, "Phone")
+        private fun initInputsMap(): HashMap<Int, EditUserOptions> {
+            val map = HashMap<Int, EditUserOptions>()
+            map[R.id.ib_fName] = EditUserOptions(InputType.TYPE_CLASS_TEXT, "First Name")
+            map[R.id.ib_lName] = EditUserOptions(InputType.TYPE_CLASS_TEXT, "Last Name")
+            map[R.id.ib_email] = EditUserOptions(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS, "Email")
+            map[R.id.ib_phone] = EditUserOptions(InputType.TYPE_CLASS_PHONE, "Phone")
             return map
         }
     }
@@ -49,9 +53,17 @@ class UserFragment : Fragment() {
         val emailEditButton = rootView.findViewById<ImageButton>(R.id.ib_email)
         val phoneEditButton = rootView.findViewById<ImageButton>(R.id.ib_phone)
 
-        val buttonList =
+        val logoutButton = rootView.findViewById<Button>(R.id.btn_logout)
+
+        logoutButton.setOnClickListener {
+            viewModel.logout()
+            val intent = Intent(activity, AuthActivity::class.java)
+            this.startActivity(intent)
+        }
+
+        val imgButtonList =
             listOf<ImageButton>(fNameEditButton, lNameEditButton, emailEditButton, phoneEditButton)
-        for (button in buttonList) {
+        for (button in imgButtonList) {
             button.setOnClickListener {
                 showEditDialog(button.id)
             }
@@ -89,8 +101,8 @@ class UserFragment : Fragment() {
         val alertDialog = AlertDialog.Builder(context)
 
         //TODO: Use placeholder strings, validate inputs
-        alertDialog.setTitle(inputsMap[buttonId]!!.second)
-        alertDialog.setMessage("Insert new ${inputsMap[buttonId]!!.second}")
+        alertDialog.setTitle(inputsMap[buttonId]!!.text)
+        alertDialog.setMessage("Insert new ${inputsMap[buttonId]!!.text}")
 
         val lp = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -102,8 +114,7 @@ class UserFragment : Fragment() {
 
         alertDialog.setView(input)
 
-
-        input.setRawInputType(inputsMap[buttonId]!!.first)
+        input.setRawInputType(inputsMap[buttonId]!!.inputType)
 
         alertDialog.setPositiveButton(
             "Confirm"

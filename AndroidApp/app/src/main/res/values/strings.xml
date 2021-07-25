@@ -30,4 +30,5 @@
     <string name="delivery_item_rating">Rating: %o</string>
     <string name="delivery_item_reward">Reward: %.2f</string>
     <string name="delivery_item_state">State: %s</string>
+    <string name="logout">LOGOUT</string>
 </resources>
