@@ -166,8 +166,9 @@ class WarperController(
     @PostMapping("/confirmDelivery")
     fun confirmDelivery(req: HttpServletRequest){
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        activeWarpers.removeActiveWarper(warper.id)
-        //TODO ADD SQL CHANGE TRANSITION
+        val activeWarper = activeWarpers.removeActiveWarper(warper.id)
+        if(activeWarper != null)
+            deliveryMapper.updateState(activeWarper.delivery.id, DeliveryState.DELIVERED)
     }
 
     @WarperResource

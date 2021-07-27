@@ -4,15 +4,11 @@ import com.google.cloud.firestore.Firestore
 import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.Size
 import com.isel.warpDelivery.routeAPI.RouteApi
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
-import org.springframework.web.servlet.function.ServerResponse.async
 
 
 data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
@@ -93,7 +89,6 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
      * **/
     fun add(warper : ActiveWarper){
 
-
         val queryRef = db.collection(PENDING_DELIVERIES).whereEqualTo("size",warper.deliverySize)
             .orderBy("timestamp")
         val warperRef = db.collection(ACTIVE_WARPERS).document(warper.username)
@@ -103,20 +98,21 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         if(warperDeliveryRef.get().get().exists())
             throw ApiException("The warper ${warper.username} is already delivering", HttpStatus.BAD_REQUEST)
 
-        async{
+        GlobalScope.launch {
             db.runTransaction { transaction ->
                 val docs = transaction.get(queryRef).get().documents
-                for(document in docs){
-                    val delivery = document.toObject(DummyDelivery::class.java).toDelivery()?:continue
-                    if(delivery.pickUpLocation.getDistance(warper.location) <= MAX_DISTANCE){
+                for (document in docs) {
+                    val delivery = document.toObject(DummyDelivery::class.java).toDelivery() ?: continue
+                    if (delivery.pickUpLocation.getDistance(warper.location) <= MAX_DISTANCE) {
                         transaction.delete(document.reference)
                         transaction.delete(warperRef)
-                        transaction.create(warperDeliveryRef,DeliveringWarper(warper,delivery))
+                        transaction.create(warperDeliveryRef, DeliveringWarper(warper, delivery))
                         return@runTransaction
                     }
                 }
-                transaction.set(warperRef,warper)
-            }.get()
+
+                transaction.set(warperRef, warper)
+            }
         }
     }
 
