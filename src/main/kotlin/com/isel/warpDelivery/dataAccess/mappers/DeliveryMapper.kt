@@ -3,9 +3,17 @@ package com.isel.warpDelivery.dataAccess.mappers
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
 import com.isel.warpDelivery.dataAccess.dataClasses.StateTransition
+import com.isel.warpDelivery.errorHandling.ApiException
 import org.jdbi.v3.core.Jdbi
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
+enum class DeliveryState(val text : String) {
+    LOOKING_FOR_WARPER("Looking for warper"),
+    DELIVERING("Delivering"),
+    DELIVERED("Delivered"),
+    CANCELED("Canceled")
+}
 @Component
 class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
 
@@ -77,11 +85,11 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                         "rating=:rating" +
                         "where deliveryid=:deliveryid"
             )
-                .bind("deliveryid", DAO.deliveryId)
-                .bind("state", DAO.state)
-                .bind("deliverydate", DAO.deliverDate)
-                .bind("rating", DAO.rating)
-                .execute()
+            .bind("deliveryid", DAO.deliveryId)
+            .bind("state", DAO.state)
+            .bind("deliverydate", DAO.deliverDate)
+            .bind("rating", DAO.rating)
+            .execute()
         }
     }
 
@@ -91,11 +99,12 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                 "DELETE from $DELIVERY_TABLE " +
                         "where deliveryid = :deliveryid"
             )
-                .bind("deliveryid", key)
-                .execute()
+            .bind("deliveryid", key)
+            .execute()
         }
     }
 
+    //TODO ADD PAGING
     fun readAll(): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
@@ -103,11 +112,11 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                         "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE "
             )
-                .mapTo(Delivery::class.java)
-                .list()
+            .mapTo(Delivery::class.java)
+            .list()
         }
 
-    fun updateState(key: String, state: String) =
+    fun updateState(key: String, state: DeliveryState) =
         jdbi.useTransaction<Exception> { handle ->
 
             val deliveryOpt = handle.createQuery(
@@ -115,22 +124,21 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
             )
-                .bind("id", key)
-                .mapTo(String::class.java)
-                .findOne()
+            .bind("id", key)
+            .mapTo(String::class.java)
+            .findOne()
 
-            println(state)
 
-            if(deliveryOpt.isEmpty) throw DeliveryNotFoundException("The delivery: $key doesn't exist")
+            if(deliveryOpt.isEmpty) throw ApiException("The delivery: $key doesn't exist", HttpStatus.NOT_FOUND)
 
             handle.createUpdate(
                 "UPDATE $DELIVERY_TABLE " +
                         "SET state = :state " +
                         "WHERE deliveryid = :deliveryid"
             )
-                .bind("state", state)
-                .bind("deliveryid", key)
-                .execute()
+            .bind("state", state.text)
+            .bind("deliveryid", key)
+            .execute()
         }
 
     fun getDeliveriesByClientUsername(username: String): List<Delivery> =
