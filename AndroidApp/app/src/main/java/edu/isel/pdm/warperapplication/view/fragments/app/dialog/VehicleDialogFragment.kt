@@ -1,8 +1,7 @@
-package edu.isel.pdm.warperapplication.view.fragments.app
+package edu.isel.pdm.warperapplication.view.fragments.app.dialog
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.widget.EditText
 import androidx.fragment.app.DialogFragment

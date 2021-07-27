@@ -3,6 +3,7 @@ package edu.isel.pdm.warperapplication
 import android.app.Application
 import android.util.Base64
 import android.util.Log
+import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -15,7 +16,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-private const val WARPERS_COLLECTION = "DELIVERINGWARPERS"
+private const val WARPERS_DELIVERIES_COLLECTION = "DELIVERINGWARPERS"
 
 class AppRepository(val app: Application) {
 
@@ -23,18 +24,19 @@ class AppRepository(val app: Application) {
     private var password: String? = null
     private var token: String? = null
 
+
     private val request = ServiceBuilder.buildService(ApiInterface::class.java)
     private val firestore = Firebase.firestore
 
-    private lateinit var docRef: DocumentReference
-    private lateinit var listenerRegistration: ListenerRegistration
+    private lateinit var deliveriesDocRef: DocumentReference
+    private var listenerRegistration: ListenerRegistration? = null
 
     fun initFirestore(
         onSubscriptionError: (Exception) -> Unit,
         onStateChanged: (Map<String, Any>) -> Unit
     ) {
-        docRef = firestore.collection(WARPERS_COLLECTION).document(username!!)
-        listenerRegistration = docRef.addSnapshotListener { snapshot, e ->
+        deliveriesDocRef = firestore.collection(WARPERS_DELIVERIES_COLLECTION).document(username!!)
+        listenerRegistration = deliveriesDocRef.addSnapshotListener { snapshot, e ->
             if (e != null) {
                 onSubscriptionError(e)
                 Log.w("FIRESTORE", "Listen failed.", e)
@@ -145,11 +147,11 @@ class AppRepository(val app: Application) {
                 }
             })
         }
-
-
     }
 
     fun getUserInfo(username: String, onSuccess: (Warper) -> Unit, onFailure: () -> Unit) {
+
+
         val call = request.getWarperInfo(username)
         call.clone().enqueue(object : Callback<Warper> {
             override fun onResponse(call: Call<Warper>, response: Response<Warper>) {
@@ -165,21 +167,36 @@ class AppRepository(val app: Application) {
         })
     }
 
-    fun getVehicles(username: String, onSuccess: (List<Vehicle>) -> Unit, onFailure: () -> Unit) {
-        val call = request.getWarperVehicles(username)
-        call.clone().enqueue(object : Callback<List<Vehicle>> {
-            override fun onResponse(call: Call<List<Vehicle>>, response: Response<List<Vehicle>>) {
-                if (response.isSuccessful) {
-                    onSuccess(response.body()!!)
-                }
-            }
+    fun getVehicles(onSuccess: (List<Vehicle>) -> Unit, onFailure: () -> Unit) {
 
-            override fun onFailure(call: Call<List<Vehicle>>, t: Throwable) {
-                onFailure()
-                Log.e("VEHICLE", t.message!!)
-            }
-        })
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    getVehicles( onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.getWarperVehicles(token!!)
+            call.clone().enqueue(object : Callback<List<Vehicle>> {
+                override fun onResponse(call: Call<List<Vehicle>>, response: Response<List<Vehicle>>) {
+                    if (response.isSuccessful) {
+                        onSuccess(response.body()!!)
+                    } else {
+                        Log.d("VEHICLE", response.code().toString())
+                        onFailure()
+                    }
+                }
+
+                override fun onFailure(call: Call<List<Vehicle>>, t: Throwable) {
+                    onFailure()
+                    Log.e("VEHICLE", t.message!!)
+                }
+            })
+        }
     }
+
 
     fun tryAddVehicle(
         username: String,
@@ -220,6 +237,38 @@ class AppRepository(val app: Application) {
 
     }
 
+    fun updateUser(
+        user: WarperEdit,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit,
+    ) {
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    updateUser(user, onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.updateWarper(user, token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                    if (response.isSuccessful) {
+                        onSuccess()
+                    }
+                }
+
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    //TODO: Handle
+                    onFailure()
+                    Log.e("UPDATE", t.message!!)
+                }
+            })
+        }
+
+    }
+
     fun logout() {
 
         //Clear user data
@@ -228,8 +277,54 @@ class AppRepository(val app: Application) {
         token = null
 
         //Remove firebase listener
-        listenerRegistration.remove()
+        detachListener()
 
         Log.v("LOGOUT", "LOGGED OUT")
+    }
+
+    fun detachListener(){
+        if(listenerRegistration != null){
+            listenerRegistration!!.remove()
+        }
+    }
+
+    fun setActive(vehicle: String,
+                  location: Location,
+                  nToken: String,
+                  onSuccess: () -> Unit,
+                  onFailure: () -> Unit
+    ){
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    setActive(vehicle, location, nToken, onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.setActive(ActiveWarper(vehicle, location, nToken), token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("ACTIVE", "SUCCESS")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("ACTIVE", t.message!!)
+                }
+            })
+        }
+    }
+
+    fun setInactive(){
+        //TODO: Set warper as inactive
     }
 }

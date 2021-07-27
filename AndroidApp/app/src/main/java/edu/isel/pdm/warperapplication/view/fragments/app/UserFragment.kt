@@ -15,6 +15,7 @@ import edu.isel.pdm.warperapplication.view.activities.AuthActivity
 import edu.isel.pdm.warperapplication.view.activities.MainActivity
 import edu.isel.pdm.warperapplication.viewModels.UserViewModel
 import edu.isel.pdm.warperapplication.web.entities.Warper
+import edu.isel.pdm.warperapplication.web.entities.WarperEdit
 
 class UserFragment : Fragment() {
 
@@ -119,7 +120,20 @@ class UserFragment : Fragment() {
         alertDialog.setPositiveButton(
             "Confirm"
         ) { _, _ ->
-            //TODO: UPDATE USER HERE
+            when(buttonId) {
+                R.id.ib_fName -> {
+                    viewModel.updateUser(WarperEdit(firstname = input.text.toString()))
+                }
+                R.id.ib_lName -> {
+                    viewModel.updateUser(WarperEdit(lastname = input.text.toString()))
+                }
+                R.id.ib_phone -> {
+                    viewModel.updateUser(WarperEdit(phonenumber = input.text.toString()))
+                }
+                R.id.ib_email -> {
+                    viewModel.updateUser(WarperEdit(email = input.text.toString()))
+                }
+            }
         }
             .setNegativeButton(
                 "Cancel"

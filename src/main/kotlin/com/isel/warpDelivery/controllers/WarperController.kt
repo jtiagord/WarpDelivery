@@ -11,6 +11,7 @@ import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.common.encodePassword
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
 import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
+import com.isel.warpDelivery.dataAccess.dataClasses.WarperEdit
 import com.isel.warpDelivery.dataAccess.mappers.*
 import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.*
@@ -88,10 +89,23 @@ class WarperController(
         return ResponseEntity.status(204).build()
     }
 
-    @GetMapping("/{username}/vehicles")
-    fun getVehicles(@PathVariable username: String): ResponseEntity<List<Vehicle>> {
-        val vehicles = vehicleMapper.readAll(username)
+    @WarperResource
+    @GetMapping("/vehicles")
+    fun getVehicles(req: HttpServletRequest): ResponseEntity<List<Vehicle>> {
+        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warperExists = warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
+        val vehicles = vehicleMapper.readAll(user.id)
         return ResponseEntity.ok().body(vehicles)
+    }
+
+    @WarperResource
+    @PutMapping()
+    fun updateWarper(req: HttpServletRequest, @RequestBody warper: WarperEdit): ResponseEntity<Any> {
+        //TODO: Handle sql exception on email
+        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warperExists = warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
+        warperMapper.update(warper, user.id)
+        return ResponseEntity.ok().build()
     }
 
     //-------------------------------------------------------------------------------
@@ -157,6 +171,7 @@ class WarperController(
 
         val size = Size.fromText(warperVehicle.type)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
+        print("ACTIVEEEE")
         activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size ,warperReq.notificationToken))
 
         return ResponseEntity.status(200).build()

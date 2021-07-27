@@ -8,3 +8,17 @@ data class Warper (
     val email : String?,
     val vehicles : List<Vehicle>?
 )
+
+data class WarperEdit(
+    val firstname: String? = null,
+    val lastname: String? = null,
+    val phonenumber: String? = null,
+    val email: String? = null,
+    val password: String? = null,
+)
+
+data class ActiveWarper(
+    val vehicle : String,
+    val location : Location,
+    val notificationToken: String
+)

@@ -1,9 +1,10 @@
 package edu.isel.pdm.warperapplication
 
 import android.app.Application
-import edu.isel.pdm.warperapplication.web.entities.Delivery
-import edu.isel.pdm.warperapplication.web.entities.Vehicle
-import edu.isel.pdm.warperapplication.web.entities.Warper
+import android.util.Log
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
+import edu.isel.pdm.warperapplication.web.entities.*
 
 
 class WarperApplication : Application() {
@@ -56,11 +57,10 @@ class WarperApplication : Application() {
     }
 
     fun getVehicles(
-        username: String,
         onSuccess: (List<Vehicle>) -> Unit,
         onFailure: () -> Unit
     ) {
-        return repository.getVehicles(username, onSuccess, onFailure)
+        return repository.getVehicles(onSuccess, onFailure)
     }
 
     fun getCurrentUser(): String {
@@ -76,7 +76,44 @@ class WarperApplication : Application() {
         return repository.tryAddVehicle(username, vehicle, onSuccess, onFailure)
     }
 
+    fun updateUser(
+        user: WarperEdit,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.updateUser(user, onSuccess, onFailure)
+    }
+
+    fun setActive(
+        vehicle: String,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+
+        FirebaseMessaging.getInstance().token
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (!task.isSuccessful) {
+                    Log.w("TOKEN", "Fetching registration token failed", task.exception)
+                    return@OnCompleteListener
+                }
+
+                Log.d("TOKEN", task.result)
+
+                // Get new FCM registration token
+                //TODO: Get actual location
+                val token = task.result
+                repository.setActive(
+                    vehicle, Location(38.74008721436314, -9.115295982914596),
+                    token, onSuccess, onFailure
+                )
+            })
+    }
+
     fun logout(){
         return repository.logout()
+    }
+
+    fun detachListener(){
+        return repository.detachListener()
     }
 }

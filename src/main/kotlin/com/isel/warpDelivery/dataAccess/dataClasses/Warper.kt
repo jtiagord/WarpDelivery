@@ -21,3 +21,11 @@ class Warper (val username : String,
         vehicles = vehicles.map{ it.toOutputModel()}
     )
 }
+
+data class WarperEdit(
+    val firstname: String?,
+    val lastname: String?,
+    val phonenumber: String?,
+    val email: String?,
+    val password: String?,
+)

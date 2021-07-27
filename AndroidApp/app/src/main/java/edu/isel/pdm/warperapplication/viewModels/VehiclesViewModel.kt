@@ -16,7 +16,7 @@ class VehiclesViewModel(app: Application) : AndroidViewModel(app) {
     var vehicles = MutableLiveData<List<Vehicle>>()
 
     fun getVehicles(){
-        app.getVehicles(app.getCurrentUser(),
+        app.getVehicles(
             onSuccess = {
                 vehicles.postValue(it)
             },

@@ -4,13 +4,17 @@ package edu.isel.pdm.warperapplication.viewModels
 import android.app.Application
 import android.content.IntentSender
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
+import com.google.firebase.messaging.FirebaseMessaging
 import edu.isel.pdm.warperapplication.WarperApplication
+import edu.isel.pdm.warperapplication.web.entities.Vehicle
 import org.osmdroid.util.GeoPoint
 
 
@@ -18,6 +22,8 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<GeoPoint>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
+    var active = MutableLiveData<Boolean>()
+    var vehicleIds = MutableLiveData<Array<String>>()
 
 
     private val app: WarperApplication by lazy {
@@ -54,18 +60,19 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
 */
 
 
-
     private val locationCallback: LocationCallback? = null
 
 
-
-    fun initFirestore(){
-        app.initFirestore(onStateChanged = {
-            updateMapData(it)
-        }, onSubscriptionError = {
-            Toast.makeText(getApplication(), "Couldn't subscribe to map updates", Toast.LENGTH_LONG)
+    fun initFirestore() {
+        app.initFirestore(
+            onStateChanged = {
+                //updateMapData(it)
+            },
+            onSubscriptionError = {
+                Toast.makeText(getApplication(), "Couldn't subscribe to map updates", Toast.LENGTH_LONG)
                 .show()
-        })
+            }
+        )
     }
 
     private fun updateMapData(data: Map<String, Any>) {
@@ -76,7 +83,33 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
 
     }
 
+    fun detachListener() {
+        app.detachListener()
+    }
 
+    fun setActive(vehicle: String) {
+        app.setActive(
+            vehicle,
+            onSuccess = {
+                Log.d("ACTIVE", "SUCESS")
+                active.postValue(true)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), "Failed to set active", Toast.LENGTH_LONG)
+                    .show()
+            }
+        )
+    }
+
+    fun getVehicles(){
+        app.getVehicles(
+            onSuccess = { vehicle ->
+                vehicleIds.postValue(vehicle.map{it.registration}.toTypedArray())
+        },
+        onFailure = {
+            Toast.makeText(getApplication(), "Failed get vehicles", Toast.LENGTH_LONG).show()
+        })
+    }
 
 }
 

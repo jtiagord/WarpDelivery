@@ -5,6 +5,13 @@
     android:layout_height="match_parent"
     tools:context=".view.fragments.app.LocationFragment">
 
+    <Button
+        android:id="@+id/btn_active"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/set_active"/>
+
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="fill_parent"

@@ -1,12 +1,23 @@
 package edu.isel.pdm.warperapplication.web
 
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceBuilder {
 
-    private val client = OkHttpClient.Builder().build()
+    private val client = OkHttpClient.Builder().addInterceptor(Interceptor { chain ->
+        val token = chain.request().header("Authorization")
+        if (token != null) {
+            val request = chain.request().newBuilder()
+                .removeHeader("Authorization")
+                .addHeader("Authorization", "Bearer $token")
+                .build()
+            return@Interceptor chain.proceed(request)
+        }
+        return@Interceptor chain.proceed(chain.request())
+    }).build()
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("http://192.168.1.66:8080/WarpDelivery/")

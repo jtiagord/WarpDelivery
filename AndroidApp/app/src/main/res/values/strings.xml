@@ -31,4 +31,7 @@
     <string name="delivery_item_reward">Reward: %.2f</string>
     <string name="delivery_item_state">State: %s</string>
     <string name="logout">LOGOUT</string>
+    <string name="set_active">SET ACTIVE</string>
+    <string name="channel_name">notifications</string>
+    <string name="channel_description">Delivery Notifications</string>
 </resources>
