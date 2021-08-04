@@ -13,10 +13,11 @@ CREATE TABLE STORE (
 	latitude double precision NOT NULL,
 	longitude double precision NOT NULL,
 	address varchar(100) NOT NULL,
-	apiKey char(32) UNIQUE NOT NULL
+	apiKey char(32) UNIQUE DEFAULT generate_id() NOT NULL 
 );
 
-CREATE TABLE USERS (
+
+CREATE TABLE WARPER (
 	username varchar(50) PRIMARY KEY,
 	firstname varchar(50) NOT NULL,
 	lastname varchar(50) NOT NULL,
@@ -25,18 +26,12 @@ CREATE TABLE USERS (
 	email varchar(100) NOT NULL CHECK (email LIKE '%@%') UNIQUE
 );
 
-CREATE TABLE WARPER (
-	username varchar(50) PRIMARY KEY REFERENCES USERS(username) on delete cascade
-	--adicionar aqui a foto q ns como será ainda
-);
-
 CREATE TABLE DELIVERY (
 	deliveryid char(32) PRIMARY KEY DEFAULT generate_id(),
 	warperusername varchar(50) REFERENCES WARPER(username) on delete cascade,
-	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
 	storeid char(32) NOT NULL REFERENCES STORE(storeid),
 	state varchar(20) NOT NULL
-	CHECK (state IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
+	CHECK (state IN ('Looking for Warper','Delivering', 'Delivered', 'Cancelled')),
 	clientphone varchar(50),
 	purchasedate timestamp NOT NULL DEFAULT NOW(),
 	deliverdate timestamp CHECK (deliverdate > purchasedate),
@@ -59,18 +54,8 @@ CREATE TABLE VEHICLE (
 CREATE TABLE STATE_TRANSITIONS (
 	deliveryid char(32) REFERENCES DELIVERY(deliveryid) on delete cascade,
 	transitiondate timestamp,
-	previousstate varchar(20) NOT NULL CHECK (previousstate IN ('Looking for Warper','Delivering', 'Delivered', 'Canceled')),
+	previousstate varchar(20) NOT NULL CHECK (previousstate IN ('Looking for Warper','Delivering', 'Delivered', 'Cancelled')),
 	nextstate varchar(20) NOT NULL CHECK (nextstate IN
-		('Looking for Warper','Delivering', 'Delivered', 'Canceled')),	--convinha ver se ha melhor forma de fazer isto
+		('Looking for Warper','Delivering', 'Delivered', 'Cancelled')),	--convinha ver se ha melhor forma de fazer isto
 	PRIMARY KEY (deliveryid, transitiondate)
-);
-
-CREATE TABLE CLIENT_ADDRESS (
-	addressid bigserial,
-	clientusername varchar(50) REFERENCES USERS(username) on delete cascade,
-	latitude double precision NOT NULL,
-	longitude double precision NOT NULL,
-	postal_code varchar(10) NOT NULL,
-	address varchar(100) NOT NULL,
-	PRIMARY KEY (addressid, clientusername)
 );

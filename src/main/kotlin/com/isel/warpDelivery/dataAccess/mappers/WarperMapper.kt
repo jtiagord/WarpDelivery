@@ -14,7 +14,6 @@ class WarperNotFoundException(s: String) : Exception(s)
 class WarperMapper(val jdbi: Jdbi) {
 
     companion object {
-        const val USER_TABLE = "USERS"
         const val WARPER_TABLE = "WARPER"
         const val VEHICLE_TABLE = "VEHICLE"
 
@@ -29,7 +28,7 @@ class WarperMapper(val jdbi: Jdbi) {
         jdbi.inTransaction<String, Exception> { handle ->
             val optional = handle.createQuery(
                 "SELECT username, phonenumber, email" +
-                        " FROM $USER_TABLE WHERE " +
+                        " FROM $WARPER_TABLE WHERE " +
                         "username=:username OR email = :email OR phonenumber = :phonenumber"
             )
                 .bind("username", DAO.username)
@@ -54,25 +53,17 @@ class WarperMapper(val jdbi: Jdbi) {
             }
 
             handle.createUpdate(
-                "Insert Into $USER_TABLE " +
+                "Insert Into $WARPER_TABLE " +
                         "(username, firstname , lastname, phonenumber, password, email) values " +
                         "(:username,:firstname,:lastname,:phonenumber,:password,:email)"
             )
-                .bind("username", DAO.username)
-                .bind("firstname", DAO.firstname)
-                .bind("lastname", DAO.lastname)
-                .bind("phonenumber", DAO.phonenumber)
-                .bind("password", DAO.password)
-                .bind("email", DAO.email)
-                .execute()
-
-            handle.createUpdate(
-                "Insert Into $WARPER_TABLE " +
-                        "(username) values " +
-                        "(:name)"
-            )
-                .bind("name", DAO.username)
-                .execute()
+            .bind("username", DAO.username)
+            .bind("firstname", DAO.firstname)
+            .bind("lastname", DAO.lastname)
+            .bind("phonenumber", DAO.phonenumber)
+            .bind("password", DAO.password)
+            .bind("email", DAO.email)
+            .execute()
 
             for (vehicle in DAO.vehicles) {
                 handle.createUpdate(
@@ -80,10 +71,10 @@ class WarperMapper(val jdbi: Jdbi) {
                             "(username, vehicleType, vehicleRegistration) values " +
                             "(:username, :type ,:registration)"
                 )
-                    .bind("username", DAO.username)
-                    .bind("type", vehicle.type)
-                    .bind("registration", vehicle.registration)
-                    .execute()
+                .bind("username", DAO.username)
+                .bind("type", vehicle.type)
+                .bind("registration", vehicle.registration)
+                .execute()
             }
             return@inTransaction DAO.username
         }
@@ -91,13 +82,13 @@ class WarperMapper(val jdbi: Jdbi) {
     fun read(key: String): Warper? =
         jdbi.inTransaction<Warper, Exception> { handle ->
             val warperOpt = handle.createQuery(
-                "SELECT $USER_TABLE.username, firstname , lastname, phonenumber, email, password " +
-                        "from $USER_TABLE JOIN $WARPER_TABLE ON $USER_TABLE.username = $WARPER_TABLE.username " +
-                        "where $USER_TABLE.username = :username"
+                "SELECT username, firstname , lastname, phonenumber, email, password " +
+                        "from $WARPER_TABLE " +
+                        "where username = :username"
             )
-                .bind("username", key)
-                .mapTo(Warper::class.java)
-                .findOne()
+            .bind("username", key)
+            .mapTo(Warper::class.java)
+            .findOne()
 
 
             val warper = if (warperOpt.isPresent) warperOpt.get() else return@inTransaction null
@@ -119,7 +110,7 @@ class WarperMapper(val jdbi: Jdbi) {
     fun update(warperInfo: WarperEdit, username: String) {
 
 
-        var query = "update $USER_TABLE set "
+        var query = "update $WARPER_TABLE set "
 
         if(warperInfo.email != null)
             query += "email = :email, "
@@ -158,32 +149,16 @@ class WarperMapper(val jdbi: Jdbi) {
                 "DELETE from $VEHICLE_TABLE " +
                         "where username = :username"
             )
-                .bind("username", key).execute()
+            .bind("username", key).execute()
 
             handle.createUpdate(
                 "DELETE from $WARPER_TABLE " +
                         "where username = :username"
             )
-                .bind("username", key).execute()
-
-            handle.createUpdate(
-                "DELETE from $USER_TABLE " +
-                        "where username = :username"
-            )
-                .bind("username", key)
-                .execute()
-
-
+            .bind("username", key)
+            .execute()
         }
     }
 
-    fun getState(username: String): Any {
-        return jdbi.inTransaction<String, Exception> { handle ->
 
-            return@inTransaction handle.createQuery("SELECT state FROM $WARPER_TABLE WHERE username = :username")
-                .bind("username", username)
-                .mapTo(String::class.java)
-                .one()
-        }
-    }
 }

@@ -11,8 +11,8 @@ data class RequestDeliveryInputModel(
     val address : String,
     val deliveryLocation : Location
 ) {
-    fun toDelivery(warperUsername: String?, clientUsername: String?,storeId : String): Delivery {
-        return Delivery(null, warperUsername, clientUsername, storeId, "Looking for Warper", userPhone, null,
+    fun toDelivery(warperUsername: String?,storeId : String): Delivery {
+        return Delivery(null, warperUsername, storeId, "Looking for Warper", userPhone, null,
         null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize, emptyList())
     }
 }

@@ -89,11 +89,13 @@ class WarperController(
         return ResponseEntity.status(204).build()
     }
 
+
+
     @WarperResource
     @GetMapping("/vehicles")
     fun getVehicles(req: HttpServletRequest): ResponseEntity<List<Vehicle>> {
         val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        val warperExists = warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
+        warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
         val vehicles = vehicleMapper.readAll(user.id)
         return ResponseEntity.ok().body(vehicles)
     }
@@ -103,37 +105,11 @@ class WarperController(
     fun updateWarper(req: HttpServletRequest, @RequestBody warper: WarperEdit): ResponseEntity<Any> {
         //TODO: Handle sql exception on email
         val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        val warperExists = warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
+        warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
         warperMapper.update(warper, user.id)
         return ResponseEntity.ok().build()
     }
 
-    //-------------------------------------------------------------------------------
-/*
-    @GetMapping("/{username}/vehicles/{vehicleRegistration}")
-    fun getVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<Vehicle> {
-        val vehicle = vehicleMapper.read(VehicleKey(username,vehicleRegistration))
-        return ResponseEntity.ok().body(vehicle)
-    }
-
-
-
-
-    @DeleteMapping("/{username}/vehicles/{vehicleRegistration}")
-    fun deleteVehicle(@PathVariable username: String, vehicleRegistration: String): ResponseEntity<String>{
-        vehicleMapper.delete(VehicleKey(username,vehicleRegistration))
-        return ResponseEntity.status(204).build()
-    }
-
-      @GetMapping("/{username}/deliveries/{deliveryId}/transitions")
-    fun getDeliveryTransitions(@PathVariable deliveryId: Long): ResponseEntity<List<StateTransition>> {
-        val transitions = deliveryMapper.getTransitions(deliveryId)
-        return ResponseEntity.ok().body(transitions)
-    }
-
-
-    //-------------------------------------------------------------------------------
-*/
 
     @PutMapping("/{username}/vehicles")
     fun addVehicle(

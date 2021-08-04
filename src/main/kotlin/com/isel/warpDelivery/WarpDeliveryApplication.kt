@@ -12,8 +12,6 @@ import com.isel.warpDelivery.common.getPublicKeyFromFile
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.postgresql.ds.PGSimpleDataSource
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -21,13 +19,9 @@ import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.util.ResourceUtils
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
-
-import java.io.File
-import java.io.FileInputStream
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import javax.sql.DataSource

@@ -10,12 +10,12 @@ data class VehicleKey(
     val vehicleRegistration : String
 )
 @Component
-class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
+class VehicleMapper(val jdbi: Jdbi) {
     companion object {
         const val VEHICLE_TABLE = "VEHICLE"
     }
 
-    override fun create(DAO: Vehicle) : VehicleKey =
+    fun create(DAO: Vehicle) : VehicleKey =
         jdbi.withHandle<VehicleKey,Exception> { handle ->
 
             handle.createUpdate(
@@ -33,7 +33,7 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
         }
 
 
-    override fun read(key: VehicleKey): Vehicle =
+    fun read(key: VehicleKey): Vehicle =
         jdbi.inTransaction<Vehicle, Exception> { handle ->
             val vehicle = handle.createQuery(
                 "SELECT username, vehicletype AS type, vehicleRegistration as registration " +
@@ -61,11 +61,11 @@ class VehicleMapper(jdbi: Jdbi) : DataMapper<VehicleKey, Vehicle>(jdbi) {
                 .list()
         }
 
-    override fun update(DAO: Vehicle) {
+    fun update(DAO: Vehicle) {
         TODO()
     }
 
-    override fun delete(key: VehicleKey) {
+    fun delete(key: VehicleKey) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $VEHICLE_TABLE " +

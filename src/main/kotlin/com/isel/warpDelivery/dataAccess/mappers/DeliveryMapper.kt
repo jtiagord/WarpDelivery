@@ -12,28 +12,27 @@ enum class DeliveryState(val text : String) {
     LOOKING_FOR_WARPER("Looking for warper"),
     DELIVERING("Delivering"),
     DELIVERED("Delivered"),
-    CANCELED("Canceled")
+    CANCELLED("Cancelled")
 }
 @Component
-class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
+class DeliveryMapper(val jdbi: Jdbi) {
 
     companion object {
         const val DELIVERY_TABLE = "DELIVERY"
         const val TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
-    override fun create(DAO: Delivery) : String=
+    fun create(DAO: Delivery) : String=
         jdbi.withHandle<String,Exception> { handle ->
 
             val delivery = handle.createUpdate(
-                "INSERT INTO DELIVERY (warperusername, clientusername, clientphone, storeid, state, " +
+                "INSERT INTO DELIVERY (warperusername, clientphone, storeid, state, " +
                         "deliverLatitude, deliverLongitude, deliverAddress, type) " +
                         "VALUES " +
-                        "(:warperUsername, :clientUsername, :clientphone, :storeId, :state, "+
+                        "(:warperUsername, :clientphone, :storeId, :state, "+
                         " :deliverLatitude, :deliverLongitude, :deliverAddress, :type)"
             )
             .bind("warperUsername", DAO.warperUsername)
-            .bind("clientUsername", DAO.clientUsername)
             .bind("clientphone", DAO.clientPhone)
             .bind("storeId", DAO.storeId)
             .bind("state", DAO.state)
@@ -49,10 +48,10 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
 
 
-    override fun read(key: String): Delivery? =
+    fun read(key: String): Delivery? =
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val deliveryOpt = handle.createQuery(
-                "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
+                "SELECT deliveryid, warperusername, storeid, state, clientphone, purchasedate, " +
                         "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
@@ -76,7 +75,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
             return@inTransaction delivery
         }
 
-    override fun update(DAO: Delivery) {
+    fun update(DAO: Delivery) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "update $DELIVERY_TABLE " +
@@ -93,7 +92,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
         }
     }
 
-    override fun delete(key: String) {
+    fun delete(key: String) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $DELIVERY_TABLE " +
@@ -141,15 +140,7 @@ class DeliveryMapper(jdbi: Jdbi) : DataMapper<String, Delivery>(jdbi) {
             .execute()
         }
 
-    fun getDeliveriesByClientUsername(username: String): List<Delivery> =
 
-        jdbi.inTransaction<List<Delivery>, Exception> { handle ->
-
-            return@inTransaction handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE clientusername = :username")
-                .bind("username", username)
-                .mapTo(Delivery::class.java)
-                .list()
-        }
 
     fun getDeliveriesByWarperUsername(username: String): List<Delivery> =
 

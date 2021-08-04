@@ -6,7 +6,6 @@ import java.sql.Timestamp
 
 class Delivery (val deliveryId : String?,
                 val warperUsername: String?,
-                val clientUsername : String?,
                 val storeId: String,
                 val state : String,
                 val clientPhone: String,
