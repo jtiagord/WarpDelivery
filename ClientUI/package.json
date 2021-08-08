@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "file-loader": "^6.2.0",
+    "firebase": "^8.9.0",
     "install": "^0.13.0",
     "npm": "^7.20.1",
     "react-mapbox-gl": "^4.8.6",
