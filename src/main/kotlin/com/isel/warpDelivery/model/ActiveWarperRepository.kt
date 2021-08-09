@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component
 
 data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
 
-data class Delivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
+data class ActiveDelivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
 class DeliveringWarper(val username : String, val location : Location,val token : String,
-                       val delivery : Delivery){
-    constructor(warper : ActiveWarper , delivery : Delivery)
-            : this(warper.username, warper.location,warper.token,delivery)
+                       val delivery : ActiveDelivery){
+    constructor(warper : ActiveWarper, activeDelivery : ActiveDelivery)
+            : this(warper.username, warper.location,warper.token,activeDelivery)
 
 }
 
@@ -50,12 +50,12 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         class DummyDelivery(val id : String? = null, val size : Size? = null,
                             val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null) {
 
-            fun toDelivery() : Delivery? {
+            fun toDelivery() : ActiveDelivery? {
                 val pickUpLocation = this.pickUpLocation?.toLocation()
                 val deliveryLocation = this.deliveryLocation?.toLocation()
 
                 return if (id == null || size == null || pickUpLocation == null || deliveryLocation == null) null
-                else Delivery(id, size, pickUpLocation, deliveryLocation)
+                else ActiveDelivery(id, size, pickUpLocation, deliveryLocation)
             }
 
         }
@@ -156,8 +156,8 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
     /**
      * Changes a warper from looking for delivery to already delivering
      */
-    private fun setWarperForDelivery(warper : ActiveWarper, delivery : Delivery){
-        val deliveringWarper = DeliveringWarper(warper, delivery)
+    private fun setWarperForDelivery(warper : ActiveWarper, activeDelivery : ActiveDelivery){
+        val deliveringWarper = DeliveringWarper(warper, activeDelivery)
         db.collection(ACTIVE_WARPERS).document(warper.username).delete().get()
         db.collection(DELIVERING_WARPERS).document(warper.username).create(deliveringWarper).get()
     }
@@ -165,7 +165,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
     /**
      * Removes a warper from delivering
      */
-    fun removeActiveWarper(warperName : String) : DeliveringWarper?{
+    fun removeDeliveringWarper(warperName : String) : DeliveringWarper?{
         val deliveringWarperRef = db.collection(DELIVERING_WARPERS).document(warperName)
 
         val deliveringWarper = deliveringWarperRef.get().get()

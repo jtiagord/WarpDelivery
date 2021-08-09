@@ -1,5 +1,6 @@
 package com.isel.warpDelivery.controllers
 
+import com.isel.warpDelivery.authentication.AdminResource
 import com.isel.warpDelivery.authentication.StoreResource
 import com.isel.warpDelivery.authentication.USER_ATTRIBUTE_KEY
 import com.isel.warpDelivery.authentication.UserInfo
@@ -11,8 +12,8 @@ import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import com.isel.warpDelivery.inputmodels.StoreInputModel
 import com.isel.warpDelivery.inputmodels.toDao
+import com.isel.warpDelivery.model.ActiveDelivery
 import com.isel.warpDelivery.model.Location
-import com.isel.warpDelivery.pubSub.DeliveryMessage
 import com.isel.warpDelivery.pubSub.WarperPublisher
 
 import org.springframework.http.ResponseEntity
@@ -28,6 +29,7 @@ import javax.servlet.http.HttpServletRequest
 @RequestMapping(STORE_PATH)
 class StoreController(val storeMapper : StoreMapper , val deliveryMapper : DeliveryMapper){
 
+    @AdminResource
     @PostMapping
     fun addStore(@RequestBody store: StoreInputModel): ResponseEntity<Any> {
         val uuid = UUID.randomUUID().toString()
@@ -56,11 +58,12 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
         val delivery = deliveryRequest.toDelivery(null, store.storeId!!)
         val deliveryId =  deliveryMapper.create(delivery)
 
-        val messageToPublish =
-            DeliveryMessage(deliveryId,storeLocation,store.address,store.storeId,
-                deliveryRequest.deliveryLocation,deliveryRequest.address,deliveryRequest.deliverySize.text)
+        val deliveryLocation = Location(delivery.deliverLatitude, delivery.deliverLongitude)
 
-        WarperPublisher.publishDelivery(messageToPublish)
+        val deliveryToPublish =
+            ActiveDelivery(deliveryId, delivery.type ,storeLocation, deliveryLocation)
+
+        WarperPublisher.publishDelivery(deliveryToPublish)
 
 
         return ResponseEntity.created(URI("$DELIVERIES_PATH/${deliveryId}")).build()

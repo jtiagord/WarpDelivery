@@ -13,6 +13,9 @@ annotation class WarperResource
 @Target(AnnotationTarget.FUNCTION)
 annotation class StoreResource
 
+@Target(AnnotationTarget.FUNCTION)
+annotation class AdminResource
+
 
 class AccessControlInterceptor : HandlerInterceptor {
 
@@ -24,12 +27,13 @@ class AccessControlInterceptor : HandlerInterceptor {
 
         val isWarperResource = handler.hasMethodAnnotation(WarperResource::class.java)
         val isStoreResource = handler.hasMethodAnnotation(StoreResource::class.java)
-
+        val isAdminResource = handler.hasMethodAnnotation(AdminResource::class.java)
 
         return when {
+            isAdminResource && userInfo?.type == USERTYPE.ADMIN -> true
             isWarperResource && userInfo?.type == USERTYPE.WARPER -> true
             isStoreResource && userInfo?.type == USERTYPE.STORE -> true
-            !isWarperResource && !isStoreResource -> true
+            !isWarperResource && !isStoreResource && !isAdminResource-> true
             else -> {
                 throw UnauthorizedException()
             }

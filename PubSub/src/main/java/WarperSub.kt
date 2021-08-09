@@ -31,16 +31,16 @@ fun subscribeAsyncExample(projectId: String?, subscriptionId: String?) {
     // Instantiate an asynchronous message receiver.
     val receiver = MessageReceiver { message: PubsubMessage, consumer: AckReplyConsumer ->
         val data =  message.data.toStringUtf8()
-        val deliveryMessage = parseData(data)
+        val delivery = parseData(data)
         val warper = warperRepository
-                                .getClosest(deliveryMessage.storeLocation,
-                                Size.fromText(deliveryMessage.deliverySize)!!)
+                                .getClosest(delivery.pickUpLocation,
+                                delivery.size)
 
         if(warper != null){
-            warperRepository.setWarperForDelivery(warper,deliveryMessage.getDelivery())
+            warperRepository.setWarperForDelivery(warper,delivery)
             sendNotification(warper)
         }else{
-            warperRepository.setPendingDelivery(deliveryMessage.getDelivery())
+            warperRepository.setPendingDelivery(delivery)
         }
 
         println("WARPER FOUND : ${warper?.username?:"NOT FOUND"}")
@@ -57,7 +57,7 @@ fun subscribeAsyncExample(projectId: String?, subscriptionId: String?) {
     subscriber.awaitTerminated()
 }
 
-fun parseData(data: String): DeliveryMessage {
+fun parseData(data: String): Delivery{
     val mapper = Gson()
-    return mapper.fromJson(data, DeliveryMessage::class.java);
+    return mapper.fromJson(data, Delivery::class.java)
 }

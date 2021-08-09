@@ -19,6 +19,7 @@ import com.isel.warpDelivery.model.ActiveWarper
 import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.outputmodels.WarperOutputModel
+import com.isel.warpDelivery.pubSub.WarperPublisher
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -157,7 +158,7 @@ class WarperController(
     @PostMapping("/confirmDelivery")
     fun confirmDelivery(req: HttpServletRequest){
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        val activeWarper = activeWarpers.removeActiveWarper(warper.id)
+        val activeWarper = activeWarpers.removeDeliveringWarper(warper.id)
         if(activeWarper != null)
             deliveryMapper.updateState(activeWarper.delivery.id, DeliveryState.DELIVERED)
     }
@@ -167,6 +168,16 @@ class WarperController(
     fun updateWarperLocation(req: HttpServletRequest, @RequestBody location: Location){
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         activeWarpers.updateLocation(warper.id,location)
+    }
+
+    @WarperResource
+    @PostMapping("/revokeDelivery")
+    fun revokeDelivery(req: HttpServletRequest){
+        val warperInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warper = activeWarpers.removeDeliveringWarper(warperInfo.id)
+        if(warper != null){
+            WarperPublisher.publishDelivery(warper.delivery)
+        }
     }
 
     @WarperResource

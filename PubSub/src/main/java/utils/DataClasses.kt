@@ -18,9 +18,9 @@ class DeliveringWarper(val username : String, val location : Location,val token 
 
 class Location (val latitude : Double, val longitude : Double){
     fun getDistance(otherLocation : Location) : Double{
-        val lat1rad  = (PI /180)*latitude
-        val lat2rad = (PI /180)*otherLocation.latitude
-        val long1rad  = (PI /180)*longitude
+        val lat1rad  =(PI /180)*latitude
+        val lat2rad  =(PI /180)*otherLocation.latitude
+        val long1rad =(PI /180)*longitude
         val long2rad =(PI /180)*otherLocation.longitude
 
         return acos(
@@ -30,21 +30,3 @@ class Location (val latitude : Double, val longitude : Double){
     }
 }
 
-class DeliveryMessage (
-    val deliveryId : String,
-    val storeLocation : Location,
-    val storeAddress : String,
-    val storeId : String,
-    val deliveryLocation: Location,
-    val deliveryAddress : String,
-    val deliverySize: String
-) {
-
-    fun getDelivery(): Delivery =
-        Delivery(
-            id= deliveryId,
-            size = Size.fromText(deliverySize)!!,
-            pickUpLocation= storeLocation,
-            deliveryLocation = deliveryLocation
-        )
-}

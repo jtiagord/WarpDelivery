@@ -20,7 +20,7 @@ import javax.servlet.ServletResponse
 import javax.servlet.http.HttpServletRequest
 
 enum class USERTYPE{
-    WARPER,CLIENT,STORE
+    WARPER,CLIENT,STORE,ADMIN
 }
 open class UserInfo(val id: String, val type : USERTYPE)
 
@@ -53,7 +53,7 @@ class AuthenticationFilter(val keys : KeyPair, val storeMapper : StoreMapper) : 
 
                 if (userInfo != null) {
                     httpRequest.setAttribute(USER_ATTRIBUTE_KEY, userInfo)
-                    logger.info("LOGGED IN AS ${userInfo.id}")
+                    logger.info("LOGGED IN AS ${userInfo.type} with id ${userInfo.id}")
                 }
             }
         }
@@ -72,6 +72,7 @@ class AuthenticationFilter(val keys : KeyPair, val storeMapper : StoreMapper) : 
         val algorithm = Algorithm.RSA256(keys.publicKey, keys.privateKey)
         val verifier: JWTVerifier = JWT.require(algorithm)
             .withIssuer(ISSUER)
+            .acceptLeeway(5L*60) //Accept a leeway of 5 minutes
             .build()
 
         val jwt : DecodedJWT
@@ -81,6 +82,7 @@ class AuthenticationFilter(val keys : KeyPair, val storeMapper : StoreMapper) : 
         } catch (ex: Exception) {
             when(ex) {
                 is JWTDecodeException, is JWTVerificationException -> {
+                    logger.info("Verifying user exception : ${ex.message}")
                     return null
                 }
                 else -> throw ex

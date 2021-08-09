@@ -1,7 +1,8 @@
 package com.isel.warpDelivery.dataAccess.dataClasses
 
 import com.isel.warpDelivery.inputmodels.Size
-import com.isel.warpDelivery.pubSub.DeliveryMessage
+import com.isel.warpDelivery.model.ActiveDelivery
+import com.isel.warpDelivery.model.Location
 import java.sql.Timestamp
 
 class Delivery (val deliveryId : String?,

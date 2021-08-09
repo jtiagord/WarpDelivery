@@ -6,28 +6,21 @@ import com.google.cloud.pubsub.v1.Publisher
 import com.google.protobuf.ByteString
 import com.google.pubsub.v1.PubsubMessage
 import com.google.pubsub.v1.TopicName
-import com.isel.warpDelivery.model.Location
+import com.isel.warpDelivery.model.ActiveDelivery
 import java.util.concurrent.TimeUnit
 
 
-class DeliveryMessage (
-    val deliveryId: String,
-    val storeLocation : Location,
-    val storeAddress : String,
-    val storeId : String,
-    val deliveryLocation: Location,
-    val deliveryAddress : String,
-    val deliverySize: String
-)
+
+
 
 object WarperPublisher {
 
     const val PROJECT_ID =  "warpdelivery-f2221"
     const val TOPIC_ID = "WarperFinder"
 
-    fun publishDelivery(delivery : DeliveryMessage) {
+    fun publishDelivery(activeDelivery : ActiveDelivery) {
         val mapper = ObjectMapper()
-        val deliveryAsJsonString : String = mapper.writeValueAsString(delivery)
+        val deliveryAsJsonString : String = mapper.writeValueAsString(activeDelivery)
         publishMessage(deliveryAsJsonString)
     }
 
