@@ -121,6 +121,9 @@ class WarperMapper(val jdbi: Jdbi) {
         if(warperInfo.phonenumber != null)
             query += "phonenumber = :phonenumber, "
 
+        if(warperInfo.password != null)
+            query += "password = :password, "
+
         query = query.dropLast(2)
         query += " where username = :username"
 
@@ -137,6 +140,8 @@ class WarperMapper(val jdbi: Jdbi) {
                 update.bind("lastname", warperInfo.lastname)
             if(warperInfo.phonenumber != null)
                 update.bind("phonenumber", warperInfo.phonenumber)
+            if(warperInfo.password != null)
+                update.bind("password", warperInfo.password)
 
             update.bind("username", username).execute()
         }

@@ -1,7 +1,9 @@
 package com.isel.warpDelivery.inputmodels
 
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
 import com.isel.warpDelivery.dataAccess.dataClasses.Store
+
 import com.isel.warpDelivery.model.Location
 
 
@@ -12,7 +14,7 @@ data class RequestDeliveryInputModel(
     val deliveryLocation : Location
 ) {
     fun toDelivery(warperUsername: String?,storeId : String): Delivery {
-        return Delivery(null, warperUsername, storeId, "Looking for Warper", userPhone, null,
+        return Delivery(null, warperUsername, storeId, DeliveryState.LOOKING_FOR_WARPER, userPhone, null,
         null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize, emptyList())
     }
 }

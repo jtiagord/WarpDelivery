@@ -1,5 +1,6 @@
 package com.isel.warpDelivery.controllers
 
+import com.isel.warpDelivery.authentication.AdminResource
 import com.isel.warpDelivery.common.*
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
@@ -20,13 +21,14 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
         const val MAX_DISTANCE_TO_STORE = 30000
     }
 
+    @AdminResource
     @GetMapping
     fun getAllDeliveries(
         req: HttpServletRequest,
-        @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") limit: Int
+        @RequestParam(defaultValue = "0") limit: Int,
+        @RequestParam(defaultValue = "10") offset: Int
     ): List<Delivery> {
-        return deliveryMapper.readAll()
+        return deliveryMapper.readAll(limit, offset)
     }
 
     @GetMapping("/{deliveryId}")

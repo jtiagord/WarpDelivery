@@ -2,6 +2,7 @@ package com.isel.warpDelivery.controllers
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.isel.warpDelivery.authentication.AdminResource
 import com.isel.warpDelivery.authentication.USER_ATTRIBUTE_KEY
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.authentication.WarperResource
@@ -10,6 +11,7 @@ import com.isel.warpDelivery.common.KeyPair
 import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.common.encodePassword
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
 import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
 import com.isel.warpDelivery.dataAccess.dataClasses.WarperEdit
 import com.isel.warpDelivery.dataAccess.mappers.*
@@ -45,11 +47,15 @@ class WarperController(
     }
 
 
+
+
     @GetMapping("/{username}")
     fun getWarper(@PathVariable username: String): WarperOutputModel {
         val warper = warperMapper.read(username) ?: throw ApiException("Warper Not Found",HttpStatus.NOT_FOUND)
         return warper.toOutputModel()
     }
+
+
 
     @PostMapping
     fun addWarper(@RequestBody warper: WarperInputModel): ResponseEntity<Any> {
@@ -57,7 +63,6 @@ class WarperController(
         val warperCreated = warperMapper.create(warper.toDao())
         return ResponseEntity.created(URI("$WARPERS_PATH/$warperCreated")).build()
     }
-
 
     @PostMapping("/Login")
     fun login(@RequestBody warperCredentials : WarperLoginInputModel): Map<String,String>{
@@ -91,29 +96,37 @@ class WarperController(
     }
 
 
-
     @WarperResource
-    @GetMapping("/vehicles")
-    fun getVehicles(req: HttpServletRequest): ResponseEntity<List<Vehicle>> {
-        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
-        val vehicles = vehicleMapper.readAll(user.id)
-        return ResponseEntity.ok().body(vehicles)
+    @PutMapping("/vehicles")
+    fun addVehicleWarper(
+        @PathVariable username: String,
+        @RequestBody vehicle: VehicleInputModel
+    ): ResponseEntity<String> {
+        val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
+        vehicleMapper.create(vehicleDao)
+        return ResponseEntity.status(200).build()
     }
+
 
     @WarperResource
     @PutMapping()
     fun updateWarper(req: HttpServletRequest, @RequestBody warper: WarperEdit): ResponseEntity<Any> {
-        //TODO: Handle sql exception on email
+        if(warper.email!= null && !warper.email.contains('@')) throw ApiException("Email is invalid")
         val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+
+        if(warper.password != null){
+            warper.password = encodePassword(warper.password!!)
+        }
+
         warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
         warperMapper.update(warper, user.id)
         return ResponseEntity.ok().build()
     }
 
-
+    @WarperResource
+    @AdminResource
     @PutMapping("/{username}/vehicles")
-    fun addVehicle(
+    fun addVehicle( req: HttpServletRequest,
         @PathVariable username: String,
         @RequestBody vehicle: VehicleInputModel
     ): ResponseEntity<String> {
@@ -131,8 +144,10 @@ class WarperController(
     }
 
     @GetMapping("/{username}/deliveries")
-    fun getDeliveries(@PathVariable username: String): ResponseEntity<List<Delivery>> {
-        val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username)
+    fun getDeliveries(@PathVariable username: String,
+                      @RequestParam(defaultValue = "10") limit : Int,
+                      @RequestParam(defaultValue = "10") offset : Int): ResponseEntity<List<Delivery>> {
+        val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username, limit , offset)
         return ResponseEntity.status(200).body(deliveries)
     }
 
@@ -147,8 +162,6 @@ class WarperController(
         throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
 
         val size = Size.fromText(warperVehicle.type)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
-
-        print("ACTIVEEEE")
         activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size ,warperReq.notificationToken))
 
         return ResponseEntity.status(200).build()

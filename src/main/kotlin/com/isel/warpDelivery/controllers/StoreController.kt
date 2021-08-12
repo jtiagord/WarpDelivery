@@ -17,10 +17,7 @@ import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.pubSub.WarperPublisher
 
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.net.URI
 import java.util.*
 import javax.servlet.http.HttpServletRequest
@@ -43,7 +40,7 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
     @StoreResource
     @PostMapping("/requestDelivery")
     fun requestDelivery(req: HttpServletRequest, @RequestBody deliveryRequest : RequestDeliveryInputModel)
-                                                                                                : ResponseEntity<Any> {
+            : ResponseEntity<Any> {
 
         val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
 
@@ -69,6 +66,17 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
         return ResponseEntity.created(URI("$DELIVERIES_PATH/${deliveryId}")).build()
     }
 
+    @StoreResource
+    @GetMapping("/deliveries")
+    fun getDeliveries(req: HttpServletRequest,
+                      @RequestParam(defaultValue = "10") limit : Int = 10,
+                      @RequestParam(defaultValue = "10") offset : Int = 10) : ResponseEntity<Any> {
+
+        val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val store = storeMapper.read(storeInfo.id) ?: throw ApiException("Store doesn't exist")
+        val deliveries = deliveryMapper.getDeliveriesByStoreId(storeInfo.id,limit, offset)
+        return ResponseEntity.status(200).body(deliveries)
+    }
 }
 
 

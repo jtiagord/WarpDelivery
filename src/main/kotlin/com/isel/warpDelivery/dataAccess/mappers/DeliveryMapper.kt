@@ -2,18 +2,14 @@ package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
 import com.isel.warpDelivery.dataAccess.dataClasses.StateTransition
 import com.isel.warpDelivery.errorHandling.ApiException
 import org.jdbi.v3.core.Jdbi
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 
-enum class DeliveryState(val text : String) {
-    LOOKING_FOR_WARPER("Looking for warper"),
-    DELIVERING("Delivering"),
-    DELIVERED("Delivered"),
-    CANCELLED("Cancelled")
-}
+
 @Component
 class DeliveryMapper(val jdbi: Jdbi) {
 
@@ -35,7 +31,7 @@ class DeliveryMapper(val jdbi: Jdbi) {
             .bind("warperUsername", DAO.warperUsername)
             .bind("clientphone", DAO.clientPhone)
             .bind("storeId", DAO.storeId)
-            .bind("state", DAO.state)
+            .bind("state", DAO.state.text)
             .bind("deliverLatitude", DAO.deliverLatitude)
             .bind("deliverLongitude", DAO.deliverLongitude)
             .bind("deliverAddress", DAO.deliverAddress)
@@ -104,13 +100,17 @@ class DeliveryMapper(val jdbi: Jdbi) {
     }
 
     //TODO ADD PAGING
-    fun readAll(): List<Delivery> =
+    fun readAll(limit : Int, offset : Int): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
                 "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
                         "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
-                        "from $DELIVERY_TABLE "
+                        "from $DELIVERY_TABLE " +
+                        "limit  :limit " +
+                        "offset :offset"
             )
+            .bind("limit", limit)
+            .bind("offset", offset)
             .mapTo(Delivery::class.java)
             .list()
         }
@@ -142,15 +142,38 @@ class DeliveryMapper(val jdbi: Jdbi) {
 
 
 
-    fun getDeliveriesByWarperUsername(username: String): List<Delivery> =
+    fun getDeliveriesByWarperUsername(username: String, limit : Int , offset : Int): List<Delivery> =
 
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
 
-            return@inTransaction handle.createQuery("SELECT * FROM $DELIVERY_TABLE WHERE warperusername = :username")
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $DELIVERY_TABLE WHERE warperusername = :username " +
+                        "limit  :limit " +
+                        "offset :offset"
+                )
+                .bind("limit", limit)
+                .bind("offset", offset)
                 .bind("username", username)
                 .mapTo(Delivery::class.java)
                 .list()
         }
+
+    fun getDeliveriesByStoreId(store: String, limit : Int , offset : Int): List<Delivery> =
+
+        jdbi.inTransaction<List<Delivery>, Exception> { handle ->
+
+            return@inTransaction handle.createQuery(
+                "SELECT * FROM $DELIVERY_TABLE WHERE storeid = :store " +
+                        "limit  :limit " +
+                        "offset :offset"
+            )
+            .bind("limit", limit)
+            .bind("offset", offset)
+            .bind("store", store)
+            .mapTo(Delivery::class.java)
+            .list()
+        }
+
 
     fun getTransitions(deliveryId: String): List<StateTransition> =
         jdbi.inTransaction<List<StateTransition> ,Exception> { handle ->

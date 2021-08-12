@@ -27,5 +27,5 @@ data class WarperEdit(
     val lastname: String?,
     val phonenumber: String?,
     val email: String?,
-    val password: String?,
+    var password: String?,
 )

@@ -9,6 +9,7 @@ import com.isel.warpDelivery.authentication.AccessControlInterceptor
 import com.isel.warpDelivery.common.KeyPair
 import com.isel.warpDelivery.common.getPrivateKeyFromFile
 import com.isel.warpDelivery.common.getPublicKeyFromFile
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryStateColumnMapper
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.postgresql.ds.PGSimpleDataSource
@@ -64,8 +65,13 @@ class WarpDeliveryApplication {
 
 
 	@Bean
-	fun jdbi(dataSource: DataSource): Jdbi = Jdbi.create(dataSource).apply {
-		installPlugin(KotlinPlugin())
+	fun jdbi(dataSource: DataSource): Jdbi {
+		val jdbi = Jdbi.create(dataSource).apply {
+			installPlugin(KotlinPlugin())
+		}
+
+		jdbi.registerColumnMapper(DeliveryStateColumnMapper())
+		return jdbi
 	}
 }
 
