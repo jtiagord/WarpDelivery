@@ -114,6 +114,10 @@ class WarperApplication : Application() {
     }
 
     fun detachListener(){
-        return repository.detachListener()
+        return repository.detachListeners()
+    }
+
+    fun updateCurrentLocation(location: Location) {
+        return repository.updateCurrentLocation(location)
     }
 }

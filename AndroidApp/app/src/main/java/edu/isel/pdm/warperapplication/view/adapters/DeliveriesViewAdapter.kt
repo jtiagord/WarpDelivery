@@ -13,9 +13,14 @@ import java.text.DateFormat.getDateTimeInstance
 import java.text.SimpleDateFormat
 import java.util.*
 
-class DeliveriesAdapter(private val deliveries: List<Delivery>): RecyclerView.Adapter<DeliveriesViewHolder>() {
+class DeliveriesAdapter(private val deliveries: List<Delivery>) :
+    RecyclerView.Adapter<DeliveriesViewHolder>() {
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeliveriesViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.delivery_item, parent, false)
+
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.delivery_item, parent, false)
+
         return DeliveriesViewHolder(view, parent.context)
     }
 
@@ -28,7 +33,9 @@ class DeliveriesAdapter(private val deliveries: List<Delivery>): RecyclerView.Ad
     }
 }
 
-class DeliveriesViewHolder(itemView : View, val context: Context): RecyclerView.ViewHolder(itemView){
+class DeliveriesViewHolder(itemView: View, val context: Context) :
+    RecyclerView.ViewHolder(itemView) {
+
     private val client: TextView = itemView.findViewById(R.id.client_username)
     private val date: TextView = itemView.findViewById(R.id.delivery_date)
     private val rating: TextView = itemView.findViewById(R.id.delivery_rating)
@@ -37,21 +44,21 @@ class DeliveriesViewHolder(itemView : View, val context: Context): RecyclerView.
 
     fun bind(delivery: Delivery) {
 
-
         client.text = context.getString(R.string.delivery_item_client, delivery.clientUsername)
-        date.text = context.getString(R.string.delivery_item_date, getDateTime(delivery.deliverDate))
+        date.text =
+            context.getString(R.string.delivery_item_date, getDateTime(delivery.deliverDate))
 
-        if(delivery.rating != null && delivery.reward != null ) {
+        if (delivery.rating != null && delivery.reward != null) {
             rating.text = context.getString(R.string.delivery_item_rating, delivery.rating)
             reward.text = context.getString(R.string.delivery_item_reward, delivery.reward)
         }
 
-        state.text =context.getString(R.string.delivery_item_state, delivery.state)
+        state.text = context.getString(R.string.delivery_item_state, delivery.state)
     }
 
-    private fun getDateTime(timestamp: String?) : String{
+    private fun getDateTime(timestamp: String?): String {
 
-        if(timestamp == null)
+        if (timestamp == null)
             return "N/A"
 
         val dateFormat = getDateTimeInstance()
