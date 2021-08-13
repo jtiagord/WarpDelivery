@@ -60,9 +60,6 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
 */
 
 
-    private val locationCallback: LocationCallback? = null
-
-
     fun initFirestore() {
         app.initFirestore(
             onStateChanged = {

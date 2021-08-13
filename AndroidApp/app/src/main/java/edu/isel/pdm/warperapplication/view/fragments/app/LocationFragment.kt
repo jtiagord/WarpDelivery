@@ -5,9 +5,11 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -90,6 +92,10 @@ class LocationFragment : Fragment() {
         when(requestCode == 0) {
 
         }
+    }
+
+    fun onNewLocation(location : Location){
+        Log.d("location", "New location : ${location.latitude},${location.longitude}")
     }
 
     //TODO: Fix map not centering correctly
