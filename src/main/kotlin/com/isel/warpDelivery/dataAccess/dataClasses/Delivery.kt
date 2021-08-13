@@ -9,7 +9,7 @@ import java.sql.ResultSet
 import java.sql.Timestamp
 
 enum class DeliveryState(val text : String) {
-    LOOKING_FOR_WARPER("Looking for warper"),
+    LOOKING_FOR_WARPER("Looking for Warper"),
     DELIVERING("Delivering"),
     DELIVERED("Delivered"),
     CANCELLED("Cancelled");
@@ -49,24 +49,7 @@ data class DeliveryEdit(
     val reward: Float ?
 )
 
-/*class DeliveryRowMapper : RowMapper<Delivery> {
-    override fun map(rs: ResultSet, ctx: StatementContext): Delivery {
-        return Delivery(
-            deliveryId = rs.getString("deliveryid"),
-            warperUsername = rs.getString("warperusername"),
-            storeId = rs.getString("storeid"),
-            state = DeliveryState.fromText(rs.getString("state"))!!,
-            clientPhone = rs.getString("clientphone"),
-            purchaseDate = rs.getTimestamp("purchasedate") ,
-            deliverDate = rs.getTimestamp("deliverdate"),
-            deliverLatitude = rs.getDouble("deliverLatitude"),
-            deliverLongitude = rs.getDouble("deliverLongitude"),
-            deliverAddress = rs.getString("deliveryAddress"),
-            reward = ctx.
-        )
-    }
 
-}*/
 
 
 class DeliveryStateColumnMapper : ColumnMapper<DeliveryState>{
