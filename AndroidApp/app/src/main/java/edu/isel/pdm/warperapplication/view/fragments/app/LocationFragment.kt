@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,8 +12,10 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.google.android.gms.location.FusedLocationProviderClient
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
+import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -22,9 +23,11 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
-class LocationFragment : Fragment() {
+class LocationFragment() : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
     var roadManager: RoadManager = OSRMRoadManager(activity, "User-Agent")
@@ -34,21 +37,18 @@ class LocationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
 
+
         val map: MapView = rootView.findViewById(R.id.map)
         map.isVisible = false
-        val mapController = map.controller
-        val warperMarker = Marker(map)
 
-        viewModel.vehicleIds.observe(viewLifecycleOwner, {
-            if(it.isEmpty())
-                Toast.makeText(context, "You have no vehicles, please add one", Toast.LENGTH_LONG).show()
-            else
-                showVehicleSelectionDialog()
-        })
+        val mapController = map.controller
+        val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context) ,map)
+        map.overlays.add(myOverlay)
+
+        myOverlay.enableMyLocation()
 
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
@@ -76,8 +76,16 @@ class LocationFragment : Fragment() {
         })
 
         viewModel.currentLocation.observe(viewLifecycleOwner, {
-            updateLocationOnMap(it, map, warperMarker)
+            //updateLocationOnMap(it, map, warperMarker)
         })
+
+        viewModel.vehicleIds.observe(viewLifecycleOwner, {
+            if(it.isEmpty())
+                Toast.makeText(context, "You have no vehicles, please add one", Toast.LENGTH_LONG).show()
+            else if (!viewModel.active.value!!)
+                showVehicleSelectionDialog()
+        })
+
 
         // Inflate the layout for this fragment
         return rootView
@@ -89,17 +97,17 @@ class LocationFragment : Fragment() {
         }
     }
 
-    //TODO: Maybe do this in the viewmodel
+    //TODO: Maybe do this in the viewmodel, fix crash on logout
     fun onNewLocation(location : Location){
-        Log.d("location", "New location : ${location.latitude},${location.longitude}")
-        viewModel.updateCurrentLocation(location.latitude, location.longitude)
+        val locationEntity = LocationEntity(location.latitude, location.longitude)
+        viewModel.updateCurrentLocation(locationEntity)
     }
 
-    private fun updateLocationOnMap(point: GeoPoint, map: MapView, warperMarker: Marker) {
-        map.overlays.remove(warperMarker)
+    private fun updateLocationOnMap(point: GeoPoint, map: MapView, warperMarker: Marker, overlay: MyLocationNewOverlay) {
+        //map.overlays.remove(warperMarker)
         warperMarker.position = point
-        map.overlays.add(warperMarker)
-        map.invalidate()
+        //overlay.
+        //map.postInvalidate()
     }
 
     private fun initMap(map: MapView, mapController: IMapController) {

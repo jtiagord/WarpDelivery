@@ -19,6 +19,6 @@ data class WarperEdit(
 
 data class ActiveWarper(
     val vehicle : String,
-    val location : Location,
+    val location : LocationEntity,
     val notificationToken: String
 )

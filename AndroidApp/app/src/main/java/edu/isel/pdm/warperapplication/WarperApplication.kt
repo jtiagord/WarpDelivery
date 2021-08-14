@@ -86,6 +86,7 @@ class WarperApplication : Application() {
 
     fun setActive(
         vehicle: String,
+        location: LocationEntity,
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ) {
@@ -103,7 +104,7 @@ class WarperApplication : Application() {
                 //TODO: Get actual location
                 val token = task.result
                 repository.setActive(
-                    vehicle, Location(38.74008721436314, -9.115295982914596),
+                    vehicle, location,
                     token, onSuccess, onFailure
                 )
             })
@@ -117,7 +118,7 @@ class WarperApplication : Application() {
         return repository.detachListeners()
     }
 
-    fun updateCurrentLocation(location: Location) {
+    fun updateCurrentLocation(location: LocationEntity) {
         return repository.updateCurrentLocation(location)
     }
 }

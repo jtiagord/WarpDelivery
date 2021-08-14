@@ -38,5 +38,5 @@ interface ApiInterface {
     ): Call<Unit>
 
     @PUT("warpers/location")
-    fun updateLocation(@Body location: Location, @Header("Authorization") token: String): Call<Unit>
+    fun updateLocation(@Body location: LocationEntity, @Header("Authorization") token: String): Call<Unit>
 }

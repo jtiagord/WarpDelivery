@@ -15,10 +15,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-private const val WARPERS_DELIVERIES_COLLECTION = "DELIVERINGWARPERS"
-private const val WARPERS_COLLECTION = "WARPERS"
+
+
 
 class AppRepository(val app: Application) {
+
+    companion object {
+        private const val WARPERS_DELIVERIES_COLLECTION = "DELIVERINGWARPERS"
+        private const val WARPERS_COLLECTION = "WARPERS"
+    }
 
     private var username: String? = null
     private var password: String? = null
@@ -302,6 +307,7 @@ class AppRepository(val app: Application) {
     fun logout() {
 
         //Clear user data
+
         username = null
         password = null
         token = null
@@ -319,7 +325,7 @@ class AppRepository(val app: Application) {
     }
 
     fun setActive(vehicle: String,
-                  location: Location,
+                  location: LocationEntity,
                   nToken: String,
                   onSuccess: () -> Unit,
                   onFailure: () -> Unit
@@ -358,7 +364,11 @@ class AppRepository(val app: Application) {
         //TODO: Set warper as inactive
     }
 
-    fun updateCurrentLocation(location: Location) {
+    fun updateCurrentLocation(location: LocationEntity) {
+
+        if(token == null)
+            return
+
         if (!tokenValid()) {
             tryLogin(this.username!!, this.password!!,
                 onSuccess = {

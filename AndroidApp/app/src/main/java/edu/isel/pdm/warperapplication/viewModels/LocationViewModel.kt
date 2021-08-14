@@ -2,18 +2,19 @@ package edu.isel.pdm.warperapplication.viewModels
 
 
 import android.app.Application
+import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.*
 import edu.isel.pdm.warperapplication.WarperApplication
-import edu.isel.pdm.warperapplication.web.entities.Location
+import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.util.GeoPoint
 
 
 class LocationViewModel(app: Application) : AndroidViewModel(app) {
-    var currentLocation = MutableLiveData<GeoPoint>()
+    var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
     var active = MutableLiveData<Boolean>()
@@ -63,6 +64,7 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     fun setActive(vehicle: String) {
         app.setActive(
             vehicle,
+            currentLocation.value!!,
             onSuccess = {
                 Log.d("ACTIVE", "SUCESS")
                 active.postValue(true)
@@ -84,9 +86,9 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         })
     }
 
-    fun updateCurrentLocation(latitude : Double, longitude: Double) {
-        app.updateCurrentLocation(Location(latitude, longitude))
-        currentLocation.postValue(GeoPoint(latitude, longitude))
+    fun updateCurrentLocation(location: LocationEntity) {
+        app.updateCurrentLocation(location)
+        currentLocation.postValue(location)
     }
 
 }
