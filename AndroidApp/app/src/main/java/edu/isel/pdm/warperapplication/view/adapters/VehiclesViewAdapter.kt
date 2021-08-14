@@ -35,4 +35,6 @@ class VehiclesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         type.text = "Type: " + vehicle.type
     }
 
+
+
 }
