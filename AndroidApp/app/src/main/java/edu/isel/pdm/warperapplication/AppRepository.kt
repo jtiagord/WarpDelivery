@@ -15,9 +15,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
-
-
 class AppRepository(val app: Application) {
 
     companion object {
@@ -40,7 +37,8 @@ class AppRepository(val app: Application) {
 
     fun initFirestore(
         onSubscriptionError: (Exception) -> Unit,
-        onStateChanged: (Map<String, Any>) -> Unit
+        onActiveWarper: (Map<String, Any>) -> Unit,
+        onDeliveringWarper: (Map<String, Any>) -> Unit
     ) {
         deliveriesDocRef = firestore.collection(WARPERS_DELIVERIES_COLLECTION).document(username!!)
         warpersDocRef = firestore.collection(WARPERS_COLLECTION).document(username!!)
@@ -53,7 +51,7 @@ class AppRepository(val app: Application) {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                onStateChanged(snapshot.data!!)
+                onDeliveringWarper(snapshot.data!!)
                 Log.d("FIRESTORE", "Delivering warper current data: ${snapshot.data}")
             } else {
                 Log.d("FIRESTORE", "Delivering warper data: null")
@@ -68,7 +66,7 @@ class AppRepository(val app: Application) {
             }
 
             if (snapshot != null && snapshot.exists()) {
-                onStateChanged(snapshot.data!!)
+                onActiveWarper(snapshot.data!!)
                 Log.d("FIRESTORE", "Active warper data: ${snapshot.data}")
             } else {
                 Log.d("FIRESTORE", "Active warper data: null")
@@ -260,8 +258,6 @@ class AppRepository(val app: Application) {
         val splitToken: List<String> = tkn.split(".")
 
         val payload = String(Base64.decode(splitToken[1], Base64.DEFAULT))
-        Log.v("PAYLOAD", payload)
-
         val gson = Gson()
         val parsedPayload = gson.fromJson(payload, TokenPayload::class.java)
 
@@ -307,14 +303,12 @@ class AppRepository(val app: Application) {
     fun logout() {
 
         //Clear user data
-
         username = null
         password = null
         token = null
 
         //Remove firebase listeners
         detachListeners()
-
         Log.v("LOGOUT", "LOGGED OUT")
     }
 

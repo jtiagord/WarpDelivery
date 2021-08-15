@@ -2,7 +2,6 @@ package edu.isel.pdm.warperapplication.viewModels
 
 
 import android.app.Application
-import android.location.Location
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
@@ -17,30 +16,30 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
-    var active = MutableLiveData<Boolean>()
+    var active = MutableLiveData<Boolean>(false)
     var vehicleIds = MutableLiveData<Array<String>>()
-
 
     private val app: WarperApplication by lazy {
         getApplication<WarperApplication>()
     }
 
-    private val locationRequest = LocationRequest.create().apply {
-        interval = 10000
-        fastestInterval = 5000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
-
-    private val builder = LocationSettingsRequest.Builder()
-        .addLocationRequest(locationRequest)
-
     fun initFirestore() {
         app.initFirestore(
-            onStateChanged = {
-                if(it.isNotEmpty() && active.value == false)
-                    Log.d("WARPER", "ACTIVEEEEEEEEE")
+            onActiveWarper = {
+                if(it.isNotEmpty() && (active.value == false || active.value == null)){
+                    Log.d("WARPER", "SETTING ACTIVE")
                     active.postValue(true)
-                //updateMapData(it)
+                }
+            },
+            onDeliveringWarper = {
+                Log.d("DATA", it.toString())
+                Log.d("ACTIVE", active.value.toString())
+                if(it.isNotEmpty() && (active.value == false || active.value == null)){
+                    Log.d("WARPER", "SETTING ACTIVE")
+                    active.postValue(true)
+                }
+
+                updateDeliveryInfo(it)
             },
             onSubscriptionError = {
                 Toast.makeText(getApplication(), "Couldn't subscribe to map updates", Toast.LENGTH_LONG)
@@ -49,12 +48,15 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    private fun updateMapData(data: Map<String, Any>) {
-        var delivery = data["deliveryLoc"] as ArrayList<Double>
-        deliveryLocation.postValue(GeoPoint(delivery[0], delivery[1]))
-        //var pickup = data["pickupLoc"] as Array<String>
-        //var current = data["currentLoc"] as Array<String>
+    private fun updateDeliveryInfo(data: Map<String, Any>) {
 
+        val delivery = data["delivery"] as Map<String, Any>
+        val pickUpLoc = delivery["pickUpLocation"] as HashMap<String,Double>
+        val deliveryLoc = delivery["deliveryLocation"] as HashMap<String, Double>
+        val currentLoc = data["location"] as HashMap<String, Double>
+        pickupLocation.postValue(GeoPoint(pickUpLoc["latitude"]!!, pickUpLoc["longitude"]!!))
+        currentLocation.postValue(LocationEntity(currentLoc["latitude"]!!, currentLoc["longitude"]!!))
+        deliveryLocation.postValue(GeoPoint(deliveryLoc["latitude"]!!, deliveryLoc["longitude"]!!))
     }
 
     fun detachListener() {

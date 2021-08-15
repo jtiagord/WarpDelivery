@@ -6,12 +6,16 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
 import android.os.StrictMode
+import android.os.StrictMode.ThreadPolicy
 import android.preference.PreferenceManager
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
+import com.google.android.gms.tasks.Tasks.await
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.fragments.app.*
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
@@ -40,21 +44,22 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        val policy = ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
 
         createLocationRequest()
 
-        //TODO: Change after map testing
-        val policy = StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
         setContentView(R.layout.activity_main)
 
         getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
+
 
         val locationFragment = LocationFragment()
         val notificationsFragment = NotificationsFragment()
         val historyFragment = HistoryFragment()
         val userFragment = UserFragment()
         val vehiclesFragment = VehiclesFragment()
+
 
         makeCurrentFragment(locationFragment)
         val bottomNavigation = findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
@@ -64,8 +69,6 @@ class MainActivity : AppCompatActivity() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-
-                Log.d("NEW LOCATION", "NEW LOCATION")
                 locationFragment.onNewLocation(locationResult.lastLocation)
             }
         }
@@ -78,14 +81,10 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-
-            Log.d("LOCATION PERMISSION", "YOU HAVE PERMISSION")
-
             fusedLocationClient.requestLocationUpdates(locationRequest,
                 locationCallback, Looper.myLooper())
         }else{
             requestPermissions()
-            Log.d("LOCATION PERMISSION", "YOU DONT HAVE PERMISSION")
         }
 
 

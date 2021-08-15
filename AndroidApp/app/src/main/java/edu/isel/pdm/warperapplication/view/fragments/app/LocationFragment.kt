@@ -12,7 +12,7 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.Task
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
@@ -22,7 +22,6 @@ import org.osmdroid.bonuspack.routing.RoadManager
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -40,15 +39,9 @@ class LocationFragment() : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
 
-
         val map: MapView = rootView.findViewById(R.id.map)
         map.isVisible = false
-
         val mapController = map.controller
-        val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context) ,map)
-        map.overlays.add(myOverlay)
-
-        myOverlay.enableMyLocation()
 
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
@@ -56,11 +49,10 @@ class LocationFragment() : Fragment() {
 
         viewModel.initFirestore()
 
-        viewModel.active.observe(viewLifecycleOwner, { it ->
-
+        viewModel.active.observe(viewLifecycleOwner, {
             if(it) {
                 viewModel.deliveryLocation.observe(viewLifecycleOwner, {
-                    //updateMap(it, map, mapController)
+                    getAndDrawRoute(map,mapController)
                 })
 
                 map.isVisible = true
@@ -75,10 +67,6 @@ class LocationFragment() : Fragment() {
             }
         })
 
-        viewModel.currentLocation.observe(viewLifecycleOwner, {
-            //updateLocationOnMap(it, map, warperMarker)
-        })
-
         viewModel.vehicleIds.observe(viewLifecycleOwner, {
             if(it.isEmpty())
                 Toast.makeText(context, "You have no vehicles, please add one", Toast.LENGTH_LONG).show()
@@ -91,33 +79,25 @@ class LocationFragment() : Fragment() {
         return rootView
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when(requestCode == 0) {
-
-        }
-    }
-
-    //TODO: Maybe do this in the viewmodel, fix crash on logout
     fun onNewLocation(location : Location){
         val locationEntity = LocationEntity(location.latitude, location.longitude)
         viewModel.updateCurrentLocation(locationEntity)
     }
 
-    private fun updateLocationOnMap(point: GeoPoint, map: MapView, warperMarker: Marker, overlay: MyLocationNewOverlay) {
-        //map.overlays.remove(warperMarker)
-        warperMarker.position = point
-        //overlay.
-        //map.postInvalidate()
-    }
 
     private fun initMap(map: MapView, mapController: IMapController) {
         map.setTileSource(TileSourceFactory.MAPNIK)
+        //map.minZoomLevel = 25.0
         map.setMultiTouchControls(true)
+        val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context) ,map)
+        map.overlays.add(myOverlay)
+        myOverlay.enableMyLocation()
+        myOverlay.enableFollowLocation()
+        map.invalidate()
     }
 
     private fun showVehicleSelectionDialog() {
         val alertDialog = AlertDialog.Builder(context)
-
         val vehiclesList = viewModel.vehicleIds.value!!
 
         var selectedItem = 0
@@ -134,18 +114,18 @@ class LocationFragment() : Fragment() {
         alertDialog.show()
     }
 
-    /*
-    fun getAndDrawRoute(map: MapView, mapController: MapController){
+
+    private fun getAndDrawRoute(map: MapView, mapController: IMapController){
         val waypoints = ArrayList<GeoPoint>()
-        waypoints.add(viewModel.startingLoc.value!!)
-        waypoints.add(viewModel.pickupLoc.value!!)
-        waypoints.add(viewModel.deliveryLoc.value!!)
+        val currLoc = viewModel.currentLocation.value!!
+        val currGeoPoint = GeoPoint(currLoc.latitude, currLoc.longitude)
+        waypoints.add(currGeoPoint)
+        waypoints.add(viewModel.pickupLocation.value!!)
+        waypoints.add(viewModel.deliveryLocation.value!!)
         val road = roadManager.getRoad(waypoints)
         val roadOverlay = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay);
-        mapController.setCenter(viewModel.startingLoc.value!!)
         map.invalidate()
-
     }
-     */
+
 }
