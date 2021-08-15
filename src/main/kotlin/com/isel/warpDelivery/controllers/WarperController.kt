@@ -47,6 +47,15 @@ class WarperController(
     }
 
 
+    @WarperResource
+    @GetMapping("/vehicles")
+    fun getVehicles(req: HttpServletRequest): ResponseEntity<List<Vehicle>> {
+        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
+        val vehicles = vehicleMapper.readAll(user.id)
+        return ResponseEntity.ok().body(vehicles)
+    }
+
 
 
     @GetMapping("/{username}")
@@ -64,14 +73,7 @@ class WarperController(
         return ResponseEntity.created(URI("$WARPERS_PATH/$warperCreated")).build()
     }
 
-    @WarperResource
-    @GetMapping("/vehicles")
-    fun getVehicles(req: HttpServletRequest): ResponseEntity<List<Vehicle>> {
-        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        warperMapper.read(user.id) ?: return ResponseEntity.notFound().build()
-        val vehicles = vehicleMapper.readAll(user.id)
-        return ResponseEntity.ok().body(vehicles)
-    }
+
 
     @PostMapping("/Login")
     fun login(@RequestBody warperCredentials : WarperLoginInputModel): Map<String,String>{
