@@ -1,32 +1,21 @@
 package edu.isel.pdm.warperapplication.view.fragments.app
 
-import android.Manifest
 import android.app.AlertDialog
-import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
-import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import androidx.annotation.RequiresApi
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
+import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.FusedLocationProviderClient
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
-import edu.isel.pdm.warperapplication.web.entities.WarperEdit
+import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -34,9 +23,11 @@ import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
 
-class LocationFragment : Fragment() {
+class LocationFragment() : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
     var roadManager: RoadManager = OSRMRoadManager(activity, "User-Agent")
@@ -46,34 +37,34 @@ class LocationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
 
+
         val map: MapView = rootView.findViewById(R.id.map)
         map.isVisible = false
-        val mapController = map.controller
 
-        viewModel.vehicleIds.observe(viewLifecycleOwner, {
-            showVehicleSelectionDialog()
-        })
+        val mapController = map.controller
+        val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context) ,map)
+        map.overlays.add(myOverlay)
+
+        myOverlay.enableMyLocation()
 
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
         }
 
+        viewModel.initFirestore()
+
         viewModel.active.observe(viewLifecycleOwner, { it ->
 
-
             if(it) {
-                viewModel.initFirestore()
-
                 viewModel.deliveryLocation.observe(viewLifecycleOwner, {
                     //updateMap(it, map, mapController)
                 })
 
                 map.isVisible = true
-                initMap(map)
+                initMap(map, mapController)
                 activeBtn.isVisible = false
                 map.invalidate()
 
@@ -83,6 +74,18 @@ class LocationFragment : Fragment() {
                 activeBtn.isVisible = true
             }
         })
+
+        viewModel.currentLocation.observe(viewLifecycleOwner, {
+            //updateLocationOnMap(it, map, warperMarker)
+        })
+
+        viewModel.vehicleIds.observe(viewLifecycleOwner, {
+            if(it.isEmpty())
+                Toast.makeText(context, "You have no vehicles, please add one", Toast.LENGTH_LONG).show()
+            else if (!viewModel.active.value!!)
+                showVehicleSelectionDialog()
+        })
+
 
         // Inflate the layout for this fragment
         return rootView
@@ -94,45 +97,20 @@ class LocationFragment : Fragment() {
         }
     }
 
+    //TODO: Maybe do this in the viewmodel, fix crash on logout
     fun onNewLocation(location : Location){
-        Log.d("location", "New location : ${location.latitude},${location.longitude}")
+        val locationEntity = LocationEntity(location.latitude, location.longitude)
+        viewModel.updateCurrentLocation(locationEntity)
     }
 
-    //TODO: Fix map not centering correctly
-    private fun updateMap(point: GeoPoint?, map: MapView, mapController: IMapController) {
-        val marker = Marker(map)
-        marker.position = point
-        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        map.overlays.add(marker)
-        mapController.setCenter(point)
-        mapController.setZoom(15)
-        map.invalidate()
+    private fun updateLocationOnMap(point: GeoPoint, map: MapView, warperMarker: Marker, overlay: MyLocationNewOverlay) {
+        //map.overlays.remove(warperMarker)
+        warperMarker.position = point
+        //overlay.
+        //map.postInvalidate()
     }
 
-    //TODO: Check if this is the right permission
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    private fun getLocationPermissions() {
-        try {
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    arrayOf(
-                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                    ),
-                    101
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    private fun initMap(map: MapView) {
+    private fun initMap(map: MapView, mapController: IMapController) {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.setMultiTouchControls(true)
     }
@@ -169,7 +147,5 @@ class LocationFragment : Fragment() {
         map.invalidate()
 
     }
-
      */
-
 }

@@ -3,7 +3,6 @@ package edu.isel.pdm.warperapplication
 import android.app.Application
 import android.util.Base64
 import android.util.Log
-import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
@@ -16,9 +15,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-private const val WARPERS_DELIVERIES_COLLECTION = "DELIVERINGWARPERS"
+
+
 
 class AppRepository(val app: Application) {
+
+    companion object {
+        private const val WARPERS_DELIVERIES_COLLECTION = "DELIVERINGWARPERS"
+        private const val WARPERS_COLLECTION = "WARPERS"
+    }
 
     private var username: String? = null
     private var password: String? = null
@@ -29,14 +34,18 @@ class AppRepository(val app: Application) {
     private val firestore = Firebase.firestore
 
     private lateinit var deliveriesDocRef: DocumentReference
-    private var listenerRegistration: ListenerRegistration? = null
+    private lateinit var warpersDocRef: DocumentReference
+    private var deliveringListenerRegistration: ListenerRegistration? = null
+    private var activeListenerRegistration: ListenerRegistration? = null
 
     fun initFirestore(
         onSubscriptionError: (Exception) -> Unit,
         onStateChanged: (Map<String, Any>) -> Unit
     ) {
         deliveriesDocRef = firestore.collection(WARPERS_DELIVERIES_COLLECTION).document(username!!)
-        listenerRegistration = deliveriesDocRef.addSnapshotListener { snapshot, e ->
+        warpersDocRef = firestore.collection(WARPERS_COLLECTION).document(username!!)
+
+        deliveringListenerRegistration = deliveriesDocRef.addSnapshotListener { snapshot, e ->
             if (e != null) {
                 onSubscriptionError(e)
                 Log.w("FIRESTORE", "Listen failed.", e)
@@ -45,9 +54,24 @@ class AppRepository(val app: Application) {
 
             if (snapshot != null && snapshot.exists()) {
                 onStateChanged(snapshot.data!!)
-                Log.d("FIRESTORE", "Current data: ${snapshot.data}")
+                Log.d("FIRESTORE", "Delivering warper current data: ${snapshot.data}")
             } else {
-                Log.d("FIRESTORE", "Current data: null")
+                Log.d("FIRESTORE", "Delivering warper data: null")
+            }
+        }
+
+        activeListenerRegistration = warpersDocRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                onSubscriptionError(e)
+                Log.w("FIRESTORE", "Listen failed.", e)
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null && snapshot.exists()) {
+                onStateChanged(snapshot.data!!)
+                Log.d("FIRESTORE", "Active warper data: ${snapshot.data}")
+            } else {
+                Log.d("FIRESTORE", "Active warper data: null")
             }
         }
     }
@@ -204,19 +228,30 @@ class AppRepository(val app: Application) {
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ) {
-        val call = request.tryAddVehicle(username, vehicle)
-        call.clone().enqueue(object : Callback<Unit> {
-            override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
-                if (response.isSuccessful) {
-                    onSuccess()
-                }
-            }
 
-            override fun onFailure(call: Call<Unit>, t: Throwable) {
-                onFailure()
-                Log.e("VEHICLE", t.message!!)
-            }
-        })
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    tryAddVehicle(username, vehicle, onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.tryAddVehicle(username, vehicle, token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
+                    if (response.isSuccessful) {
+                        onSuccess()
+                    }
+                }
+
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("VEHICLE", t.message!!)
+                }
+            })
+        }
     }
 
     private fun tokenValid() : Boolean {
@@ -272,24 +307,25 @@ class AppRepository(val app: Application) {
     fun logout() {
 
         //Clear user data
+
         username = null
         password = null
         token = null
 
-        //Remove firebase listener
-        detachListener()
+        //Remove firebase listeners
+        detachListeners()
 
         Log.v("LOGOUT", "LOGGED OUT")
     }
 
-    fun detachListener(){
-        if(listenerRegistration != null){
-            listenerRegistration!!.remove()
-        }
+
+    fun detachListeners(){
+        deliveringListenerRegistration?.remove()
+        activeListenerRegistration?.remove()
     }
 
     fun setActive(vehicle: String,
-                  location: Location,
+                  location: LocationEntity,
                   nToken: String,
                   onSuccess: () -> Unit,
                   onFailure: () -> Unit
@@ -326,5 +362,38 @@ class AppRepository(val app: Application) {
 
     fun setInactive(){
         //TODO: Set warper as inactive
+    }
+
+    fun updateCurrentLocation(location: LocationEntity) {
+
+        if(token == null)
+            return
+
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    updateCurrentLocation(location)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.updateLocation(location, token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("LOCATION", "SUCCESS")
+                    } else {
+                        Log.d("LOCATION", "FAILED UPDATING LOCATION")
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    Log.e("LOCATION", t.message!!)
+                }
+            })
+        }
     }
 }

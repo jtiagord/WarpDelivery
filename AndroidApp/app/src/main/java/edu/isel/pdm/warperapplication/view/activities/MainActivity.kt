@@ -2,7 +2,6 @@ package edu.isel.pdm.warperapplication.view.activities
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.os.Looper
@@ -13,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.google.android.gms.location.*
-import com.google.android.material.snackbar.Snackbar
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.fragments.app.*
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
@@ -36,13 +34,12 @@ class MainActivity : AppCompatActivity() {
      * Callback for changes in location.
      */
     lateinit var locationCallback: LocationCallback
-
     lateinit var locationRequest : LocationRequest
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         createLocationRequest()
 
@@ -85,7 +82,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("LOCATION PERMISSION", "YOU HAVE PERMISSION")
 
             fusedLocationClient.requestLocationUpdates(locationRequest,
-                locationCallback, Looper.myLooper());
+                locationCallback, Looper.myLooper())
         }else{
             requestPermissions()
             Log.d("LOCATION PERMISSION", "YOU DONT HAVE PERMISSION")
@@ -102,6 +99,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+
     }
 
     private fun makeCurrentFragment(fragment: Fragment){
@@ -111,6 +109,11 @@ class MainActivity : AppCompatActivity() {
             replace(R.id.fl_wrapper, fragment)
             commit()
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     //TODO HANDLE BETTER LOCATION
