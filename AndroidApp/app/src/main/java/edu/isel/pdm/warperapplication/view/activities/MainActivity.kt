@@ -174,8 +174,8 @@ class MainActivity : AppCompatActivity() {
      */
     private fun createLocationRequest() {
         locationRequest = LocationRequest.create()
-        locationRequest.interval = 1000
-        locationRequest.fastestInterval = 1000
+        locationRequest.interval = 10000
+        locationRequest.fastestInterval = 10000
         locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
     }
 }

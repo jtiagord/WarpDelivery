@@ -3,9 +3,10 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-
+**/google-services.json
+**/serviceAccount.json
 ClientUI/node_modules/
-
+node_modules/
 
 *.java.hsp
 *.sonarj

@@ -40,10 +40,12 @@ class AppRepository(val app: Application) {
         onActiveWarper: (Map<String, Any>) -> Unit,
         onDeliveringWarper: (Map<String, Any>) -> Unit
     ) {
+        Log.d( "FIRESTORE", "Listening to ${username}")
         deliveriesDocRef = firestore.collection(WARPERS_DELIVERIES_COLLECTION).document(username!!)
         warpersDocRef = firestore.collection(WARPERS_COLLECTION).document(username!!)
 
         deliveringListenerRegistration = deliveriesDocRef.addSnapshotListener { snapshot, e ->
+            Log.d("FIRESTORE", "NEW SNAPSHOT")
             if (e != null) {
                 onSubscriptionError(e)
                 Log.w("FIRESTORE", "Listen failed.", e)
@@ -59,6 +61,7 @@ class AppRepository(val app: Application) {
         }
 
         activeListenerRegistration = warpersDocRef.addSnapshotListener { snapshot, e ->
+            Log.d("FIRESTORE", "NEW SNAPSHOT")
             if (e != null) {
                 onSubscriptionError(e)
                 Log.w("FIRESTORE", "Listen failed.", e)

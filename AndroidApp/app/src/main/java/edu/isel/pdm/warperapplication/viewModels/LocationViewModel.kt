@@ -60,6 +60,7 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun detachListener() {
+        Log.d("FIRESTORE", "DETACHING")
         app.detachListener()
     }
 
@@ -68,7 +69,7 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
             vehicle,
             currentLocation.value!!,
             onSuccess = {
-                Log.d("ACTIVE", "SUCESS")
+                Log.d("ACTIVE", "SUCCESS")
                 active.postValue(true)
             },
             onFailure = {

@@ -1,7 +1,7 @@
 package edu.isel.pdm.warperapplication.view.fragments.app
 
 import android.app.AlertDialog
-import android.content.Intent
+
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.google.android.gms.tasks.Task
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
@@ -62,7 +61,6 @@ class LocationFragment() : Fragment() {
 
             } else {
                 map.isVisible = false
-                viewModel.detachListener()
                 activeBtn.isVisible = true
             }
         })
@@ -117,7 +115,7 @@ class LocationFragment() : Fragment() {
 
     private fun getAndDrawRoute(map: MapView, mapController: IMapController){
         val waypoints = ArrayList<GeoPoint>()
-        val currLoc = viewModel.currentLocation.value!!
+        val currLoc = viewModel.currentLocation.value ?: LocationEntity(0.0,0.0)
         val currGeoPoint = GeoPoint(currLoc.latitude, currLoc.longitude)
         waypoints.add(currGeoPoint)
         waypoints.add(viewModel.pickupLocation.value!!)
@@ -126,6 +124,11 @@ class LocationFragment() : Fragment() {
         val roadOverlay = RoadManager.buildRoadOverlay(road)
         map.overlays.add(roadOverlay);
         map.invalidate()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        viewModel.detachListener()
     }
 
 }
