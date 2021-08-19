@@ -1,6 +1,7 @@
 import ReactMapboxGl,{Layer,Feature} from 'react-mapbox-gl'
 import React,{useState,useEffect} from 'react'
 import db from './firebase.config'
+import { getDoc } from './getDoc'
 
 export function Markers({token}:{token:string}){
     const [warperCoord,setWarperCoord] = useState<Coordinates>({lat:null,long: null})
@@ -12,13 +13,15 @@ export function Markers({token}:{token:string}){
 
       async function getDeliveryInfo(){
         const response=db.collection('DELIVERINGWARPERS')
-        const query = response.where('token',"==",token)
+        const query = response.where('delivery.id',"==",token)
+        
+        const data = await getDoc(token)
 
-        const data = await query.get()
         if (data.empty) {
           console.log('Sorry, we could not find a delivery matching that token.');
           return;
         } 
+
         data.forEach(doc => {
           setClientCoord({lat:doc.data().delivery.deliveryLocation.latitude,long:doc.data().delivery.deliveryLocation.longitude})
           setStoreCoord({lat:doc.data().delivery.pickUpLocation.latitude,long:doc.data().delivery.pickUpLocation.longitude})
