@@ -58,6 +58,7 @@ class LocationFragment() : Fragment() {
 
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
+        val inactiveBtn = rootView.findViewById<Button>(R.id.btn_inactive)
 
         val map: MapView = rootView.findViewById(R.id.map)
         map.isVisible = false
@@ -67,23 +68,35 @@ class LocationFragment() : Fragment() {
             viewModel.getVehicles()
         }
 
+        inactiveBtn.setOnClickListener{
+            viewModel.setInactive()
+        }
+
         viewModel.initFirestore()
 
         viewModel.active.observe(viewLifecycleOwner, {
             if(it) {
                 viewModel.deliveryLocation.observe(viewLifecycleOwner, { point ->
-                    if(point != null)
+                    if(point != null) {
+                        Log.d("ACTIVE", "delivering")
                         getRouteAsync(map,mapController)
+                        inactiveBtn.isVisible = false
+                    }
                 })
 
+                //Display UI for active / delivering state
                 map.isVisible = true
                 initMap(map, mapController)
                 activeBtn.isVisible = false
-                map.invalidate()
+                inactiveBtn.isVisible = true
+                Log.d("ACTIVE", "active")
 
             } else {
+                //Display UI for inactive state
+                Log.d("ACTIVE", "inactive")
                 map.isVisible = false
                 activeBtn.isVisible = true
+                inactiveBtn.isVisible = false
             }
         })
 

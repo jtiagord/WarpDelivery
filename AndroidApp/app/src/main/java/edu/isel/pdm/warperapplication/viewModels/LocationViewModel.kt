@@ -94,6 +94,28 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         currentLocation.postValue(location)
     }
 
+    fun setInactive(){
+        app.setInactive(
+            onSuccess = {
+                active.postValue(false)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), "Failed to set as inactive", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
+    fun finishDelivery(){
+        app.finishDelivery(
+            onSuccess = {
+                active.postValue(false)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), "Failed to set finish current delivery", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
 }
 
 

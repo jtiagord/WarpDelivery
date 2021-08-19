@@ -111,6 +111,21 @@ class WarperApplication : Application() {
             })
     }
 
+    fun setInactive(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        return repository.setInactive(onSuccess, onFailure)
+    }
+
+    fun finishDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        return repository.finishDelivery(onSuccess, onFailure)
+    }
+
+
     fun logout(){
         return repository.logout()
     }

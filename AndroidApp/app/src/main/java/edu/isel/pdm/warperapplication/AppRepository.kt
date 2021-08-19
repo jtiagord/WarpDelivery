@@ -357,8 +357,45 @@ class AppRepository(val app: Application) {
         }
     }
 
-    fun setInactive(){
-        //TODO: Set warper as inactive
+    fun setInactive(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    setInactive(onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.setInactive(token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("ACTIVE", "set as inactive")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("ACTIVE", t.message!!)
+                }
+            })
+        }
+    }
+
+    fun finishDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        //TODO: Implement
     }
 
     fun updateCurrentLocation(location: LocationEntity) {
