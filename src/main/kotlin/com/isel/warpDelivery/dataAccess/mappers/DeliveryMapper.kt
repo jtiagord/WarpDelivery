@@ -99,7 +99,6 @@ class DeliveryMapper(val jdbi: Jdbi) {
         }
     }
 
-    //TODO ADD PAGING
     fun readAll(limit : Int, offset : Int): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
@@ -138,6 +137,33 @@ class DeliveryMapper(val jdbi: Jdbi) {
             .bind("state", state.text)
             .bind("deliveryid", key)
             .execute()
+        }
+
+    fun updateStateAndAssignWarper(key: String, state: DeliveryState, warperUsername : String) =
+        jdbi.useTransaction<Exception> { handle ->
+
+            val deliveryOpt = handle.createQuery(
+                "SELECT deliveryid " +
+                        "from $DELIVERY_TABLE " +
+                        "where deliveryid = :id"
+            )
+                .bind("id", key)
+                .mapTo(String::class.java)
+                .findOne()
+
+
+            if(deliveryOpt.isEmpty) throw ApiException("The delivery: $key doesn't exist", HttpStatus.NOT_FOUND)
+
+            handle.createUpdate(
+                "UPDATE $DELIVERY_TABLE " +
+                        "SET state = :state, " +
+                        "warperusername = :warperusername "+
+                        "WHERE deliveryid = :deliveryid"
+            )
+                .bind("state", state.text)
+                .bind("warperusername", warperUsername)
+                .bind("deliveryid", key)
+                .execute()
         }
 
 

@@ -19,6 +19,8 @@ import java.util.*
 const val ISSUER = "WARPDELIVERY"
 const val API_URL = "http://localhost:8080"
 const val CREATE_STORE_ENDPOINT = "${API_URL}/WarpDelivery/stores"
+const val GENERATE_DELIVERY_ENDPOINT = "${API_URL}/WarpDelivery/stores/requestDelivery"
+const val HANDLEDELIVERY_ENDPOINT_TEMPLATE = "${API_URL}/WarpDelivery/stores/{deliveryId}/handleDelivery"
 
 data class KeyPair(val publicKey: RSAPublicKey, val privateKey: RSAPrivateKey)
 
@@ -39,18 +41,112 @@ fun main(args : Array<String>){
         when(answer){
             1 -> generateAdminToken()
             2 -> createStore()
+            3 -> generateDelivery()
+            4 -> handleDeliveryToWarper()
+            5 -> cancelDelivery()
         }
     }while(answer != 0)
+}
+
+fun cancelDelivery() {
+    TODO("Not yet implemented")
+}
+
+fun handleDeliveryToWarper() {
+    TODO("Not yet implemented")
+}
+
+fun generateDelivery() {
+    val gson = Gson()
+    val url = URL(GENERATE_DELIVERY_ENDPOINT)
+
+    val apiKey = askForApiKey()
+
+    val deliveryInfo = askForDeliveryInformation()
+
+    with(url.openConnection() as HttpURLConnection) {
+        requestMethod = "POST"
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("Authorization", "key=$apiKey")
+        doOutput = true
+        doInput = true
+
+
+        val outputStreamWriter = OutputStreamWriter(outputStream)
+        outputStreamWriter.write(gson.toJson(deliveryInfo))
+        outputStreamWriter.flush()
+
+        println("Response Code : $responseCode")
+        when(responseCode) {
+            in 200..299-> {
+                val responseCode = responseCode
+                //The id is in the last part of the location header
+                val id = getHeaderField("Location").split("/").last()
+                println("Your delivery id : $id")
+            }
+            401->{
+                println("Invalid ApiKey")
+            }
+            400 -> {
+                val response = errorStream.bufferedReader()
+                    .use { it.readText() }
+
+                val errorMessage =  gson.fromJson(response, ErrorMessage::class.java)
+                println("Error Message : ${errorMessage.errorMessage}")
+            }
+
+        }
+
+    }
+    println("Press Enter to Proceed")
+    readLine()
+}
+
+fun askForDeliveryInformation() : DeliveryInfo {
+    var userPhone = ""
+    while(userPhone.isEmpty()) {
+        println("Insert the user phone")
+        userPhone = readLine() ?: ""
+        if (userPhone.isEmpty()) println("user phone can't be empty")
+    }
+
+    var deliverySize : Size? = null
+    while(deliverySize == null) {
+        println("Insert the Size (small, medium, large)")
+        deliverySize = Size.fromText(readLine()?:"")
+        if (deliverySize==null) println("Invalid Size")
+    }
+
+    var address = ""
+    while(address.isEmpty()) {
+        println("Insert the address")
+        address = readLine() ?: ""
+        if (address.isEmpty()) println("Address can't be empty")
+    }
+
+    var latitude : Double? = null
+    while(latitude == null) {
+        println("Insert the latitude")
+        latitude = readLine()?.toDoubleOrNull()
+        if (latitude == null) println("Invalid latitude")
+    }
+
+    var longitude : Double? = null
+    while(longitude == null) {
+        println("Insert the longitude")
+        longitude = readLine()?.toDoubleOrNull()
+        if (longitude==null) println("Invalid longitude")
+    }
+
+    return DeliveryInfo(userPhone,deliverySize,address,Location(latitude,longitude))
 }
 
 fun createStore() {
     val gson = Gson()
     val url = URL(CREATE_STORE_ENDPOINT)
-    val stb = StringBuilder()
 
     val store = askForStoreInput()
-
-
 
     with(url.openConnection() as HttpURLConnection) {
         requestMethod = "POST"
@@ -61,7 +157,7 @@ fun createStore() {
         doOutput = true
         doInput = true
 
-        // Send the JSON we created
+
         val outputStreamWriter = OutputStreamWriter(outputStream)
         outputStreamWriter.write(gson.toJson(store))
         outputStreamWriter.flush()
@@ -131,6 +227,14 @@ fun askForStoreInput(): Store {
         Location(latitude = latitude, longitude = longitude))
 }
 
+fun askForApiKey() : String{
+    while(true) {
+        println("Insert the store Api Key")
+        val apikey = readLine()
+        if (apikey?.isNotEmpty() == true) return apikey.trim()
+    }
+}
+
 fun generateAdminToken(printToken : Boolean = true) : String {
     println("Generating admin token")
 
@@ -193,6 +297,8 @@ fun showMenu() : Int {
     println("1 - Generate Admin Token")
     println("2 - Create a store")
     println("3 - Generate a delivery for a store")
+    println("4 - Handle Delivery to Warper")
+    println("5 - Cancel Delivery")
     println("0 - Exit")
     print("Choose an option : ")
 

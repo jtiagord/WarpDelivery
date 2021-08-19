@@ -9,10 +9,10 @@ data class ActiveWarper(val username : String, val location : Location, val deli
 
 data class Delivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
-class DeliveringWarper(val username : String, val location : Location,val token : String,
+class DeliveringWarper(val username : String, val location : Location, val deliveryId : String,
                        val delivery : Delivery){
     constructor(warper : ActiveWarper , delivery : Delivery)
-            : this(warper.username, warper.location,warper.token,delivery)
+            : this(warper.username, warper.location,delivery.id ,delivery)
 
 }
 
