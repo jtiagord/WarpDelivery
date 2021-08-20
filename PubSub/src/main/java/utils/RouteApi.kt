@@ -15,6 +15,7 @@ class RouteApi{
     fun getRouteDistance(from : Location, to : Location) : Double?{
         val url = URL("$API_URL${from.longitude},${from.latitude};${to.longitude},${to.latitude}")
         val stb = StringBuilder()
+        println("$API_URL${from.longitude},${from.latitude};${to.longitude},${to.latitude}")
 
         with(url.openConnection() as HttpURLConnection) {
             inputStream.bufferedReader().use {

@@ -8,8 +8,6 @@ import java.net.URL
 import java.nio.charset.Charset
 import java.nio.file.Files
 import java.security.KeyFactory
-import java.security.PrivateKey
-import java.security.PublicKey
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.security.spec.PKCS8EncodedKeySpec
@@ -20,7 +18,8 @@ const val ISSUER = "WARPDELIVERY"
 const val API_URL = "http://localhost:8080"
 const val CREATE_STORE_ENDPOINT = "${API_URL}/WarpDelivery/stores"
 const val GENERATE_DELIVERY_ENDPOINT = "${API_URL}/WarpDelivery/stores/requestDelivery"
-const val HANDLEDELIVERY_ENDPOINT_TEMPLATE = "${API_URL}/WarpDelivery/stores/{deliveryId}/handleDelivery"
+const val HANDLE_DELIVERY_ENDPOINT_TEMPLATE = "${API_URL}/WarpDelivery/stores/deliveries/{deliveryId}/handleDelivery"
+const val CANCEL_DELIVERY_ENDPOINT_TEMPLATE = "${API_URL}/WarpDelivery/stores/deliveries/{deliveryId}/cancelDelivery"
 
 data class KeyPair(val publicKey: RSAPublicKey, val privateKey: RSAPrivateKey)
 
@@ -28,11 +27,17 @@ lateinit var publicKey: RSAPublicKey
 lateinit var privateKey: RSAPrivateKey
 
 fun main(args : Array<String>){
+    val keysFolder : String?
 
-    if(args.isEmpty()) return println("You need to provide a keys folder on the arguments or environment variables")
+    if(args.isEmpty()) {
+        keysFolder = System.getenv("WARPDELIVERY_KEYS")
+        return println("You need to provide a keys folder on the arguments or environment variables")
+    }else{
+        keysFolder = args[0]
+    }
 
-    publicKey = getPublicKeyFromFile("${args[0]}/public.pem")
-    privateKey = getPrivateKeyFromFile("${args[0]}/private_key.pem")
+    publicKey = getPublicKeyFromFile("${keysFolder}/public.pem")
+    privateKey = getPrivateKeyFromFile("${keysFolder}/private_key.pem")
 
 
     var answer = 0
@@ -49,18 +54,92 @@ fun main(args : Array<String>){
 }
 
 fun cancelDelivery() {
-    TODO("Not yet implemented")
+    val gson = Gson()
+
+
+    val apiKey = askFor("ApiKey")
+
+    val deliveryId = askFor("Delivery Id")
+
+    val url = URL(CANCEL_DELIVERY_ENDPOINT_TEMPLATE.replace("{deliveryId}", deliveryId))
+
+    with(url.openConnection() as HttpURLConnection) {
+        requestMethod = "POST"
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("Authorization", "key=$apiKey")
+        doOutput = true
+        doInput = true
+
+        println("Response Code : $responseCode")
+        when(responseCode) {
+            in 200..299-> {
+                println("Delivery Handled")
+            }
+            401->{
+                println("Invalid ApiKey")
+            }
+            in listOf(400,404) -> {
+                val response = errorStream.bufferedReader()
+                    .use { it.readText() }
+
+                val errorMessage =  gson.fromJson(response, ErrorMessage::class.java)
+                println("Error Message : ${errorMessage.errorMessage}")
+            }
+
+        }
+
+    }
+    println("Press Enter to Proceed")
+    readLine()
 }
 
 fun handleDeliveryToWarper() {
-    TODO("Not yet implemented")
+    val gson = Gson()
+
+
+    val apiKey = askFor("ApiKey")
+
+    val deliveryId = askFor("Delivery Id")
+
+    val url = URL(HANDLE_DELIVERY_ENDPOINT_TEMPLATE.replace("{deliveryId}", deliveryId))
+
+    with(url.openConnection() as HttpURLConnection) {
+        requestMethod = "POST"
+        setRequestProperty("Content-Type", "application/json")
+        setRequestProperty("Accept", "application/json")
+        setRequestProperty("Authorization", "key=$apiKey")
+        doOutput = true
+        doInput = true
+
+        println("Response Code : $responseCode")
+        when(responseCode) {
+            in 200..299-> {
+                println("Delivery Handled")
+            }
+            401->{
+                println("Invalid ApiKey")
+            }
+            in listOf(400,404) -> {
+                val response = errorStream.bufferedReader()
+                    .use { it.readText() }
+
+                val errorMessage =  gson.fromJson(response, ErrorMessage::class.java)
+                println("Error Message : ${errorMessage.errorMessage}")
+            }
+
+        }
+
+    }
+    println("Press Enter to Proceed")
+    readLine()
 }
 
 fun generateDelivery() {
     val gson = Gson()
     val url = URL(GENERATE_DELIVERY_ENDPOINT)
 
-    val apiKey = askForApiKey()
+    val apiKey = askFor("ApiKey")
 
     val deliveryInfo = askForDeliveryInformation()
 
@@ -227,9 +306,9 @@ fun askForStoreInput(): Store {
         Location(latitude = latitude, longitude = longitude))
 }
 
-fun askForApiKey() : String{
+fun askFor(askFor: String) : String{
     while(true) {
-        println("Insert the store Api Key")
+        println("Insert the ${askFor}")
         val apikey = readLine()
         if (apikey?.isNotEmpty() == true) return apikey.trim()
     }
