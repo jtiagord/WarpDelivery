@@ -74,7 +74,7 @@ fun cancelDelivery() {
         println("Response Code : $responseCode")
         when(responseCode) {
             in 200..299-> {
-                println("Delivery Handled")
+                println("Delivery Cancelled")
             }
             401->{
                 println("Invalid ApiKey")
