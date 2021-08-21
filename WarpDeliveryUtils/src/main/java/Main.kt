@@ -27,22 +27,18 @@ lateinit var publicKey: RSAPublicKey
 lateinit var privateKey: RSAPrivateKey
 
 fun main(args : Array<String>){
-    val keysFolder : String?
 
-    if(args.isEmpty()) {
-        keysFolder = System.getenv("WARPDELIVERY_KEYS")
-        return println("You need to provide a keys folder on the arguments or environment variables")
-    }else{
-        keysFolder = args[0]
-    }
+    val keysFolder = if(args.isEmpty()) System.getenv("WARPDELIVERY_KEYS") else args[0]
+
+    if(keysFolder==null) println("You need to provide a keys folder on the arguments or environment variables")
 
     publicKey = getPublicKeyFromFile("${keysFolder}/public.pem")
     privateKey = getPrivateKeyFromFile("${keysFolder}/private_key.pem")
 
 
-    var answer = 0
+    var answer : Int
     do {
-        answer = showMenu();
+        answer = showMenu()
         when(answer){
             1 -> generateAdminToken()
             2 -> createStore()
@@ -159,7 +155,7 @@ fun generateDelivery() {
         println("Response Code : $responseCode")
         when(responseCode) {
             in 200..299-> {
-                val responseCode = responseCode
+
                 //The id is in the last part of the location header
                 val id = getHeaderField("Location").split("/").last()
                 println("Your delivery id : $id")
@@ -245,7 +241,6 @@ fun createStore() {
 
         println("Response Code : $responseCode")
         if (responseCode in 200..299) {
-            val responseCode = responseCode
 
             //The id is in the last part of the location header
             val id = getHeaderField("Location").split("/").last()
