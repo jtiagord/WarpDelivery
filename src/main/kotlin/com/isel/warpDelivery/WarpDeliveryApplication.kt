@@ -9,6 +9,7 @@ import com.isel.warpDelivery.authentication.AccessControlInterceptor
 import com.isel.warpDelivery.common.KeyPair
 import com.isel.warpDelivery.common.getPrivateKeyFromFile
 import com.isel.warpDelivery.common.getPublicKeyFromFile
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryFullInfoMapper
 import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryStateColumnMapper
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
@@ -71,6 +72,7 @@ class WarpDeliveryApplication {
 		}
 
 		jdbi.registerColumnMapper(DeliveryStateColumnMapper())
+		jdbi.registerRowMapper(DeliveryFullInfoMapper())
 		return jdbi
 	}
 }
