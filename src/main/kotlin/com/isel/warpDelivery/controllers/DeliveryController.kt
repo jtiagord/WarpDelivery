@@ -4,7 +4,6 @@ import com.isel.warpDelivery.authentication.AdminResource
 import com.isel.warpDelivery.common.*
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
-import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryFullInfo
 import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.dataAccess.mappers.StoreMapper
 import com.isel.warpDelivery.errorHandling.ApiException
@@ -33,8 +32,8 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
     }
 
     @GetMapping("/{deliveryId}")
-    fun getDelivery(req: HttpServletRequest, @PathVariable deliveryId: String) : DeliveryFullInfo {
-        return deliveryMapper.getDeliveryFullInfo(deliveryId) ?:
+    fun getDelivery(req: HttpServletRequest, @PathVariable deliveryId: String) : Delivery {
+        return deliveryMapper.read(deliveryId) ?:
             throw ApiException("The delivery: $deliveryId doesn't exist", HttpStatus.NOT_FOUND)
     }
 

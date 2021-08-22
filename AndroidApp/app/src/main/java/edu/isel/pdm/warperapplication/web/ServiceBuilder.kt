@@ -20,7 +20,7 @@ object ServiceBuilder {
     }).build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.1.8:8080/WarpDelivery/")
+        .baseUrl("http://192.168.1.66:8080/WarpDelivery/")
         .addConverterFactory(GsonConverterFactory.create())
         .client(client)
         .build()
