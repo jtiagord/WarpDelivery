@@ -44,18 +44,12 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        val policy = ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
         createLocationRequest()
 
         setContentView(R.layout.activity_main)
-
         getInstance().load(this, PreferenceManager.getDefaultSharedPreferences(this))
 
-
         val locationFragment = LocationFragment()
-        val notificationsFragment = NotificationsFragment()
         val historyFragment = HistoryFragment()
         val userFragment = UserFragment()
         val vehiclesFragment = VehiclesFragment()
@@ -91,7 +85,6 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation.setOnNavigationItemSelectedListener {
             when(it.itemId){
                 R.id.ic_location -> makeCurrentFragment(locationFragment)
-                R.id.ic_notifications -> makeCurrentFragment(notificationsFragment)
                 R.id.ic_history -> makeCurrentFragment(historyFragment)
                 R.id.ic_user -> makeCurrentFragment(userFragment)
                 R.id.ic_vehicles -> makeCurrentFragment(vehiclesFragment)
@@ -167,7 +160,6 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
-
 
     /**
      * Sets the location request parameters.

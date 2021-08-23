@@ -40,6 +40,7 @@ class LocationFragment() : Fragment() {
     companion object {
         private val userAgent = "OsmNavigator/2.4"
         lateinit var roadManager: RoadManager
+        var roadObtained = false
         var roads: Array<Road> = emptyArray()
         var roadOverlays : Array<Polyline> = emptyArray()
 
@@ -51,7 +52,6 @@ class LocationFragment() : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        //TODO: Adapt to vehicle
         roadManager = OSRMRoadManager(context, userAgent)
         val manager = roadManager as OSRMRoadManager
         manager.setMean(OSRMRoadManager.MEAN_BY_CAR)
@@ -77,7 +77,7 @@ class LocationFragment() : Fragment() {
         viewModel.active.observe(viewLifecycleOwner, {
             if(it) {
                 viewModel.deliveryLocation.observe(viewLifecycleOwner, { point ->
-                    if(point != null) {
+                    if(point != null && !roadObtained) {
                         Log.d("ACTIVE", "delivering")
                         getRouteAsync(map,mapController)
                         inactiveBtn.isVisible = false
@@ -86,7 +86,7 @@ class LocationFragment() : Fragment() {
 
                 //Display UI for active / delivering state
                 map.isVisible = true
-                initMap(map, mapController)
+                initMap(map)
                 activeBtn.isVisible = false
                 inactiveBtn.isVisible = true
                 Log.d("ACTIVE", "active")
@@ -118,7 +118,7 @@ class LocationFragment() : Fragment() {
     }
 
 
-    private fun initMap(map: MapView, mapController: IMapController) {
+    private fun initMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.isTilesScaledToDpi = true
         map.minZoomLevel = 1.0
@@ -176,6 +176,7 @@ class LocationFragment() : Fragment() {
 
         override fun onPostExecute(result: Road) {
             updateUIWithRoad(result)
+            roadObtained = true
 
         }
 

@@ -16,7 +16,7 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
-    var active = MutableLiveData<Boolean>(false)
+    var active = MutableLiveData(false)
     var vehicleIds = MutableLiveData<Array<String>>()
 
     private val app: WarperApplication by lazy {
