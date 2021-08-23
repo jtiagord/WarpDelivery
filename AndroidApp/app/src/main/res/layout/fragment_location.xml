@@ -25,4 +25,12 @@
         android:gravity="bottom"
         android:text="@string/set_inactive" />
 
+    <Button
+        android:id="@+id/btn_finish"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="bottom"
+        android:text="@string/finish_delivery" />
+
 </FrameLayout>

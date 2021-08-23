@@ -146,6 +146,16 @@ class WarperController(
         return ResponseEntity.status(200).build()
     }
 
+    @WarperResource
+    @AdminResource
+    @DeleteMapping("/{username}/vehicles/{registration}")
+    fun removeVehicle(req: HttpServletRequest, @PathVariable username: String, @PathVariable registration: String)
+    : ResponseEntity<String> {
+        val vehicleKey = VehicleKey(username, registration)
+        vehicleMapper.delete(vehicleKey)
+        return return ResponseEntity.status(200).build()
+    }
+
 
     /// NEED TESTING STILL
     @GetMapping("/{username}/deliveries/{deliveryId}")

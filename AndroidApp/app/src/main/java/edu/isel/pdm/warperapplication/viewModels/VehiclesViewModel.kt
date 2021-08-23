@@ -2,6 +2,7 @@ package edu.isel.pdm.warperapplication.viewModels
 
 import android.app.Application
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import edu.isel.pdm.warperapplication.WarperApplication
@@ -26,14 +27,25 @@ class VehiclesViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
+    //TODO: Use placeholder strings
     fun addVehicle(vehicle: Vehicle){
-        Log.v("VEHICLE", "ADDING")
-        app.tryAddVehicle(app.getCurrentUser(), vehicle,
+        app.tryAddVehicle(vehicle,
             onSuccess = {
                 getVehicles()
             },
             onFailure = {
-                //TODO:
+                Toast.makeText(app, "Failed to add", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
+    fun removeVehicle(registration: String){
+        app.removeVehicle(registration,
+            onSuccess = {
+                getVehicles()
+            },
+            onFailure = {
+                Toast.makeText(app, "Failed to remove", Toast.LENGTH_LONG).show()
             }
         )
     }
