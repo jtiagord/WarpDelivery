@@ -2,6 +2,7 @@ package com.isel.warpDelivery.dataAccess.mappers
 
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryFullInfo
 import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
 import com.isel.warpDelivery.dataAccess.dataClasses.StateTransition
 import com.isel.warpDelivery.errorHandling.ApiException
@@ -15,6 +16,8 @@ class DeliveryMapper(val jdbi: Jdbi) {
 
     companion object {
         const val DELIVERY_TABLE = "DELIVERY"
+        const val WARPER_TABLE = "WARPER"
+        const val STORE_TABLE = "STORE"
         const val TRANSITIONS_TABLE = "STATE_TRANSITIONS"
     }
 
@@ -99,7 +102,6 @@ class DeliveryMapper(val jdbi: Jdbi) {
         }
     }
 
-    //TODO ADD PAGING
     fun readAll(limit : Int, offset : Int): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
@@ -138,6 +140,33 @@ class DeliveryMapper(val jdbi: Jdbi) {
             .bind("state", state.text)
             .bind("deliveryid", key)
             .execute()
+        }
+
+    fun updateStateAndAssignWarper(key: String, state: DeliveryState, warperUsername : String) =
+        jdbi.useTransaction<Exception> { handle ->
+
+            val deliveryOpt = handle.createQuery(
+                "SELECT deliveryid " +
+                        "from $DELIVERY_TABLE " +
+                        "where deliveryid = :id"
+            )
+                .bind("id", key)
+                .mapTo(String::class.java)
+                .findOne()
+
+
+            if(deliveryOpt.isEmpty) throw ApiException("The delivery: $key doesn't exist", HttpStatus.NOT_FOUND)
+
+            handle.createUpdate(
+                "UPDATE $DELIVERY_TABLE " +
+                        "SET state = :state, " +
+                        "warperusername = :warperusername "+
+                        "WHERE deliveryid = :deliveryid"
+            )
+                .bind("state", state.text)
+                .bind("warperusername", warperUsername)
+                .bind("deliveryid", key)
+                .execute()
         }
 
 
@@ -222,6 +251,22 @@ class DeliveryMapper(val jdbi: Jdbi) {
                 .findFirst()
                 .get()
         }.compareTo(userInfo.id) == 0
+
+    fun getDeliveryFullInfo(deliveryId: String): DeliveryFullInfo? =
+        jdbi.withHandle<DeliveryFullInfo, Exception> { handle ->
+
+            val result = handle.createQuery("SELECT * FROM $DELIVERY_TABLE  d" +
+                        " LEFT JOIN $WARPER_TABLE w ON d.warperusername = w.username " +
+                        "JOIN $STORE_TABLE s ON d.storeid = s.storeid " +
+                        " WHERE d.deliveryid = :deliveryid")
+                .bind("deliveryid",deliveryId)
+                .mapTo(DeliveryFullInfo::class.java)
+                .findOne()
+
+
+
+            return@withHandle if(result.isPresent) result.get() else null
+        }
 
 
 

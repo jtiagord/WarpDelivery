@@ -199,10 +199,16 @@ class WarperController(
     fun revokeDelivery(req: HttpServletRequest){
         val warperInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val warper = activeWarpers.removeDeliveringWarper(warperInfo.id)
+
         if(warper != null){
+            val delivery = deliveryMapper.read(warper.deliveryId)
+            if(delivery?.state == DeliveryState.DELIVERING || delivery?.state == DeliveryState.DELIVERED){
+                throw ApiException("You can't revoke a delivery that has already been handled")
+            }
             WarperPublisher.publishDelivery(warper.delivery)
         }
     }
+
 
     @WarperResource
     @PutMapping("/SetInactive")
@@ -210,8 +216,6 @@ class WarperController(
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         activeWarpers.remove(warper.id)
     }
-
-
 
 }
 

@@ -6,6 +6,7 @@ import com.isel.warpDelivery.authentication.USER_ATTRIBUTE_KEY
 import com.isel.warpDelivery.authentication.UserInfo
 import com.isel.warpDelivery.common.DELIVERIES_PATH
 import com.isel.warpDelivery.common.STORE_PATH
+import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
 import com.isel.warpDelivery.dataAccess.mappers.DeliveryMapper
 import com.isel.warpDelivery.dataAccess.mappers.StoreMapper
 import com.isel.warpDelivery.errorHandling.ApiException
@@ -13,8 +14,10 @@ import com.isel.warpDelivery.inputmodels.RequestDeliveryInputModel
 import com.isel.warpDelivery.inputmodels.StoreInputModel
 import com.isel.warpDelivery.inputmodels.toDao
 import com.isel.warpDelivery.model.ActiveDelivery
+import com.isel.warpDelivery.model.ActiveWarperRepository
 import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.pubSub.WarperPublisher
+import org.springframework.http.HttpStatus
 
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -24,7 +27,8 @@ import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping(STORE_PATH)
-class StoreController(val storeMapper : StoreMapper , val deliveryMapper : DeliveryMapper){
+class StoreController(val storeMapper : StoreMapper , val deliveryMapper : DeliveryMapper,
+                        val warperRepository: ActiveWarperRepository){
 
     @AdminResource
     @PostMapping
@@ -64,6 +68,44 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
 
 
         return ResponseEntity.created(URI("$DELIVERIES_PATH/${deliveryId}")).build()
+    }
+
+    @StoreResource
+    @PostMapping("/deliveries/{deliveryId}/handleDelivery")
+    fun handleDelivery(req: HttpServletRequest, @PathVariable deliveryId : String) {
+
+        val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warper = warperRepository.getWarperWithDeliveryId(deliveryId)
+        val delivery = deliveryMapper.read(deliveryId) ?: throw ApiException("Delivery doesn't exist",
+                HttpStatus.NOT_FOUND)
+
+        if(delivery.storeId != storeInfo.id) throw ApiException("Delivery doesn't exist", HttpStatus.NOT_FOUND)
+
+        if(warper == null){
+            throw ApiException("There is no warper assigned to delivering your delivery")
+        }
+
+        deliveryMapper.updateStateAndAssignWarper(deliveryId, DeliveryState.DELIVERING, warper.username)
+    }
+
+    @StoreResource
+    @PostMapping("/deliveries/{deliveryId}/cancelDelivery")
+    fun cancelDelivery(req: HttpServletRequest, @PathVariable deliveryId : String) {
+
+        val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+        val warper = warperRepository.getWarperWithDeliveryId(deliveryId)
+        val delivery = deliveryMapper.read(deliveryId) ?:
+                 throw ApiException("Delivery doesn't exist", HttpStatus.NOT_FOUND)
+
+        if(delivery.storeId != storeInfo.id) throw ApiException("Delivery doesn't exist", HttpStatus.NOT_FOUND)
+
+        if(delivery.state == DeliveryState.DELIVERING || delivery.state == DeliveryState.DELIVERED){
+            throw ApiException("A delivery that has already been handled can't be canceled")
+        }
+
+        warperRepository.cancelDelivery(deliveryId)
+        deliveryMapper.updateState(deliveryId, DeliveryState.CANCELLED)
+
     }
 
     @StoreResource
