@@ -201,7 +201,7 @@ class WarperController(
         val warper = activeWarpers.removeDeliveringWarper(warperInfo.id)
 
         if(warper != null){
-            val delivery = deliveryMapper.read(warper.deliveryId)
+            val delivery = deliveryMapper.read(warper.delivery.id)
             if(delivery?.state == DeliveryState.DELIVERING || delivery?.state == DeliveryState.DELIVERED){
                 throw ApiException("You can't revoke a delivery that has already been handled")
             }

@@ -39,7 +39,7 @@ class LocationFragment() : Fragment() {
 
     companion object {
         private val userAgent = "OsmNavigator/2.4"
-        lateinit var roadManager: RoadManager
+        lateinit var roadManager: RoadManager //WHY IS THIS IN COMPANION OBJECT
         var roads: Array<Road> = emptyArray()
         var roadOverlays : Array<Polyline> = emptyArray()
 
@@ -101,7 +101,8 @@ class LocationFragment() : Fragment() {
 
     fun onNewLocation(location : Location){
         val locationEntity = LocationEntity(location.latitude, location.longitude)
-        viewModel.updateCurrentLocation(locationEntity)
+        if(viewModel.active.value == true)
+            viewModel.updateCurrentLocation(locationEntity)
     }
 
 
@@ -168,6 +169,7 @@ class LocationFragment() : Fragment() {
 
         private fun updateUIWithRoad(road: Road) {
             val roadOverlay = RoadManager.buildRoadOverlay(road)
+            map.overlays.
             map.overlays.add(roadOverlay)
             map.invalidate()
         }

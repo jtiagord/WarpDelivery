@@ -5,14 +5,20 @@ import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.sin
 
+
+
+enum class DeliveringWarperState {
+    RETRIEVING, DELIVERING
+}
+
 data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
 
 data class Delivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
-class DeliveringWarper(val username : String, val location : Location, val deliveryId : String,
-                       val delivery : Delivery){
-    constructor(warper : ActiveWarper , delivery : Delivery)
-            : this(warper.username, warper.location,delivery.id ,delivery)
+class DeliveringWarper(val username : String, val location : Location,
+                       val delivery : Delivery, val state : DeliveringWarperState){
+    constructor(warper : ActiveWarper , delivery : Delivery, state : DeliveringWarperState)
+            : this(warper.username, warper.location,delivery, state)
 
 }
 

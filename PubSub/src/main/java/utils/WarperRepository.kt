@@ -94,7 +94,7 @@ class ActiveWarperRepository{
     }
 
     fun setWarperForDelivery(warper : ActiveWarper, delivery : Delivery){
-        val deliveringWarper = DeliveringWarper(warper, delivery)
+        val deliveringWarper = DeliveringWarper(warper, delivery, DeliveringWarperState.RETRIEVING)
         db.collection(ACTIVE_WARPERS).document(warper.username).delete().get()
         db.collection(DELIVERING_WARPERS).document(warper.username).create(deliveringWarper).get()
     }
@@ -106,19 +106,8 @@ class ActiveWarperRepository{
         batch.commit()
     }
 
-
-
     fun remove(username : String){
         db.collection(ACTIVE_WARPERS).document(username)
             .delete()
     }
-
-
-    fun updateLocation(username : String, location: Location){
-        db.collection(ACTIVE_WARPERS).document(username)
-            .update("location", location)
-        db.collection(ACTIVE_WARPERS).document(username)
-            .update("location", location)
-    }
-
 }

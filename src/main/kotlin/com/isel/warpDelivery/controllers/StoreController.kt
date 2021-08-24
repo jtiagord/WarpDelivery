@@ -15,6 +15,7 @@ import com.isel.warpDelivery.inputmodels.StoreInputModel
 import com.isel.warpDelivery.inputmodels.toDao
 import com.isel.warpDelivery.model.ActiveDelivery
 import com.isel.warpDelivery.model.ActiveWarperRepository
+import com.isel.warpDelivery.model.DeliveringWarperState
 import com.isel.warpDelivery.model.Location
 import com.isel.warpDelivery.pubSub.WarperPublisher
 import org.springframework.http.HttpStatus
@@ -84,7 +85,7 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
         if(warper == null){
             throw ApiException("There is no warper assigned to delivering your delivery")
         }
-
+        warperRepository.updateState(warper.username, DeliveringWarperState.DELIVERING)
         deliveryMapper.updateStateAndAssignWarper(deliveryId, DeliveryState.DELIVERING, warper.username)
     }
 
