@@ -52,7 +52,7 @@ class AppRepository(val app: Application) {
                 return@addSnapshotListener
             }
 
-            if (snapshot != null && snapshot.exists()) {
+            if (snapshot?.data != null && snapshot.exists()) {
                 onDeliveringWarper(snapshot.data!!)
                 Log.d("FIRESTORE", "Delivering warper current data: ${snapshot.data}")
             } else {
@@ -68,7 +68,7 @@ class AppRepository(val app: Application) {
                 return@addSnapshotListener
             }
 
-            if (snapshot != null && snapshot.exists()) {
+            if (snapshot?.data != null && snapshot.exists()) {
                 onActiveWarper(snapshot.data!!)
                 Log.d("FIRESTORE", "Active warper data: ${snapshot.data}")
             } else {
@@ -224,7 +224,6 @@ class AppRepository(val app: Application) {
 
 
     fun tryAddVehicle(
-        username: String,
         vehicle: Vehicle,
         onSuccess: () -> Unit,
         onFailure: () -> Unit
@@ -233,13 +232,13 @@ class AppRepository(val app: Application) {
         if (!tokenValid()) {
             tryLogin(this.username!!, this.password!!,
                 onSuccess = {
-                    tryAddVehicle(username, vehicle, onSuccess, onFailure)
+                    tryAddVehicle(vehicle, onSuccess, onFailure)
                 }, onFailure = {
                     throw java.lang.IllegalStateException("Error getting token")
                 }
             )
         } else {
-            val call = request.tryAddVehicle(username, vehicle, token!!)
+            val call = request.tryAddVehicle(username!!, vehicle, token!!)
             call.clone().enqueue(object : Callback<Unit> {
                 override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
                     if (response.isSuccessful) {
@@ -357,8 +356,45 @@ class AppRepository(val app: Application) {
         }
     }
 
-    fun setInactive(){
-        //TODO: Set warper as inactive
+    fun setInactive(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    setInactive(onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.setInactive(token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("ACTIVE", "set as inactive")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("ACTIVE", t.message!!)
+                }
+            })
+        }
+    }
+
+    fun finishDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        //TODO: Implement
     }
 
     fun updateCurrentLocation(location: LocationEntity) {
@@ -389,6 +425,41 @@ class AppRepository(val app: Application) {
                 }
                 override fun onFailure(call: Call<Unit>, t: Throwable) {
                     Log.e("LOCATION", t.message!!)
+                }
+            })
+        }
+    }
+
+    fun removeVehicle(
+        registration: String,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    removeVehicle(registration, onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.removeVehicle(username!!, registration, token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("VEHICLE", "Removed vehicle: $registration")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("VEHICLE", t.message!!)
                 }
             })
         }

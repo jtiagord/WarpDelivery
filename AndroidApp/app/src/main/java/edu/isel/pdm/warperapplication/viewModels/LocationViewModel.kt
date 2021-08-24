@@ -16,8 +16,9 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
-    var active = MutableLiveData<Boolean>(false)
+    var active = MutableLiveData(false)
     var vehicleIds = MutableLiveData<Array<String>>()
+    var atDeliveryPoint = MutableLiveData(false)
 
     private val app: WarperApplication by lazy {
         getApplication<WarperApplication>()
@@ -92,6 +93,28 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     fun updateCurrentLocation(location: LocationEntity) {
         app.updateCurrentLocation(location)
         currentLocation.postValue(location)
+    }
+
+    fun setInactive(){
+        app.setInactive(
+            onSuccess = {
+                active.postValue(false)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), "Failed to set as inactive", Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
+    fun finishDelivery(){
+        app.finishDelivery(
+            onSuccess = {
+                active.postValue(false)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), "Failed to set finish current delivery", Toast.LENGTH_LONG).show()
+            }
+        )
     }
 
 }

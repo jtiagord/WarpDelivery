@@ -3,7 +3,6 @@ package edu.isel.pdm.warperapplication.view.fragments.app
 import android.app.AlertDialog
 
 import android.location.Location
-import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,9 +13,12 @@ import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
 import org.osmdroid.bonuspack.routing.OSRMRoadManager
 import org.osmdroid.bonuspack.routing.RoadManager
@@ -28,7 +30,6 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.views.overlay.Polyline
 
-import java.util.*
 import kotlin.collections.ArrayList
 
 
@@ -39,32 +40,39 @@ class LocationFragment() : Fragment() {
 
     companion object {
         private val userAgent = "OsmNavigator/2.4"
-        lateinit var roadManager: RoadManager //WHY IS THIS IN COMPANION OBJECT
-        var roads: Array<Road> = emptyArray()
-        var roadOverlays : Array<Polyline> = emptyArray()
+        lateinit var roadManager: RoadManager
+        var roadObtained = false
 
     }
 
+    private lateinit var map : MapView
+    private lateinit var mapController: IMapController
+    private var roadOverlay: Polyline? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
 
-        //TODO: Adapt to vehicle
         roadManager = OSRMRoadManager(context, userAgent)
         val manager = roadManager as OSRMRoadManager
         manager.setMean(OSRMRoadManager.MEAN_BY_CAR)
 
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
+        val inactiveBtn = rootView.findViewById<Button>(R.id.btn_inactive)
+        val finishBtn = rootView.findViewById<Button>(R.id.btn_finish)
 
-        val map: MapView = rootView.findViewById(R.id.map)
+        map = rootView.findViewById(R.id.map)
         map.isVisible = false
-        val mapController = map.controller
+        mapController = map.controller
 
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
+        }
+
+        inactiveBtn.setOnClickListener{
+            viewModel.setInactive()
         }
 
         viewModel.initFirestore()
@@ -72,18 +80,31 @@ class LocationFragment() : Fragment() {
         viewModel.active.observe(viewLifecycleOwner, {
             if(it) {
                 viewModel.deliveryLocation.observe(viewLifecycleOwner, { point ->
-                    if(point != null)
-                        getRouteAsync(map,mapController)
+                    if(point != null && !roadObtained) {
+                        Log.d("ACTIVE", "delivering")
+                        getRouteAsync(map)
+                        inactiveBtn.isVisible = false
+                    }
                 })
 
+                //Display UI for active / delivering state
                 map.isVisible = true
-                initMap(map, mapController)
+                initMap(map)
                 activeBtn.isVisible = false
-                map.invalidate()
+                inactiveBtn.isVisible = true
+                Log.d("ACTIVE", "active")
+
+                viewModel.atDeliveryPoint.observe(viewLifecycleOwner, {
+                    finishBtn.isVisible = true
+                })
 
             } else {
+                //Display UI for inactive state
+                Log.d("ACTIVE", "inactive")
                 map.isVisible = false
                 activeBtn.isVisible = true
+                inactiveBtn.isVisible = false
+                finishBtn.isVisible = false
             }
         })
 
@@ -99,14 +120,36 @@ class LocationFragment() : Fragment() {
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewLifecycleOwner.lifecycleScope.launch {
+
+        }
+    }
+
     fun onNewLocation(location : Location){
-        val locationEntity = LocationEntity(location.latitude, location.longitude)
-        if(viewModel.active.value == true)
-            viewModel.updateCurrentLocation(locationEntity)
+        if(!viewModel.active.value!!)
+            return
+
+        val oldLocation = viewModel.currentLocation.value
+        val newLocation = LocationEntity(location.latitude, location.longitude)
+        val deliveryLocation = viewModel.deliveryLocation.value
+
+        if(deliveryLocation != null && newLocation.getDistance(deliveryLocation.toLocation()) < 10) {
+            viewModel.atDeliveryPoint.postValue(true)
+            Log.v("DELIVERY", "AT POINT")
+        }
+
+        if(oldLocation != null &&
+            newLocation.getDistance(oldLocation) > 2) {
+            getRouteAsync(map)
+        }
+
+        viewModel.updateCurrentLocation(newLocation)
     }
 
 
-    private fun initMap(map: MapView, mapController: IMapController) {
+    private fun initMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
         map.isTilesScaledToDpi = true
         map.minZoomLevel = 1.0
@@ -139,7 +182,7 @@ class LocationFragment() : Fragment() {
     }
 
 
-    private fun getRouteAsync(map: MapView, mapController: IMapController){
+    private fun getRouteAsync(map: MapView){
         val waypoints = ArrayList<GeoPoint>()
         val currLoc = viewModel.currentLocation.value ?: LocationEntity(0.0,0.0)
         val currGeoPoint = GeoPoint(currLoc.latitude, currLoc.longitude)
@@ -148,37 +191,29 @@ class LocationFragment() : Fragment() {
         waypoints.add(currGeoPoint)
         waypoints.add(viewModel.pickupLocation.value!!)
         waypoints.add(viewModel.deliveryLocation.value!!)
-        UpdateRoadTask(roadManager, map).execute(waypoints)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            val newRoad = roadManager.getRoad(waypoints)
+
+            updateUIWithRoad(newRoad)
+        }
 
     }
 
-
-
-    class UpdateRoadTask(val roadManager: RoadManager, val map: MapView) :
-        AsyncTask<ArrayList<GeoPoint>, Void?, Road>() {
-
-        override fun doInBackground(vararg params: ArrayList<GeoPoint>): Road? {
-            val waypoints = params[0]
-            return roadManager.getRoad(waypoints)
-        }
-
-        override fun onPostExecute(result: Road) {
-            updateUIWithRoad(result)
-
-        }
-
-        private fun updateUIWithRoad(road: Road) {
-            val roadOverlay = RoadManager.buildRoadOverlay(road)
-            map.overlays.
-            map.overlays.add(roadOverlay)
-            map.invalidate()
-        }
+    private fun updateUIWithRoad(road: Road) {
+        val newRoadOverlay = RoadManager.buildRoadOverlay(road)
+        if(roadOverlay != null)  map.overlays.remove(roadOverlay)
+        roadOverlay = newRoadOverlay
+        map.overlays.add(roadOverlay)
+        map.invalidate()
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
         viewModel.detachListener()
     }
+}
 
+private fun GeoPoint.toLocation(): LocationEntity {
+    return LocationEntity(this.latitude, this.longitude)
 }

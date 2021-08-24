@@ -69,12 +69,19 @@ class WarperApplication : Application() {
     }
 
     fun tryAddVehicle(
-        username: String,
         vehicle: Vehicle,
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ) {
-        return repository.tryAddVehicle(username, vehicle, onSuccess, onFailure)
+        return repository.tryAddVehicle(vehicle, onSuccess, onFailure)
+    }
+
+    fun removeVehicle(
+        registration: String,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.removeVehicle(registration, onSuccess, onFailure)
     }
 
     fun updateUser(
@@ -102,7 +109,6 @@ class WarperApplication : Application() {
                 Log.d("TOKEN", task.result)
 
                 // Get new FCM registration token
-                //TODO: Get actual location
                 val token = task.result
                 repository.setActive(
                     vehicle, location,
@@ -110,6 +116,21 @@ class WarperApplication : Application() {
                 )
             })
     }
+
+    fun setInactive(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        return repository.setInactive(onSuccess, onFailure)
+    }
+
+    fun finishDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        return repository.finishDelivery(onSuccess, onFailure)
+    }
+
 
     fun logout(){
         return repository.logout()

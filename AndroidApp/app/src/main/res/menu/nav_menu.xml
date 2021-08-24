@@ -7,12 +7,6 @@
     />
 
     <item
-        android:title="@string/notifications"
-        android:id="@+id/ic_notifications"
-        android:icon="@drawable/ic_notification"
-    />
-
-    <item
         android:title="@string/history"
         android:id="@+id/ic_history"
         android:icon="@drawable/ic_history"

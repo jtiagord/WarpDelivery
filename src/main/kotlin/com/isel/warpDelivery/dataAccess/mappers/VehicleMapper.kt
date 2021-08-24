@@ -69,9 +69,10 @@ class VehicleMapper(val jdbi: Jdbi) {
         jdbi.useTransaction<Exception> { handle ->
             handle.createUpdate(
                 "DELETE from $VEHICLE_TABLE " +
-                        "where vehicleregistration= :vehicleregistration"
+                        "where vehicleregistration= :vehicleregistration AND username = :username"
             )
-                .bind("vehicleregistration", key)
+                .bind("vehicleregistration", key.vehicleRegistration)
+                .bind("username", key.userName)
                 .execute()
         }
     }

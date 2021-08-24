@@ -37,7 +37,6 @@ class VehiclesFragment : Fragment() {
         val addButton = rootView.findViewById<FloatingActionButton>(R.id.addButton)
 
         addButton.setOnClickListener {
-            //addVehicleDialog.show(parentFragmentManager, "Add Vehicle")
             showVehicleCreationDialog()
         }
         refreshButton.setOnClickListener {
@@ -62,7 +61,9 @@ class VehiclesFragment : Fragment() {
         view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
-            adapter = VehiclesAdapter(vehicles)
+            adapter = VehiclesAdapter(vehicles, {
+                viewModel.removeVehicle(it)
+        })
         }
     }
 
