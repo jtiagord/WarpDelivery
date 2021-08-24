@@ -26,6 +26,8 @@ class VehiclesFragment : Fragment() {
 
     private val viewModel: VehiclesViewModel by viewModels()
 
+    var vehicleDialog: AlertDialog? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -61,12 +63,13 @@ class VehiclesFragment : Fragment() {
         view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
-            adapter = VehiclesAdapter(vehicles, {
-                viewModel.removeVehicle(it)
-        })
+            adapter = VehiclesAdapter(vehicles) {
+                viewModel.removeVehicle(it.substringAfter(" "))
+            }
         }
     }
 
+    //TODO: use placeholder strings
     private fun showVehicleCreationDialog() {
         val alertDialog = AlertDialog.Builder(context)
         var selectedItem = 0
@@ -88,13 +91,19 @@ class VehiclesFragment : Fragment() {
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    val vehicle = Vehicle(regEditText.text.toString(), vehicleTypes[selectedItem])
+                    val vehicle = Vehicle(regEditText.text.toString().trim(), vehicleTypes[selectedItem])
                     viewModel.addVehicle(vehicle)
                 }
             }
             .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.cancel()
             }
-        alertDialog.show()
+
+        vehicleDialog = alertDialog.show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vehicleDialog?.dismiss()
     }
 }

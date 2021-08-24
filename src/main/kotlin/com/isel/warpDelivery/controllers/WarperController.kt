@@ -140,7 +140,7 @@ class WarperController(
     fun addVehicle( req: HttpServletRequest,
         @PathVariable username: String,
         @RequestBody vehicle: VehicleInputModel
-    ): ResponseEntity<String> {
+    ): ResponseEntity<Any> {
         val vehicleDao = Vehicle(username, vehicle.type, vehicle.registration)
         vehicleMapper.create(vehicleDao)
         return ResponseEntity.status(200).build()
@@ -150,10 +150,16 @@ class WarperController(
     @AdminResource
     @DeleteMapping("/{username}/vehicles/{registration}")
     fun removeVehicle(req: HttpServletRequest, @PathVariable username: String, @PathVariable registration: String)
-    : ResponseEntity<String> {
+    : ResponseEntity<Any> {
         val vehicleKey = VehicleKey(username, registration)
-        vehicleMapper.delete(vehicleKey)
-        return return ResponseEntity.status(200).build()
+        val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
+
+        //TODO : user.type == ADMIN ||
+        if( user.id == username) {
+            vehicleMapper.delete(vehicleKey)
+            return ResponseEntity.status(200).build()
+        }
+        return ResponseEntity.status(403).build()
     }
 
 

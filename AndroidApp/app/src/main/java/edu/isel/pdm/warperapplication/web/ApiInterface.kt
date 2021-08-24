@@ -51,4 +51,9 @@ interface ApiInterface {
         @Path ("registration") registration: String,
         @Header("Authorization") token: String
     ): Call<Unit>
+
+    @POST("warpers/confirmDelivery")
+    fun confirmDelivery(
+        @Header("Authorization") token: String
+    ): Call<Unit>
 }

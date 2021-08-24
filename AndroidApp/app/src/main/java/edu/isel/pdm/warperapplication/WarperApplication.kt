@@ -124,11 +124,11 @@ class WarperApplication : Application() {
         return repository.setInactive(onSuccess, onFailure)
     }
 
-    fun finishDelivery(
+    fun confirmDelivery(
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ){
-        return repository.finishDelivery(onSuccess, onFailure)
+        return repository.confirmDelivery(onSuccess, onFailure)
     }
 
 

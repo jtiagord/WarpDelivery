@@ -390,11 +390,38 @@ class AppRepository(val app: Application) {
         }
     }
 
-    fun finishDelivery(
+    fun confirmDelivery(
         onSuccess: () -> Unit,
         onFailure: () -> Unit
     ){
-        //TODO: Implement
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    confirmDelivery(onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.confirmDelivery(token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("DELIVERY", "Delivery confirmed")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("ACTIVE", t.message!!)
+                }
+            })
+        }
     }
 
     fun updateCurrentLocation(location: LocationEntity) {

@@ -6,19 +6,23 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.google.android.gms.location.*
 import edu.isel.pdm.warperapplication.WarperApplication
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.util.GeoPoint
 
+enum class WarperState {
+    INACTIVE, LOOKING_FOR_DELIVERY, RETRIEVING, DELIVERING
+}
 
 class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
-    var active = MutableLiveData(false)
+    var state = MutableLiveData(WarperState.INACTIVE)
     var vehicleIds = MutableLiveData<Array<String>>()
     var atDeliveryPoint = MutableLiveData(false)
+    var atPickupPoint = MutableLiveData(false)
+
 
     private val app: WarperApplication by lazy {
         getApplication<WarperApplication>()
@@ -27,17 +31,18 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     fun initFirestore() {
         app.initFirestore(
             onActiveWarper = {
-                if(it.isNotEmpty() && (active.value == false || active.value == null)){
+                if(it.isNotEmpty() && (state.value == WarperState.INACTIVE || state.value == null)){
                     Log.d("WARPER", "SETTING ACTIVE")
-                    active.postValue(true)
+                    state.postValue(WarperState.LOOKING_FOR_DELIVERY)
                 }
             },
             onDeliveringWarper = {
                 Log.d("DATA", it.toString())
-                Log.d("ACTIVE", active.value.toString())
-                if(it.isNotEmpty() && (active.value == false || active.value == null)){
+                Log.d("ACTIVE", state.value.toString())
+                if(it.isNotEmpty()){
                     Log.d("WARPER", "SETTING ACTIVE")
-                    active.postValue(true)
+
+                    state.postValue(WarperState.valueOf(it["state"] as String))
                 }
 
                 updateDeliveryInfo(it)
@@ -71,7 +76,7 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
             currentLocation.value!!,
             onSuccess = {
                 Log.d("ACTIVE", "SUCCESS")
-                active.postValue(true)
+                state.postValue(WarperState.LOOKING_FOR_DELIVERY)
             },
             onFailure = {
                 Toast.makeText(getApplication(), "Failed to set active", Toast.LENGTH_LONG)
@@ -85,20 +90,20 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
             onSuccess = { vehicle ->
                 vehicleIds.postValue(vehicle.map{it.registration}.toTypedArray())
         },
-        onFailure = {
+            onFailure = {
             Toast.makeText(getApplication(), "Failed get vehicles", Toast.LENGTH_LONG).show()
         })
     }
 
     fun updateCurrentLocation(location: LocationEntity) {
-        app.updateCurrentLocation(location)
+        if(state.value != WarperState.INACTIVE) app.updateCurrentLocation(location)
         currentLocation.postValue(location)
     }
 
     fun setInactive(){
         app.setInactive(
             onSuccess = {
-                active.postValue(false)
+                state.postValue(WarperState.INACTIVE)
             },
             onFailure = {
                 Toast.makeText(getApplication(), "Failed to set as inactive", Toast.LENGTH_LONG).show()
@@ -106,13 +111,13 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    fun finishDelivery(){
-        app.finishDelivery(
+    fun confirmDelivery(){
+        app.confirmDelivery(
             onSuccess = {
-                active.postValue(false)
+                state.postValue(WarperState.INACTIVE)
             },
             onFailure = {
-                Toast.makeText(getApplication(), "Failed to set finish current delivery", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication(), "Failed to confirm current delivery", Toast.LENGTH_LONG).show()
             }
         )
     }
