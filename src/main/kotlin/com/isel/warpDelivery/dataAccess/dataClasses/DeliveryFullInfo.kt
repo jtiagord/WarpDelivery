@@ -16,6 +16,7 @@ class DeliveryFullInfo (
     val purchaseDate : Timestamp?,
     var deliverDate : Timestamp?,
     val deliverAddress: String,
+    val clientPhone : String
 )
 
 data class WarperInfo (
@@ -50,7 +51,8 @@ class DeliveryFullInfoMapper : RowMapper<DeliveryFullInfo> {
                         state = DeliveryState.fromText(rs.getString("state"))?:DeliveryState.DELIVERED,
                         purchaseDate = rs.getTimestamp("purchaseDate"),
                         deliverDate = rs.getTimestamp("deliverDate"),
-                        deliverAddress = rs.getString("deliverAddress")
+                        deliverAddress = rs.getString("deliverAddress"),
+                        clientPhone = rs.getString("clientPhone")
         )
 
     }
