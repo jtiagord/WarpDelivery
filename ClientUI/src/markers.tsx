@@ -1,9 +1,14 @@
-import ReactMapboxGl,{Layer,Feature} from 'react-mapbox-gl'
-import React,{useState,useEffect} from 'react'
-import db from './firebase.config'
+import {Layer,Feature,Popup} from 'react-mapbox-gl'
+import {useState,useEffect} from 'react'
+import collections from './dbCollections'
 import { getDoc } from './getDoc'
 
-export function Markers({token}:{token:string}){
+type MarkerInfo = {
+  id:string,
+  data:any
+}
+
+export function Markers({id,data}:MarkerInfo){
     const [warperCoord,setWarperCoord] = useState<Coordinates>({lat:null,long: null})
     const [clientCoord,setClientCoord] = useState<Coordinates>({lat:null,long:null})
     const [storeCoord,setStoreCoord] = useState<Coordinates>({lat:null,long:null})
@@ -12,13 +17,12 @@ export function Markers({token}:{token:string}){
       getDeliveryInfo()
 
       async function getDeliveryInfo(){
-        const response=db.collection('DELIVERINGWARPERS')
-        const query = response.where('delivery.id',"==",token)
+        const query = collections.delivering.where('delivery.id',"==",id)
         
-        const data = await getDoc(token)
+        const data = await getDoc(id)
 
         if (data.empty) {
-          console.log('Sorry, we could not find a delivery matching that token.');
+          console.log('Sorry, we could not find a delivery matching that id.');
           return;
         } 
 
@@ -42,7 +46,7 @@ return(
 
       <Layer type="circle" id="marker" paint={{
                 'circle-color': "#ff5200",
-                'circle-stroke-width': 10,
+                'circle-stroke-width': 5,
                 'circle-stroke-color': '#ff5200',
                 'circle-stroke-opacity': 1
               }}>
@@ -83,6 +87,19 @@ return(
               }}>
         <Feature coordinates={[clientCoord.long,clientCoord.lat]}/>
       </Layer>
+      <Popup
+        coordinates={[warperCoord.long,warperCoord.lat]}
+      >
+        <p>{data.warper.name}</p>
+      </Popup>
+
+      <Popup
+        coordinates={[storeCoord.long,storeCoord.lat]}
+      >
+        <p>{data.store.name}</p>
+        <p>{data.store.postalcode}</p>
+        <p>{data.store.address}</p>
+      </Popup>
     </div>
 )
 }

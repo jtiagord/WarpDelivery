@@ -15,7 +15,7 @@ import java.security.spec.X509EncodedKeySpec
 import java.util.*
 
 const val ISSUER = "WARPDELIVERY"
-const val API_URL = "http://localhost:8080"
+const val API_URL = "http://localhost:8081"
 const val CREATE_STORE_ENDPOINT = "${API_URL}/WarpDelivery/stores"
 const val GENERATE_DELIVERY_ENDPOINT = "${API_URL}/WarpDelivery/stores/requestDelivery"
 const val HANDLE_DELIVERY_ENDPOINT_TEMPLATE = "${API_URL}/WarpDelivery/stores/deliveries/{deliveryId}/handleDelivery"
