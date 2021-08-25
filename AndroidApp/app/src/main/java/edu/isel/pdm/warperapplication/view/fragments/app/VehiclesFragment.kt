@@ -56,7 +56,7 @@ class VehiclesFragment : Fragment() {
 
     private fun updateVehicles(view: RecyclerView, vehicles: List<Vehicle>?) {
         if (vehicles == null) {
-            Toast.makeText(activity, "Error updating vehicles", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, R.string.vehicles_update_error, Toast.LENGTH_LONG).show()
             return
         }
 
@@ -69,25 +69,24 @@ class VehiclesFragment : Fragment() {
         }
     }
 
-    //TODO: use placeholder strings
     private fun showVehicleCreationDialog() {
         val alertDialog = AlertDialog.Builder(context)
         var selectedItem = 0
         val regEditText = EditText(requireActivity())
-        regEditText.hint = "Vehicle Registration"
+        regEditText.hint = getString(R.string.vehicle_registration_title)
 
-        alertDialog.setTitle("Add vehicle")
+        alertDialog.setTitle(R.string.add_vehicle)
             .setView(regEditText)
             .setSingleChoiceItems(vehicleTypes, 0) { _, which ->
                 selectedItem = which
             }
 
             //TODO: Stop dialog from dismissing
-            .setPositiveButton("Ok") { _, _ ->
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
                 if (regEditText.text.isNullOrBlank()) {
                     Toast.makeText(
                         context,
-                        "Please fill out the registration field",
+                        getString(R.string.registration_empty_tip),
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
@@ -95,7 +94,7 @@ class VehiclesFragment : Fragment() {
                     viewModel.addVehicle(vehicle)
                 }
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
                 dialog.cancel()
             }
 

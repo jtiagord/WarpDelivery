@@ -47,4 +47,30 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="add_vehicle_fail">Failed to add vehicle</string>
+    <string name="user_update_fail">Failed to update user info</string>
+    <string name="vehicle_registration">Registration: %1$s </string>
+    <string name="vehicle_type">Type: %1$s</string>
+    <string name="edit_field">Insert a new %1$s please</string>
+    <string name="confirm">confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="vehicle_registration_title">Vehicle Registration</string>
+    <string name="ok">OK</string>
+    <string name="registration_empty_tip">Please fill out the registration field</string>
+    <string name="vehicle_remove_fail">Failed to remove</string>
+    <string name="firestore_updates_fail">Couldn\'t subscribe to firestore updates</string>
+    <string name="set_active_fail">Failed to set active</string>
+    <string name="get_vehicles_fail">Failed get vehicles</string>
+    <string name="set_inactive_fail">Failed to set as inactive</string>
+    <string name="delivery_confirm_failt">Failed to confirm current delivery</string>
+    <string name="delivery_location_title">Delivery location</string>
+    <string name="pickup_location_title">Pickup Location</string>
+    <string name="no_vehicles_error">You have no vehicles, please add one</string>
+    <string name="select_vehicle">Select vehicle</string>
+    <string name="vehicles_update_error">Error updating vehicles</string>
+    <string name="empty_field_error">Please fill in the field</string>
+    <string name="empty_fields_error">Please fill in all the fields</string>
+    <string name="password_mismatch_error">Passwords do not match</string>
+    <string name="invalid_details_error">Invalid username / password combo</string>
+    <string name="delete_vehicle_tip">Hold on a vehicle to delete it</string>
 </resources>

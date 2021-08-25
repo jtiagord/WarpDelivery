@@ -14,8 +14,7 @@ class RegisterViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun tryRegister(
-        user: String, password: String, fName: String, lName: String, email: String,
-        phone: String
+        user: String, password: String, fName: String, lName: String, email: String, phone: String
     ) {
         app.tryRegister(user, password, fName, lName, email, phone,
             onSuccess = {

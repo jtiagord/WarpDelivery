@@ -39,10 +39,9 @@ class LocationFragment() : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
 
-
     companion object {
         private val userAgent = "OsmNavigator/2.4"
-        lateinit var roadManager: RoadManager
+        private lateinit var roadManager: RoadManager
     }
 
     private lateinit var map: MapView
@@ -50,17 +49,12 @@ class LocationFragment() : Fragment() {
     private var roadOverlay: Polyline? = null
     private var pickupMarker: Marker? = null
     private var deliveryMarker: Marker? = null
+    private var vehicleSelectionDialog : AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        roadManager = OSRMRoadManager(context, userAgent)
-        val manager = roadManager as OSRMRoadManager
-        manager.setMean(OSRMRoadManager.MEAN_BY_CAR)
-
-
 
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
         val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
@@ -71,6 +65,7 @@ class LocationFragment() : Fragment() {
         map.isVisible = false
         mapController = map.controller
 
+        //Init buttons
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
         }
@@ -83,12 +78,16 @@ class LocationFragment() : Fragment() {
             viewModel.confirmDelivery()
         }
 
+        //Init road manager
+        roadManager = OSRMRoadManager(context, userAgent)
+        val manager = roadManager as OSRMRoadManager
+        manager.setMean(OSRMRoadManager.MEAN_BY_CAR)
+
         viewModel.initFirestore()
 
         viewModel.deliveryLocation.observe(viewLifecycleOwner, { point ->
             val state = viewModel.state.value
             if (state == WarperState.RETRIEVING || state == WarperState.DELIVERING) {
-                Log.d("ACTIVE", "delivering")
                 getRouteAsync(state)
                 inactiveBtn.isVisible = false
             }
@@ -99,9 +98,12 @@ class LocationFragment() : Fragment() {
             finishBtn.isVisible = true
         })
 
+        //Observe state changes and draw UI according to warper state
         viewModel.state.observe(viewLifecycleOwner, {
+
             if (it != WarperState.INACTIVE) {
 
+                //Display UI for active / delivering / looking for delivery state
                 if(it == WarperState.RETRIEVING) {
                     finishBtn.isVisible = false
                     pickupMarker?.setVisible(true)
@@ -111,17 +113,15 @@ class LocationFragment() : Fragment() {
                     pickupMarker?.setVisible(true)
                     deliveryMarker?.setVisible(true)
                 }
-                //Display UI for active / delivering state
+
                 map.isVisible = true
                 initMap(map)
                 activeBtn.isVisible = false
                 inactiveBtn.isVisible = true
-                Log.d("ACTIVE", "active")
 
             } else {
 
                 //Display UI for inactive state
-                Log.d("ACTIVE", "inactive")
                 if(pickupMarker != null){
                     pickupMarker!!.setVisible(false)
                     pickupMarker = null
@@ -140,24 +140,17 @@ class LocationFragment() : Fragment() {
             }
         })
 
+        //Displays the vehicle selection dialog after vehicles are obtained from the API
         viewModel.vehicleIds.observe(viewLifecycleOwner, {
             if (it.isEmpty())
-                Toast.makeText(context, "You have no vehicles, please add one", Toast.LENGTH_LONG)
+                Toast.makeText(context, getString(R.string.no_vehicles_error), Toast.LENGTH_LONG)
                     .show()
             else if (viewModel.state.value == WarperState.INACTIVE)
                 showVehicleSelectionDialog()
         })
 
-
         // Inflate the layout for this fragment
         return rootView
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        viewLifecycleOwner.lifecycleScope.launch {
-
-        }
     }
 
     fun onNewLocation(location: Location) {
@@ -166,8 +159,7 @@ class LocationFragment() : Fragment() {
         val newLocation = LocationEntity(location.latitude, location.longitude)
         val deliveryLocation = viewModel.deliveryLocation.value
 
-        if (viewModel.state.value == WarperState.DELIVERING && deliveryLocation != null)
-            Log.v("DISTANCE", "" + newLocation.getDistance(deliveryLocation.toLocation()))
+        //Enable finish button if distance to delivery point is less than 17m
         if (viewModel.state.value == WarperState.DELIVERING &&
             deliveryLocation != null &&
             newLocation.getDistance(deliveryLocation.toLocation()) < 17
@@ -176,15 +168,16 @@ class LocationFragment() : Fragment() {
             Log.v("DELIVERY", "AT POINT")
         }
 
+        //Get and updated path if the warper has moved more than 2m
         if (oldLocation != null &&
             newLocation.getDistance(oldLocation) > 2 && deliveryLocation != null
         ) {
             getRouteAsync(viewModel.state.value!!)
         }
 
+        //Send a location update to the API
         viewModel.updateCurrentLocation(newLocation)
     }
-
 
     private fun initMap(map: MapView) {
         map.setTileSource(TileSourceFactory.MAPNIK)
@@ -194,11 +187,13 @@ class LocationFragment() : Fragment() {
         map.isVerticalMapRepetitionEnabled = false
         map.setMultiTouchControls(true)
 
+        //Add user location overlay
         val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map)
         map.overlays.add(myOverlay)
         myOverlay.enableMyLocation()
         myOverlay.enableFollowLocation()
 
+        //Add markers if needed
         if(deliveryMarker != null)
             map.overlays.add(deliveryMarker)
 
@@ -213,29 +208,27 @@ class LocationFragment() : Fragment() {
         val vehiclesList = viewModel.vehicleIds.value!!
 
         var selectedItem = 0
-        alertDialog.setTitle("Select vehicle")
+        alertDialog.setTitle(R.string.select_vehicle)
             .setSingleChoiceItems(vehiclesList, 0) { _, which ->
                 selectedItem = which
             }
-            .setPositiveButton("Ok") { _, _ ->
+            .setPositiveButton(R.string.ok) { _, _ ->
                 viewModel.setActive(vehiclesList[selectedItem])
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
                 dialog.cancel()
             }
-        alertDialog.show()
+        vehicleSelectionDialog = alertDialog.show()
     }
-
 
     private fun getRouteAsync(state: WarperState) {
         val waypoints = ArrayList<GeoPoint>()
 
         val currLoc = viewModel.currentLocation.value ?: LocationEntity(0.0, 0.0)
-        val currGeoPoint = GeoPoint(currLoc.latitude, currLoc.longitude)
+        val currGeoPoint = currLoc.toGeoPoint(currLoc.latitude, currLoc.longitude)
 
         val pickupGeoPoint = viewModel.pickupLocation.value!!
         val deliveryGeoPoint = viewModel.deliveryLocation.value!!
-        waypoints.add(currGeoPoint)
 
         if (state == WarperState.RETRIEVING)
             waypoints.add(pickupGeoPoint)
@@ -243,7 +236,8 @@ class LocationFragment() : Fragment() {
         if (state == WarperState.DELIVERING)
             waypoints.add(deliveryGeoPoint)
 
-
+        waypoints.add(currGeoPoint)
+        //Obtain the road in a new thread
         lifecycleScope.launch(Dispatchers.IO) {
             val newRoad = roadManager.getRoad(waypoints)
 
@@ -259,35 +253,41 @@ class LocationFragment() : Fragment() {
         deliveryGeoPoint: GeoPoint
     ) {
 
-        //Add road overlay
-        val newRoadOverlay = RoadManager.buildRoadOverlay(road)
+        //Remove old road overlay if exists
         if (roadOverlay != null) map.overlays.remove(roadOverlay)
+
+        //Add new road overlay
+        val newRoadOverlay = RoadManager.buildRoadOverlay(road)
         roadOverlay = newRoadOverlay
         map.overlays.add(roadOverlay)
 
-        Log.v("MARKERP", pickupMarker.toString())
-        Log.v("STATE", viewModel.state.value.toString())
-        //Add marker overlays if needed
+        //Add pickup marker overlay if needed
         if (viewModel.state.value == WarperState.RETRIEVING) {
             pickupMarker = Marker(map)
-            pickupMarker!!.title = "Pickup Location"
+            pickupMarker!!.title = getString(R.string.pickup_location_title)
             pickupMarker!!.position = pickupGeoPoint
             map.overlays.add(pickupMarker)
         }
 
-        Log.v("MARKERD", deliveryMarker.toString())
+        //Add delivery marker overlay if needed
         if (viewModel.state.value == WarperState.DELIVERING) {
             deliveryMarker = Marker(map)
-            deliveryMarker!!.title = "Delivery location"
+            deliveryMarker!!.title = getString(R.string.delivery_location_title)
             deliveryMarker!!.position = deliveryGeoPoint
             map.overlays.add(deliveryMarker)
         }
+
         map.invalidate()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         viewModel.detachListener()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vehicleSelectionDialog?.dismiss()
     }
 }
 

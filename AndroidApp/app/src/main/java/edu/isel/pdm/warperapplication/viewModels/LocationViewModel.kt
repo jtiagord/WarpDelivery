@@ -1,11 +1,11 @@
 package edu.isel.pdm.warperapplication.viewModels
 
-
 import android.app.Application
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
+import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.WarperApplication
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.util.GeoPoint
@@ -31,37 +31,37 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     fun initFirestore() {
         app.initFirestore(
             onActiveWarper = {
-                if(it.isNotEmpty() && (state.value == WarperState.INACTIVE || state.value == null)){
-                    Log.d("WARPER", "SETTING ACTIVE")
+                if (it.isNotEmpty() && (state.value == WarperState.INACTIVE || state.value == null)) {
+                    Log.d("STATE", "LOOKING FOR DELIVERY")
                     state.postValue(WarperState.LOOKING_FOR_DELIVERY)
                 }
             },
             onDeliveringWarper = {
-                Log.d("DATA", it.toString())
-                Log.d("ACTIVE", state.value.toString())
-                if(it.isNotEmpty()){
-                    Log.d("WARPER", "SETTING ACTIVE")
-
-                    state.postValue(WarperState.valueOf(it["state"] as String))
+                val status = it["state"] as String
+                if (it.isNotEmpty()) {
+                    Log.d("STATE", status)
+                    state.postValue(WarperState.valueOf(status))
                 }
-
                 updateDeliveryInfo(it)
             },
             onSubscriptionError = {
-                Toast.makeText(getApplication(), "Couldn't subscribe to map updates", Toast.LENGTH_LONG)
-                .show()
+                Toast.makeText(getApplication(), R.string.firestore_updates_fail, Toast.LENGTH_LONG)
+                    .show()
             }
         )
     }
 
     private fun updateDeliveryInfo(data: Map<String, Any>) {
 
+        //Extract data from document
         val delivery = data["delivery"] as Map<String, Any>
-        val pickUpLoc = delivery["pickUpLocation"] as HashMap<String,Double>
+        val pickupLoc = delivery["pickUpLocation"] as HashMap<String, Double>
         val deliveryLoc = delivery["deliveryLocation"] as HashMap<String, Double>
-        val currentLoc = data["location"] as HashMap<String, Double>
-        pickupLocation.postValue(GeoPoint(pickUpLoc["latitude"]!!, pickUpLoc["longitude"]!!))
-        currentLocation.postValue(LocationEntity(currentLoc["latitude"]!!, currentLoc["longitude"]!!))
+        val currLoc = data["location"] as HashMap<String, Double>
+
+        //Update pickup, delivery and current location
+        pickupLocation.postValue(GeoPoint(pickupLoc["latitude"]!!, pickupLoc["longitude"]!!))
+        currentLocation.postValue(LocationEntity(currLoc["latitude"]!!, currLoc["longitude"]!!))
         deliveryLocation.postValue(GeoPoint(deliveryLoc["latitude"]!!, deliveryLoc["longitude"]!!))
     }
 
@@ -75,53 +75,60 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
             vehicle,
             currentLocation.value!!,
             onSuccess = {
-                Log.d("ACTIVE", "SUCCESS")
+                Log.d("STATE", "LOOKING FOR DELIVERY")
                 state.postValue(WarperState.LOOKING_FOR_DELIVERY)
             },
             onFailure = {
-                Toast.makeText(getApplication(), "Failed to set active", Toast.LENGTH_LONG)
+                Toast.makeText(getApplication(), R.string.set_active_fail, Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
+    fun getVehicles() {
+        app.getVehicles(
+            onSuccess = { vehicle ->
+                vehicleIds.postValue(vehicle.map { it.registration }.toTypedArray())
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), R.string.get_vehicles_fail, Toast.LENGTH_LONG)
+                    .show()
+            })
+    }
+
+    fun updateCurrentLocation(location: LocationEntity) {
+
+        //Don't send location update API calls if the warper is inactive
+        if (state.value != WarperState.INACTIVE)
+            app.updateCurrentLocation(location)
+
+        currentLocation.postValue(location)
+    }
+
+    fun setInactive() {
+        app.setInactive(
+            onSuccess = {
+                Log.d("STATE", "INACTIVE")
+                state.postValue(WarperState.INACTIVE)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), R.string.set_inactive_fail, Toast.LENGTH_LONG)
                     .show()
             }
         )
     }
 
-    fun getVehicles(){
-        app.getVehicles(
-            onSuccess = { vehicle ->
-                vehicleIds.postValue(vehicle.map{it.registration}.toTypedArray())
-        },
-            onFailure = {
-            Toast.makeText(getApplication(), "Failed get vehicles", Toast.LENGTH_LONG).show()
-        })
-    }
-
-    fun updateCurrentLocation(location: LocationEntity) {
-        if(state.value != WarperState.INACTIVE) app.updateCurrentLocation(location)
-        currentLocation.postValue(location)
-    }
-
-    fun setInactive(){
-        app.setInactive(
-            onSuccess = {
-                state.postValue(WarperState.INACTIVE)
-            },
-            onFailure = {
-                Toast.makeText(getApplication(), "Failed to set as inactive", Toast.LENGTH_LONG).show()
-            }
-        )
-    }
-
-    fun confirmDelivery(){
+    fun confirmDelivery() {
         app.confirmDelivery(
             onSuccess = {
+                Log.d("STATE", "INACTIVE")
                 state.postValue(WarperState.INACTIVE)
             },
             onFailure = {
-                Toast.makeText(getApplication(), "Failed to confirm current delivery", Toast.LENGTH_LONG).show()
+                Toast.makeText(getApplication(), R.string.delivery_confirm_failt, Toast.LENGTH_LONG)
+                    .show()
             }
         )
     }
-
 }
 
 

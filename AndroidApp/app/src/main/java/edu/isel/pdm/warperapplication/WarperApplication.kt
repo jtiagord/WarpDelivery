@@ -21,6 +21,7 @@ class WarperApplication : Application() {
         repository.initFirestore(onSubscriptionError, onActiveWarper, onDeliveringWarper)
     }
 
+    //Auth
     fun tryLogin(
         username: String,
         password: String,
@@ -41,6 +42,7 @@ class WarperApplication : Application() {
         )
     }
 
+    //Deliveries
     fun getDeliveries(
         username: String,
         onSuccess: (List<Delivery>) -> Unit,
@@ -49,6 +51,14 @@ class WarperApplication : Application() {
         return repository.getDeliveries(username, onSuccess, onFailure)
     }
 
+    fun confirmDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ){
+        return repository.confirmDelivery(onSuccess, onFailure)
+    }
+
+    //User
     fun getUserInfo(
         username: String,
         onSuccess: (Warper) -> Unit,
@@ -57,15 +67,24 @@ class WarperApplication : Application() {
         return repository.getUserInfo(username, onSuccess, onFailure)
     }
 
+    fun updateUser(
+        user: WarperEdit,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.updateUser(user, onSuccess, onFailure)
+    }
+
+    fun getCurrentUser(): String {
+        return repository.getCurrentUser()
+    }
+
+    //Vehicles
     fun getVehicles(
         onSuccess: (List<Vehicle>) -> Unit,
         onFailure: () -> Unit
     ) {
         return repository.getVehicles(onSuccess, onFailure)
-    }
-
-    fun getCurrentUser(): String {
-        return repository.getCurrentUser()
     }
 
     fun tryAddVehicle(
@@ -84,14 +103,7 @@ class WarperApplication : Application() {
         return repository.removeVehicle(registration, onSuccess, onFailure)
     }
 
-    fun updateUser(
-        user: WarperEdit,
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit
-    ) {
-        return repository.updateUser(user, onSuccess, onFailure)
-    }
-
+    //Status
     fun setActive(
         vehicle: String,
         location: LocationEntity,
@@ -110,10 +122,7 @@ class WarperApplication : Application() {
 
                 // Get new FCM registration token
                 val token = task.result
-                repository.setActive(
-                    vehicle, location,
-                    token, onSuccess, onFailure
-                )
+                repository.setActive(vehicle, location,token, onSuccess, onFailure)
             })
     }
 
@@ -124,13 +133,10 @@ class WarperApplication : Application() {
         return repository.setInactive(onSuccess, onFailure)
     }
 
-    fun confirmDelivery(
-        onSuccess: () -> Unit,
-        onFailure: () -> Unit
-    ){
-        return repository.confirmDelivery(onSuccess, onFailure)
+    //Location
+    fun updateCurrentLocation(location: LocationEntity) {
+        return repository.updateCurrentLocation(location)
     }
-
 
     fun logout(){
         return repository.logout()
@@ -140,7 +146,5 @@ class WarperApplication : Application() {
         return repository.detachListeners()
     }
 
-    fun updateCurrentLocation(location: LocationEntity) {
-        return repository.updateCurrentLocation(location)
-    }
+
 }
