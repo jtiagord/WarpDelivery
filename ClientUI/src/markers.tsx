@@ -12,6 +12,7 @@ export function Markers({id,data}:MarkerInfo){
     const [warperCoord,setWarperCoord] = useState<Coordinates>({lat:null,long: null})
     const [clientCoord,setClientCoord] = useState<Coordinates>({lat:null,long:null})
     const [storeCoord,setStoreCoord] = useState<Coordinates>({lat:null,long:null})
+    const [popUpVisibility,setPopUpVisibility] = useState(0)
 
     useEffect(() => {
       getDeliveryInfo()
@@ -50,9 +51,11 @@ return(
                 'circle-stroke-color': '#ff5200',
                 'circle-stroke-opacity': 1
               }}>
-        <Feature coordinates={[warperCoord.long,warperCoord.lat]}/>
+        <Feature coordinates={[warperCoord.long,warperCoord.lat]}
+        onClick={()=>{setPopUpVisibility(1)}}/>
         <Feature coordinates={[clientCoord.long,clientCoord.lat]}/>
-        <Feature coordinates={[storeCoord.long,storeCoord.lat]}/>
+        <Feature coordinates={[storeCoord.long,storeCoord.lat]}
+        onClick={()=>{setPopUpVisibility(2)}}/>
       </Layer>
 
       <Layer type="symbol" layout={{
@@ -87,19 +90,23 @@ return(
               }}>
         <Feature coordinates={[clientCoord.long,clientCoord.lat]}/>
       </Layer>
-      <Popup
+      {popUpVisibility == 1?
+        <Popup
         coordinates={[warperCoord.long,warperCoord.lat]}
       >
-        <p>{data.warper.name}</p>
-      </Popup>
-
-      <Popup
-        coordinates={[storeCoord.long,storeCoord.lat]}
-      >
-        <p>{data.store.name}</p>
-        <p>{data.store.postalcode}</p>
-        <p>{data.store.address}</p>
-      </Popup>
+        <p>{data.warper.firstname} {data.warper.lastname}</p>
+        <p>{data.warper.phonenumber}</p>
+      </Popup>:
+        popUpVisibility==2?
+        <Popup
+          coordinates={[storeCoord.long,storeCoord.lat]}
+        >
+          <p>{data.store.name}</p>
+          <p>{data.store.postalcode}</p>
+          <p>{data.store.address}</p>
+        </Popup>:
+        null
+      }
     </div>
 )
 }
