@@ -2,7 +2,6 @@ package edu.isel.pdm.warperapplication.view.fragments.auth
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +34,7 @@ class RegisterFragment : Fragment() {
         val passwordReInput = rootView.findViewById<EditText>(R.id.et_rePassword)
 
         viewModel.registerStatus.observe(viewLifecycleOwner, {
-            if (it){
+            if (it) {
                 val intent = Intent(activity, MainActivity::class.java)
                 this.startActivity(intent)
             } else {
@@ -51,15 +50,16 @@ class RegisterFragment : Fragment() {
                 passwordInput, passwordReInput
             )
 
+
             if (checkInputs(inputList)) {
 
                 val password = passwordInput.text.toString()
                 val passwordRe = passwordReInput.text.toString()
 
                 if (password != passwordRe)
-                    Toast.makeText(context, "Passwords do not match", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, R.string.password_mismatch_error, Toast.LENGTH_LONG)
+                        .show()
                 else {
-
                     val username = usernameInput.text.toString()
                     val firstName = firstNameInput.text.toString()
                     val lastName = lastNameInput.text.toString()
@@ -69,8 +69,7 @@ class RegisterFragment : Fragment() {
                     register(username, password, firstName, lastName, email, phone)
                 }
             } else {
-                Log.v("REGISTER", "NULL INPUTS")
-                Toast.makeText(context, "Please fill in all the fields", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, R.string.empty_fields_error, Toast.LENGTH_LONG).show()
             }
         }
 
@@ -95,6 +94,4 @@ class RegisterFragment : Fragment() {
     ) {
         viewModel.tryRegister(username, password, fName, lName, email, phone)
     }
-
-    //TODO: Add support for scrolling
 }

@@ -15,7 +15,6 @@ import edu.isel.pdm.warperapplication.view.adapters.DeliveriesAdapter
 import edu.isel.pdm.warperapplication.viewModels.HistoryViewModel
 import edu.isel.pdm.warperapplication.web.entities.Delivery
 
-
 class HistoryFragment : Fragment() {
 
     private val viewModel : HistoryViewModel by viewModels()

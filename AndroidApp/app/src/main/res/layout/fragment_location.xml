@@ -5,10 +5,22 @@
     android:layout_height="match_parent"
     tools:context=".view.fragments.app.LocationFragment">
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_deliveryInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="17dp"
+        android:layout_marginBottom="17dp"
+        android:clickable="true"
+        android:src="@drawable/ic_history" />
+
     <org.osmdroid.views.MapView
         android:id="@+id/map"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent" />
+        android:layout_height="fill_parent">
+
+    </org.osmdroid.views.MapView>
 
     <Button
         android:id="@+id/btn_active"

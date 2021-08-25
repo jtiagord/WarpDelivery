@@ -26,6 +26,8 @@ class VehiclesFragment : Fragment() {
 
     private val viewModel: VehiclesViewModel by viewModels()
 
+    var vehicleDialog: AlertDialog? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -54,16 +56,16 @@ class VehiclesFragment : Fragment() {
 
     private fun updateVehicles(view: RecyclerView, vehicles: List<Vehicle>?) {
         if (vehicles == null) {
-            Toast.makeText(activity, "Error updating vehicles", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, R.string.vehicles_update_error, Toast.LENGTH_LONG).show()
             return
         }
 
         view.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(activity)
-            adapter = VehiclesAdapter(vehicles, {
-                viewModel.removeVehicle(it)
-        })
+            adapter = VehiclesAdapter(vehicles) {
+                viewModel.removeVehicle(it.substringAfter(" "))
+            }
         }
     }
 
@@ -71,30 +73,36 @@ class VehiclesFragment : Fragment() {
         val alertDialog = AlertDialog.Builder(context)
         var selectedItem = 0
         val regEditText = EditText(requireActivity())
-        regEditText.hint = "Vehicle Registration"
+        regEditText.hint = getString(R.string.vehicle_registration_title)
 
-        alertDialog.setTitle("Add vehicle")
+        alertDialog.setTitle(R.string.add_vehicle)
             .setView(regEditText)
             .setSingleChoiceItems(vehicleTypes, 0) { _, which ->
                 selectedItem = which
             }
 
             //TODO: Stop dialog from dismissing
-            .setPositiveButton("Ok") { _, _ ->
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
                 if (regEditText.text.isNullOrBlank()) {
                     Toast.makeText(
                         context,
-                        "Please fill out the registration field",
+                        getString(R.string.registration_empty_tip),
                         Toast.LENGTH_LONG
                     ).show()
                 } else {
-                    val vehicle = Vehicle(regEditText.text.toString(), vehicleTypes[selectedItem])
+                    val vehicle = Vehicle(regEditText.text.toString().trim(), vehicleTypes[selectedItem])
                     viewModel.addVehicle(vehicle)
                 }
             }
-            .setNegativeButton("Cancel") { dialog, _ ->
+            .setNegativeButton(R.string.cancel) { dialog, _ ->
                 dialog.cancel()
             }
-        alertDialog.show()
+
+        vehicleDialog = alertDialog.show()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        vehicleDialog?.dismiss()
     }
 }

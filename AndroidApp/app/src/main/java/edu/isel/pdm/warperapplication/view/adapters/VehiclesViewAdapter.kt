@@ -30,14 +30,13 @@ class VehiclesAdapter(private val vehicles: List<Vehicle>, private val removeVeh
     }
 }
 
-//TODO: Improve aspect, use placeholder strings
 class VehiclesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val registration: TextView = itemView.findViewById(R.id.registration)
     private val type: TextView = itemView.findViewById(R.id.type)
 
     fun bind(vehicle: Vehicle) {
-        registration.text = "Registration: " + vehicle.registration
-        type.text = "Type: " + vehicle.type
+        registration.text = itemView.context.getString(R.string.vehicle_registration, vehicle.registration)
+        type.text = itemView.context.getString(R.string.vehicle_type, vehicle.type)
     }
 
 }
