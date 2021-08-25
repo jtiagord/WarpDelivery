@@ -9,15 +9,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.viewModels.WarperState
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
+import edu.isel.pdm.warperapplication.web.entities.Vehicle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
@@ -50,6 +55,14 @@ class LocationFragment() : Fragment() {
     private var pickupMarker: Marker? = null
     private var deliveryMarker: Marker? = null
     private var vehicleSelectionDialog : AlertDialog? = null
+    private var deliveryInfoDialog : AlertDialog? = null
+
+
+    private lateinit var activeBtn : Button
+    private lateinit var inactiveBtn : ExtendedFloatingActionButton
+    private lateinit var finishBtn : ExtendedFloatingActionButton
+    private lateinit var revokeBtn : ExtendedFloatingActionButton
+    private lateinit var infoBtn : ExtendedFloatingActionButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,26 +70,18 @@ class LocationFragment() : Fragment() {
     ): View? {
 
         val rootView = inflater.inflate(R.layout.fragment_location, container, false)
-        val activeBtn = rootView.findViewById<Button>(R.id.btn_active)
-        val inactiveBtn = rootView.findViewById<Button>(R.id.btn_inactive)
-        val finishBtn = rootView.findViewById<Button>(R.id.btn_finish)
+
+        activeBtn = rootView.findViewById(R.id.btn_active)
+        inactiveBtn = rootView.findViewById(R.id.btn_inactive)
+        finishBtn = rootView.findViewById(R.id.btn_finish)
+        revokeBtn = rootView.findViewById(R.id.btn_revoke)
+        infoBtn = rootView.findViewById(R.id.btn_deliveryInfo)
 
         map = rootView.findViewById(R.id.map)
         map.isVisible = false
         mapController = map.controller
 
-        //Init buttons
-        activeBtn.setOnClickListener {
-            viewModel.getVehicles()
-        }
-
-        inactiveBtn.setOnClickListener {
-            viewModel.setInactive()
-        }
-
-        finishBtn.setOnClickListener {
-            viewModel.confirmDelivery()
-        }
+        initButtons()
 
         //Init road manager
         roadManager = OSRMRoadManager(context, userAgent)
@@ -93,51 +98,18 @@ class LocationFragment() : Fragment() {
             }
         })
 
-        //Observe if warper is at delivery point
-        viewModel.atDeliveryPoint.observe(viewLifecycleOwner, {
-            finishBtn.isVisible = true
-        })
-
         //Observe state changes and draw UI according to warper state
         viewModel.state.observe(viewLifecycleOwner, {
-
-            if (it != WarperState.INACTIVE) {
-
-                //Display UI for active / delivering / looking for delivery state
-                if(it == WarperState.RETRIEVING) {
-                    finishBtn.isVisible = false
-                    pickupMarker?.setVisible(true)
-                    deliveryMarker?.setVisible(false)
-                }
-                else if(it == WarperState.DELIVERING) {
-                    pickupMarker?.setVisible(true)
-                    deliveryMarker?.setVisible(true)
-                }
-
-                map.isVisible = true
-                initMap(map)
-                activeBtn.isVisible = false
-                inactiveBtn.isVisible = true
-
-            } else {
-
-                //Display UI for inactive state
-                if(pickupMarker != null){
-                    pickupMarker!!.setVisible(false)
-                    pickupMarker = null
-                }
-
-                if(deliveryMarker != null){
-                    deliveryMarker!!.setVisible(false)
-                    deliveryMarker = null
-                }
-
-                deliveryMarker?.setVisible(false)
-                map.isVisible = false
-                activeBtn.isVisible = true
-                inactiveBtn.isVisible = false
-                finishBtn.isVisible = false
+            when (it) {
+                WarperState.INACTIVE -> setInactiveUI()
+                WarperState.LOOKING_FOR_DELIVERY -> setSearchingUI()
+                WarperState.RETRIEVING -> setRetrievingUI()
+                WarperState.DELIVERING -> setDeliveringUI()
             }
+        })
+
+        viewModel.deliveryFullInfo.observe(viewLifecycleOwner, {
+            showDeliveryInfoDialog()
         })
 
         //Displays the vehicle selection dialog after vehicles are obtained from the API
@@ -153,6 +125,86 @@ class LocationFragment() : Fragment() {
         return rootView
     }
 
+    private fun setInactiveUI(){
+        //Display UI for inactive state
+        if(pickupMarker != null){
+            pickupMarker!!.setVisible(false)
+            pickupMarker = null
+        }
+
+        if(deliveryMarker != null){
+            deliveryMarker!!.setVisible(false)
+            deliveryMarker = null
+        }
+
+        activeBtn.isVisible = true
+        inactiveBtn.isVisible = false
+        finishBtn.isVisible = false
+        revokeBtn.isVisible = false
+        infoBtn.isVisible = false
+
+        map.isVisible = false
+
+    }
+
+    private fun setSearchingUI(){
+        initMap(map)
+
+        activeBtn.isVisible = false
+        inactiveBtn.isVisible = true
+        finishBtn.isVisible = false
+        revokeBtn.isVisible = false
+        infoBtn.isVisible = false
+
+        map.isVisible = true
+    }
+
+    private fun setRetrievingUI(){
+        initMap(map)
+
+        activeBtn.isVisible = false
+        inactiveBtn.isVisible = false
+        finishBtn.isVisible = false
+        revokeBtn.isVisible = true
+        infoBtn.isVisible = true
+
+        map.isVisible = true
+    }
+
+    private fun setDeliveringUI() {
+        initMap(map)
+
+        activeBtn.isVisible = false
+        inactiveBtn.isVisible = false
+        finishBtn.isVisible = false
+        revokeBtn.isVisible = false
+        infoBtn.isVisible = true
+        map.isVisible = true
+    }
+
+    private fun initButtons(){
+        activeBtn.setOnClickListener {
+            viewModel.getVehicles()
+        }
+
+        inactiveBtn.setOnClickListener {
+            viewModel.setInactive()
+        }
+
+        finishBtn.setOnClickListener {
+            viewModel.confirmDelivery()
+        }
+
+        revokeBtn.setOnClickListener {
+            viewModel.revokeDelivery()
+        }
+
+        infoBtn.setOnClickListener{
+            //TODO: Change
+            viewModel.getDeliveryInfo()
+        }
+    }
+
     fun onNewLocation(location: Location) {
 
         val oldLocation = viewModel.currentLocation.value
@@ -164,7 +216,7 @@ class LocationFragment() : Fragment() {
             deliveryLocation != null &&
             newLocation.getDistance(deliveryLocation.toLocation()) < 17
         ) {
-            viewModel.atDeliveryPoint.postValue(true)
+            finishBtn.isVisible =  true
             Log.v("DELIVERY", "AT POINT")
         }
 
@@ -280,6 +332,23 @@ class LocationFragment() : Fragment() {
         map.invalidate()
     }
 
+    private fun showDeliveryInfoDialog() {
+        val alertDialog = AlertDialog.Builder(context)
+
+        val inflater = this.layoutInflater
+
+        val view = inflater.inflate(R.layout.dialog_delivery_info, null)
+
+        val phone = view.findViewById<TextView>(R.id.client_phone)
+
+        alertDialog.setView(view)
+
+        alertDialog.setTitle(R.string.delivery_info)
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->}
+
+        deliveryInfoDialog = alertDialog.show()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         viewModel.detachListener()
@@ -288,6 +357,7 @@ class LocationFragment() : Fragment() {
     override fun onPause() {
         super.onPause()
         vehicleSelectionDialog?.dismiss()
+        deliveryInfoDialog?.dismiss()
     }
 }
 

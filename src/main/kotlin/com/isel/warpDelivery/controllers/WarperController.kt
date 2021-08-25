@@ -225,14 +225,12 @@ class WarperController(
         }
     }
 
-
     @WarperResource
     @PutMapping("/SetInactive")
     fun removeActiveWarper(req: HttpServletRequest){
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         activeWarpers.remove(warper.id)
     }
-
 }
 
 

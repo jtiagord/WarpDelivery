@@ -16,8 +16,7 @@ class WarperApplication : Application() {
         onSubscriptionError: (Exception) -> Unit,
         onActiveWarper: (Map<String, Any>) -> Unit,
         onDeliveringWarper: (Map<String, Any>) -> Unit
-    )
-    {
+    ) {
         repository.initFirestore(onSubscriptionError, onActiveWarper, onDeliveringWarper)
     }
 
@@ -54,8 +53,23 @@ class WarperApplication : Application() {
     fun confirmDelivery(
         onSuccess: () -> Unit,
         onFailure: () -> Unit
-    ){
+    ) {
         return repository.confirmDelivery(onSuccess, onFailure)
+    }
+
+    fun getDeliveryInfo(
+        deliveryId: String,
+        onSuccess: (DeliveryFullInfo) -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.getDeliveryInfo(deliveryId, onSuccess, onFailure)
+    }
+
+    fun revokeDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        return repository.revokeDelivery(onSuccess, onFailure)
     }
 
     //User
@@ -122,14 +136,14 @@ class WarperApplication : Application() {
 
                 // Get new FCM registration token
                 val token = task.result
-                repository.setActive(vehicle, location,token, onSuccess, onFailure)
+                repository.setActive(vehicle, location, token, onSuccess, onFailure)
             })
     }
 
     fun setInactive(
         onSuccess: () -> Unit,
         onFailure: () -> Unit
-    ){
+    ) {
         return repository.setInactive(onSuccess, onFailure)
     }
 
@@ -138,11 +152,11 @@ class WarperApplication : Application() {
         return repository.updateCurrentLocation(location)
     }
 
-    fun logout(){
+    fun logout() {
         return repository.logout()
     }
 
-    fun detachListener(){
+    fun detachListener() {
         return repository.detachListeners()
     }
 

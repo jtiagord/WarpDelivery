@@ -10,8 +10,16 @@ interface ApiInterface {
     @GET("warpers/{username}/deliveries/")
     fun getWarperDeliveries(@Path("username") username: String): Call<List<Delivery>>
 
+    @GET("deliveries/{deliveryId}")
+    fun getDeliveryInfo(@Path("deliveryId") deliveryId: String): Call<DeliveryFullInfo?>
+
     @POST("warpers/confirmDelivery")
     fun confirmDelivery(
+        @Header("Authorization") token: String
+    ): Call<Unit>
+
+    @POST("warpers/revokeDelivery")
+    fun revokeDelivery(
         @Header("Authorization") token: String
     ): Call<Unit>
 

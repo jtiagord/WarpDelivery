@@ -62,7 +62,7 @@
     <string name="set_active_fail">Failed to set active</string>
     <string name="get_vehicles_fail">Failed get vehicles</string>
     <string name="set_inactive_fail">Failed to set as inactive</string>
-    <string name="delivery_confirm_failt">Failed to confirm current delivery</string>
+    <string name="delivery_confirm_fail">Failed to confirm current delivery</string>
     <string name="delivery_location_title">Delivery location</string>
     <string name="pickup_location_title">Pickup Location</string>
     <string name="no_vehicles_error">You have no vehicles, please add one</string>
@@ -73,4 +73,9 @@
     <string name="password_mismatch_error">Passwords do not match</string>
     <string name="invalid_details_error">Invalid username / password combo</string>
     <string name="delete_vehicle_tip">Hold on a vehicle to delete it</string>
+    <string name="delivery_revoke_fail">Failed to revoke delivery</string>
+    <string name="revoke_delivery">Revoke delivery</string>
+    <string name="delivery_info">delivery info</string>
+    <string name="store_info">Store Information</string>
+    <string name="delivery_get_fail">Failed to get delivery info</string>
 </resources>

@@ -203,6 +203,68 @@ class AppRepository(val app: Application) {
         }
     }
 
+    fun getDeliveryInfo(
+        deliveryId : String,
+        onSuccess: (DeliveryFullInfo) -> Unit,
+        onFailure: () -> Unit
+    ) {
+
+        val call = request.getDeliveryInfo(deliveryId)
+        call.clone().enqueue(object : Callback<DeliveryFullInfo?> {
+            override fun onResponse(
+                call: Call<DeliveryFullInfo?>,
+                response: Response<DeliveryFullInfo?>
+            ) {
+                if (response.isSuccessful) {
+                    Log.d("DELIVERY", "Delivery confirmed")
+                    onSuccess(response.body()!!)
+                } else {
+                    onFailure()
+                }
+            }
+
+            override fun onFailure(call: Call<DeliveryFullInfo?>, t: Throwable) {
+                onFailure()
+                Log.e("ACTIVE", t.message!!)
+            }
+        })
+    }
+
+    fun revokeDelivery(
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    revokeDelivery(onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
+                }
+            )
+        } else {
+            val call = request.revokeDelivery(token!!)
+            call.clone().enqueue(object : Callback<Unit> {
+                override fun onResponse(
+                    call: Call<Unit>,
+                    response: Response<Unit>
+                ) {
+                    if (response.isSuccessful) {
+                        Log.d("DELIVERY", "Delivery revoked")
+                        onSuccess()
+                    } else {
+                        onFailure()
+                    }
+                }
+
+                override fun onFailure(call: Call<Unit>, t: Throwable) {
+                    onFailure()
+                    Log.e("DELIVERY", t.message!!)
+                }
+            })
+        }
+    }
+
     //USER
     fun getUserInfo(username: String, onSuccess: (Warper) -> Unit, onFailure: () -> Unit) {
 

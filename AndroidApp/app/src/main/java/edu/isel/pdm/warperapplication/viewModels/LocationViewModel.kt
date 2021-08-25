@@ -7,6 +7,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.WarperApplication
+import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.util.GeoPoint
 
@@ -18,11 +19,10 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
     var currentLocation = MutableLiveData<LocationEntity>()
     var pickupLocation = MutableLiveData<GeoPoint>()
     var deliveryLocation = MutableLiveData<GeoPoint>()
+    var deliveryId = MutableLiveData<String?>()
+    var deliveryFullInfo = MutableLiveData<DeliveryFullInfo>()
     var state = MutableLiveData(WarperState.INACTIVE)
     var vehicleIds = MutableLiveData<Array<String>>()
-    var atDeliveryPoint = MutableLiveData(false)
-    var atPickupPoint = MutableLiveData(false)
-
 
     private val app: WarperApplication by lazy {
         getApplication<WarperApplication>()
@@ -58,11 +58,13 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         val pickupLoc = delivery["pickUpLocation"] as HashMap<String, Double>
         val deliveryLoc = delivery["deliveryLocation"] as HashMap<String, Double>
         val currLoc = data["location"] as HashMap<String, Double>
+        val id = delivery["id"] as String
 
         //Update pickup, delivery and current location
         pickupLocation.postValue(GeoPoint(pickupLoc["latitude"]!!, pickupLoc["longitude"]!!))
         currentLocation.postValue(LocationEntity(currLoc["latitude"]!!, currLoc["longitude"]!!))
         deliveryLocation.postValue(GeoPoint(deliveryLoc["latitude"]!!, deliveryLoc["longitude"]!!))
+        deliveryId.postValue(id)
     }
 
     fun detachListener() {
@@ -124,12 +126,33 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
                 state.postValue(WarperState.INACTIVE)
             },
             onFailure = {
-                Toast.makeText(getApplication(), R.string.delivery_confirm_failt, Toast.LENGTH_LONG)
+                Toast.makeText(getApplication(), R.string.delivery_confirm_fail, Toast.LENGTH_LONG)
                     .show()
             }
         )
     }
+
+    fun revokeDelivery() {
+        app.revokeDelivery(
+            onSuccess = {
+                Log.d("STATE", "INACTIVE")
+                state.postValue(WarperState.INACTIVE)
+            },
+            onFailure = {
+                Toast.makeText(getApplication(), R.string.delivery_revoke_fail, Toast.LENGTH_LONG)
+                    .show()
+            }
+        )
+    }
+
+    fun getDeliveryInfo(){
+        app.getDeliveryInfo(deliveryId.value!!,
+            onSuccess = {
+            deliveryFullInfo.postValue(it)
+        },
+            onFailure = {
+                Toast.makeText(getApplication(), R.string.delivery_get_fail, Toast.LENGTH_LONG)
+                    .show()
+            })
+    }
 }
-
-
-
