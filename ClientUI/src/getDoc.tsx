@@ -1,8 +1,5 @@
-import db from './firebase.config'
+import collections from './dbCollections'
 
 export function getDoc(token:string){
-    const response=db.collection('DELIVERINGWARPERS')
-    const query = response.where('delivery.id',"==",token)
-
-    return query.get()
+    return collections.delivering.where('delivery.id',"==",token).get()
 }
