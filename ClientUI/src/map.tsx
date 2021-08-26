@@ -2,16 +2,48 @@ import ReactMapboxGl from 'react-mapbox-gl'
 import {useState,useEffect} from 'react'
 import {Markers} from './markers'
 import { getDoc } from './getDoc'
+import collections from './dbCollections'
 import { GetDeliveryInfo } from './getDeliveryInfo'
 
 export function Map({token}:{token:string}){
     const [center,setCenter] = useState<Coordinates>({lat:null,long:null})
     const [zoom, setZoom] = useState(15)
-    const {deliveryData,isError} = GetDeliveryInfo(token)
-    
+    const [state,setState] = useState(null)
+    //const {deliveryData,isError} = GetDeliveryInfo(token)
+
+    useEffect(()=>{
+      if(state==='DELIVERING')
+        setMapCenter()
+
+      async function setMapCenter(){
+        let unmounted=false
+        const data = await getDoc(token)
+        if(!data.empty){
+          data.forEach(doc => {
+            if(!unmounted)
+            setCenter({lat:doc.data().location.latitude,long:doc.data().location.longitude})
+          }); 
+        }
+        return () => {unmounted=true}
+      }
+    },[state])
+
+    useEffect(()=>{
+      let unmounted=false
+      const listener = collections.delivering.onSnapshot((docSnapShot:any)=>{
+        docSnapShot.docChanges().forEach((change:any)=>{
+          if(!unmounted)
+            setState(change.doc.data().state)
+        })
+      }, err => {
+        console.log(`Encountered error: ${err}`);
+      })
+      return () => {unmounted=true}
+    },[])
+/*     
     if(isError) return <div>failed to load</div>
     if (!deliveryData) return <div>loading...</div>
-    const state = deliveryData.state
+    const state = deliveryData.state */
 
     const Map = ReactMapboxGl({
       accessToken:
@@ -56,19 +88,7 @@ export function Map({token}:{token:string}){
       }
     },[])
 */
-    useEffect(()=>{
-      if(state==='DELIVERED'){
-        setMapCenter()
-      }
-      async function setMapCenter(){
-        const data = await getDoc(token)
-        if(!data.empty){
-          data.forEach(doc => {
-            setCenter({lat:doc.data().location.latitude,long:doc.data().location.longitude})
-          }); 
-        }
-      }
-    },[deliveryData])
+    
     
 return(
   <div>
@@ -93,7 +113,7 @@ return(
               center={[center.long,center.lat]}
               zoom={[zoom]}
             >
-            <Markers id={token} data={deliveryData}/>
+            <Markers id={token}/>
             </Map>
           </div>
       }

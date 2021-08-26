@@ -2,22 +2,21 @@ import {Layer,Feature,Popup} from 'react-mapbox-gl'
 import {useState,useEffect} from 'react'
 import collections from './dbCollections'
 import { getDoc } from './getDoc'
+import { GetDeliveryInfo } from './getDeliveryInfo'
 
-type MarkerInfo = {
-  id:string,
-  data:any
-}
-
-export function Markers({id,data}:MarkerInfo){
+export function Markers({id}:{id:string}){
     const [warperCoord,setWarperCoord] = useState<Coordinates>({lat:null,long: null})
     const [clientCoord,setClientCoord] = useState<Coordinates>({lat:null,long:null})
     const [storeCoord,setStoreCoord] = useState<Coordinates>({lat:null,long:null})
-    const [popUpVisibility,setPopUpVisibility] = useState(0)
+    const [storePopupVisibility,setStorePopupVisibility] = useState(false)
+    const [warperPopupVisibility,setWarperPopupVisibility] = useState(false)
+    const {data,isError} = GetDeliveryInfo(id)
 
     useEffect(() => {
       getDeliveryInfo()
 
       async function getDeliveryInfo(){
+        let unmounted = false
         const query = collections.delivering.where('delivery.id',"==",id)
         
         const data = await getDoc(id)
@@ -28,19 +27,27 @@ export function Markers({id,data}:MarkerInfo){
         } 
 
         data.forEach(doc => {
+          if(!unmounted){
           setClientCoord({lat:doc.data().delivery.deliveryLocation.latitude,long:doc.data().delivery.deliveryLocation.longitude})
           setStoreCoord({lat:doc.data().delivery.pickUpLocation.latitude,long:doc.data().delivery.pickUpLocation.longitude})
+          }
         }); 
 
-        const listener = await query.onSnapshot((docSnapShot:any)=>{
+        const listener = query.onSnapshot((docSnapShot:any)=>{
           docSnapShot.docChanges().forEach((change:any)=>{
-            setWarperCoord({lat:change.doc.data().location.latitude,long:change.doc.data().location.longitude})
+            if(!unmounted)
+              setWarperCoord({lat:change.doc.data().location.latitude,long:change.doc.data().location.longitude})
           })
         }, err => {
           console.log(`Encountered error: ${err}`);
         })
+
+        return () => {unmounted=true}
       }
     }, [])
+
+    if(isError) return <div>failed to load</div>
+    if (!data) return <div>loading...</div>
        
 return(
    <div>
@@ -52,10 +59,10 @@ return(
                 'circle-stroke-opacity': 1
               }}>
         <Feature coordinates={[warperCoord.long,warperCoord.lat]}
-        onClick={()=>{setPopUpVisibility(1)}}/>
+        onClick={()=>{setWarperPopupVisibility(!warperPopupVisibility)}}/>
         <Feature coordinates={[clientCoord.long,clientCoord.lat]}/>
         <Feature coordinates={[storeCoord.long,storeCoord.lat]}
-        onClick={()=>{setPopUpVisibility(2)}}/>
+        onClick={()=>{setStorePopupVisibility(!storePopupVisibility)}}/>
       </Layer>
 
       <Layer type="symbol" layout={{
@@ -90,14 +97,14 @@ return(
               }}>
         <Feature coordinates={[clientCoord.long,clientCoord.lat]}/>
       </Layer>
-      {popUpVisibility == 1?
+      {warperPopupVisibility?
         <Popup
         coordinates={[warperCoord.long,warperCoord.lat]}
       >
         <p>{data.warper.firstname} {data.warper.lastname}</p>
         <p>{data.warper.phonenumber}</p>
-      </Popup>:
-        popUpVisibility==2?
+      </Popup>: null}
+        {storePopupVisibility?
         <Popup
           coordinates={[storeCoord.long,storeCoord.lat]}
         >
