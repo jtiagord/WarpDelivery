@@ -8,12 +8,14 @@ import edu.isel.pdm.warperapplication.WarperApplication
 class LoginViewModel(app: Application) : AndroidViewModel(app) {
 
     val loginStatus = MutableLiveData<Boolean>()
+    var lastLogin : Pair<String,String>? = null
 
     private val app: WarperApplication by lazy {
         getApplication<WarperApplication>()
     }
 
     fun tryLogin(user: String, password: String) {
+        lastLogin = Pair(user,password)
         app.tryLogin(user, password,
             onSuccess = {
                 if(it != null){
