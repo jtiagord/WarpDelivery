@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
@@ -17,12 +16,11 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.viewModels.WarperState
+import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
-import edu.isel.pdm.warperapplication.web.entities.Vehicle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.osmdroid.api.IMapController
@@ -105,12 +103,11 @@ class LocationFragment() : Fragment() {
                 WarperState.LOOKING_FOR_DELIVERY -> setSearchingUI()
                 WarperState.RETRIEVING -> setRetrievingUI()
                 WarperState.DELIVERING -> setDeliveringUI()
+                else -> setInactiveUI()
             }
         })
 
-        viewModel.deliveryFullInfo.observe(viewLifecycleOwner, {
-            showDeliveryInfoDialog()
-        })
+
 
         //Displays the vehicle selection dialog after vehicles are obtained from the API
         viewModel.vehicleIds.observe(viewLifecycleOwner, {
@@ -200,8 +197,10 @@ class LocationFragment() : Fragment() {
         }
 
         infoBtn.setOnClickListener{
-            //TODO: Change
-            viewModel.getDeliveryInfo()
+
+            viewModel.getDeliveryInfo{ delivery->
+                showDeliveryInfoDialog(delivery)
+            }
         }
     }
 
@@ -332,7 +331,7 @@ class LocationFragment() : Fragment() {
         map.invalidate()
     }
 
-    private fun showDeliveryInfoDialog() {
+    private fun showDeliveryInfoDialog(delivery: DeliveryFullInfo) {
         val alertDialog = AlertDialog.Builder(context)
 
         val inflater = this.layoutInflater
@@ -340,6 +339,14 @@ class LocationFragment() : Fragment() {
         val view = inflater.inflate(R.layout.dialog_delivery_info, null)
 
         val phone = view.findViewById<TextView>(R.id.client_phone)
+        val address = view.findViewById<TextView>(R.id.deliver_address)
+        val store = view.findViewById<TextView>(R.id.store_name)
+        val storeAddress = view.findViewById<TextView>(R.id.store_address)
+
+        phone.text = delivery.clientPhone
+        address.text = delivery.deliverAddress
+        store.text = delivery.store.name
+        storeAddress.text = delivery.store.address
 
         alertDialog.setView(view)
 

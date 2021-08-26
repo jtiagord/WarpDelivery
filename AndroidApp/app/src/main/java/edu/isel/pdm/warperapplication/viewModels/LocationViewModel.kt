@@ -10,6 +10,7 @@ import edu.isel.pdm.warperapplication.WarperApplication
 import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 import edu.isel.pdm.warperapplication.web.entities.LocationEntity
 import org.osmdroid.util.GeoPoint
+import java.lang.IllegalStateException
 
 enum class WarperState {
     INACTIVE, LOOKING_FOR_DELIVERY, RETRIEVING, DELIVERING
@@ -37,12 +38,12 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
                 }
             },
             onDeliveringWarper = {
-                val status = it["state"] as String
                 if (it.isNotEmpty()) {
-                    Log.d("STATE", status)
+                    val status = it["state"] as String
                     state.postValue(WarperState.valueOf(status))
+                    updateDeliveryInfo(it)
                 }
-                updateDeliveryInfo(it)
+
             },
             onSubscriptionError = {
                 Toast.makeText(getApplication(), R.string.firestore_updates_fail, Toast.LENGTH_LONG)
@@ -145,11 +146,13 @@ class LocationViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    fun getDeliveryInfo(){
-        app.getDeliveryInfo(deliveryId.value!!,
+    fun getDeliveryInfo( onSuccess: (DeliveryFullInfo) -> Unit ){
+        val deliveryId= deliveryId.value?:throw IllegalStateException("No Delivery To Fetch")
+
+        app.getDeliveryInfo(deliveryId = deliveryId,
             onSuccess = {
-            deliveryFullInfo.postValue(it)
-        },
+                onSuccess(it)
+            },
             onFailure = {
                 Toast.makeText(getApplication(), R.string.delivery_get_fail, Toast.LENGTH_LONG)
                     .show()

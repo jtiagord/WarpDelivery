@@ -52,7 +52,7 @@ class AppRepository(val app: Application) {
             }
 
             if (snapshot?.data != null && snapshot.exists()) {
-                onDeliveringWarper(snapshot.data!!)
+                onDeliveringWarper(snapshot.data?: mapOf())
                 Log.d("FIRESTORE", "Delivering warper current data: ${snapshot.data}")
             } else {
                 Log.d("FIRESTORE", "Delivering warper data: null")
