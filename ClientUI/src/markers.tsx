@@ -2,15 +2,19 @@ import {Layer,Feature,Popup} from 'react-mapbox-gl'
 import {useState,useEffect} from 'react'
 import collections from './dbCollections'
 import { getDoc } from './getDoc'
-import { GetDeliveryInfo } from './getDeliveryInfo'
 
-export function Markers({id}:{id:string}){
+type MarkerInfo={
+  id:string,
+  deliveryData:any
+}
+
+export function Markers({id,deliveryData}:MarkerInfo){
     const [warperCoord,setWarperCoord] = useState<Coordinates>({lat:null,long: null})
     const [clientCoord,setClientCoord] = useState<Coordinates>({lat:null,long:null})
     const [storeCoord,setStoreCoord] = useState<Coordinates>({lat:null,long:null})
     const [storePopupVisibility,setStorePopupVisibility] = useState(false)
     const [warperPopupVisibility,setWarperPopupVisibility] = useState(false)
-    const {data,isError} = GetDeliveryInfo(id)
+    
 
     useEffect(() => {
       getDeliveryInfo()
@@ -46,12 +50,10 @@ export function Markers({id}:{id:string}){
       }
     }, [])
 
-    if(isError) return <div>failed to load</div>
-    if (!data) return <div>loading...</div>
+   
        
 return(
    <div>
-
       <Layer type="circle" id="marker" paint={{
                 'circle-color': "#ff5200",
                 'circle-stroke-width': 5,
@@ -101,16 +103,16 @@ return(
         <Popup
         coordinates={[warperCoord.long,warperCoord.lat]}
       >
-        <p>{data.warper.firstname} {data.warper.lastname}</p>
-        <p>{data.warper.phonenumber}</p>
+        <p>{deliveryData.warper.firstname} {deliveryData.warper.lastname}</p>
+        <p>{deliveryData.warper.phonenumber}</p>
       </Popup>: null}
         {storePopupVisibility?
         <Popup
           coordinates={[storeCoord.long,storeCoord.lat]}
         >
-          <p>{data.store.name}</p>
-          <p>{data.store.postalcode}</p>
-          <p>{data.store.address}</p>
+          <p>{deliveryData.store.name}</p>
+          <p>{deliveryData.store.postalcode}</p>
+          <p>{deliveryData.store.address}</p>
         </Popup>:
         null
       }
