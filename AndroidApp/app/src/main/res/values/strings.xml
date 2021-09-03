@@ -25,10 +25,11 @@
     <string name="last_name">Last Name</string>
     <string name="email_address">Email Address</string>
     <string name="phone_number">Phone Number</string>
-    <string name="delivery_item_client">Client: %s</string>
+    <string name="delivery_item_store">Store: %s</string>
     <string name="delivery_item_date">Date: %s</string>
-    <string name="delivery_item_rating">Rating: %o</string>
-    <string name="delivery_item_reward">Reward: %.2f</string>
+    <string name="delivery_item_type">Type: %s</string>
+    <string name="delivery_item_rating">Rating: %s</string>
+    <string name="delivery_item_reward">Reward: %s</string>
     <string name="delivery_item_state">State: %s</string>
     <string name="logout">LOGOUT</string>
     <string name="set_active">SET ACTIVE</string>
@@ -82,4 +83,6 @@
     <string name="store_address_title">Store Address:</string>
     <string name="store_name_title">Store Name Title:</string>
     <string name="client_address_title">Client Address:</string>
+    <string name="delivery_update_error">Error updating deliveries</string>
+    <string name="store_title">Store :</string>
 </resources>

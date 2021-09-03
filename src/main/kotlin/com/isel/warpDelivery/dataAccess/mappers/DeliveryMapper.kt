@@ -105,9 +105,10 @@ class DeliveryMapper(val jdbi: Jdbi) {
     fun readAll(limit : Int, offset : Int): List<Delivery> =
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
             return@inTransaction handle.createQuery(
-                "SELECT deliveryid, clientusername, warperusername, storeid, state, clientphone, purchasedate, " +
+                "SELECT deliveryid, warperusername, storeid, state, clientphone, purchasedate, " +
                         "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
                         "from $DELIVERY_TABLE " +
+
                         "limit  :limit " +
                         "offset :offset"
             )
@@ -176,8 +177,11 @@ class DeliveryMapper(val jdbi: Jdbi) {
         jdbi.inTransaction<List<Delivery>, Exception> { handle ->
 
             return@inTransaction handle.createQuery(
-                "SELECT * FROM $DELIVERY_TABLE WHERE warperusername = :username " +
-                        "limit  :limit " +
+                "SELECT deliveryid, warperusername, $DELIVERY_TABLE.storeid, state, clientphone, purchasedate, deliverDate, " +
+                        "deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type, name AS storeName " +
+                        "FROM $DELIVERY_TABLE JOIN $STORE_TABLE ON $DELIVERY_TABLE.storeid = $STORE_TABLE.storeid " +
+                        "WHERE warperusername = :username " +
+                        "limit :limit " +
                         "offset :offset"
                 )
                 .bind("limit", limit)

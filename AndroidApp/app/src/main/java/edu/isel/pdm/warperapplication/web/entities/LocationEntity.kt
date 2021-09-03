@@ -19,8 +19,8 @@ class LocationEntity(
         ) * 6371000
     }
 
-    fun toGeoPoint(latitude: Double, longitude: Double): GeoPoint {
-        return GeoPoint(latitude, longitude)
+    fun toGeoPoint(): GeoPoint {
+        return GeoPoint(this.latitude, this.longitude)
     }
 
     fun fromGeoPoint(point: GeoPoint): LocationEntity {

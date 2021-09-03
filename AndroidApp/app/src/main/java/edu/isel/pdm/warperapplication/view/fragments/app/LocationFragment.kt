@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.viewModels.LocationViewModel
 import edu.isel.pdm.warperapplication.viewModels.WarperState
@@ -32,8 +33,10 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import org.osmdroid.bonuspack.routing.Road
+import org.osmdroid.util.TileSystem
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import org.osmdroid.views.overlay.compass.CompassOverlay
 
 import kotlin.collections.ArrayList
 
@@ -52,15 +55,19 @@ class LocationFragment() : Fragment() {
     private var roadOverlay: Polyline? = null
     private var pickupMarker: Marker? = null
     private var deliveryMarker: Marker? = null
-    private var vehicleSelectionDialog : AlertDialog? = null
-    private var deliveryInfoDialog : AlertDialog? = null
+    private var vehicleSelectionDialog: AlertDialog? = null
+    private var deliveryInfoDialog: AlertDialog? = null
+    private var compassOverlay: CompassOverlay? = null
+    private var locationOverlay: MyLocationNewOverlay? = null
+    private var tracking = false
 
 
-    private lateinit var activeBtn : Button
-    private lateinit var inactiveBtn : ExtendedFloatingActionButton
-    private lateinit var finishBtn : ExtendedFloatingActionButton
-    private lateinit var revokeBtn : ExtendedFloatingActionButton
-    private lateinit var infoBtn : ExtendedFloatingActionButton
+    private lateinit var activeBtn: Button
+    private lateinit var inactiveBtn: ExtendedFloatingActionButton
+    private lateinit var finishBtn: ExtendedFloatingActionButton
+    private lateinit var revokeBtn: ExtendedFloatingActionButton
+    private lateinit var infoBtn: ExtendedFloatingActionButton
+    private lateinit var trackingBtn: FloatingActionButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -74,12 +81,13 @@ class LocationFragment() : Fragment() {
         finishBtn = rootView.findViewById(R.id.btn_finish)
         revokeBtn = rootView.findViewById(R.id.btn_revoke)
         infoBtn = rootView.findViewById(R.id.btn_deliveryInfo)
+        trackingBtn = rootView.findViewById(R.id.btn_tracking)
+        initButtons()
 
         map = rootView.findViewById(R.id.map)
         map.isVisible = false
         mapController = map.controller
 
-        initButtons()
 
         //Init road manager
         roadManager = OSRMRoadManager(context, userAgent)
@@ -107,8 +115,6 @@ class LocationFragment() : Fragment() {
             }
         })
 
-
-
         //Displays the vehicle selection dialog after vehicles are obtained from the API
         viewModel.vehicleIds.observe(viewLifecycleOwner, {
             if (it.isEmpty())
@@ -122,14 +128,14 @@ class LocationFragment() : Fragment() {
         return rootView
     }
 
-    private fun setInactiveUI(){
+    private fun setInactiveUI() {
         //Display UI for inactive state
-        if(pickupMarker != null){
+        if (pickupMarker != null) {
             pickupMarker!!.setVisible(false)
             pickupMarker = null
         }
 
-        if(deliveryMarker != null){
+        if (deliveryMarker != null) {
             deliveryMarker!!.setVisible(false)
             deliveryMarker = null
         }
@@ -139,12 +145,13 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = false
+        trackingBtn.isVisible = false
 
         map.isVisible = false
 
     }
 
-    private fun setSearchingUI(){
+    private fun setSearchingUI() {
         initMap(map)
 
         activeBtn.isVisible = false
@@ -152,11 +159,12 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = false
+        trackingBtn.isVisible = true
 
         map.isVisible = true
     }
 
-    private fun setRetrievingUI(){
+    private fun setRetrievingUI() {
         initMap(map)
 
         activeBtn.isVisible = false
@@ -164,6 +172,7 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = true
         infoBtn.isVisible = true
+        trackingBtn.isVisible = true
 
         map.isVisible = true
     }
@@ -176,10 +185,12 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = true
+        trackingBtn.isVisible = true
+
         map.isVisible = true
     }
 
-    private fun initButtons(){
+    private fun initButtons() {
         activeBtn.setOnClickListener {
             viewModel.getVehicles()
         }
@@ -196,11 +207,15 @@ class LocationFragment() : Fragment() {
             viewModel.revokeDelivery()
         }
 
-        infoBtn.setOnClickListener{
+        infoBtn.setOnClickListener {
 
-            viewModel.getDeliveryInfo{ delivery->
+            viewModel.getDeliveryInfo { delivery ->
                 showDeliveryInfoDialog(delivery)
             }
+        }
+
+        trackingBtn.setOnClickListener {
+            tracking = !tracking
         }
     }
 
@@ -215,16 +230,22 @@ class LocationFragment() : Fragment() {
             deliveryLocation != null &&
             newLocation.getDistance(deliveryLocation.toLocation()) < 17
         ) {
-            finishBtn.isVisible =  true
+            finishBtn.isVisible = true
             Log.v("DELIVERY", "AT POINT")
         }
 
         //Get and updated path if the warper has moved more than 2m
+
         if (oldLocation != null &&
             newLocation.getDistance(oldLocation) > 2 && deliveryLocation != null
         ) {
+            Log.v("TRACKING", tracking.toString())
+            if(tracking)
+                mapController.animateTo(newLocation.toGeoPoint())
+
             getRouteAsync(viewModel.state.value!!)
         }
+
 
         //Send a location update to the API
         viewModel.updateCurrentLocation(newLocation)
@@ -235,24 +256,26 @@ class LocationFragment() : Fragment() {
         map.isTilesScaledToDpi = true
         map.minZoomLevel = 1.0
         map.maxZoomLevel = 21.0
+        map.setScrollableAreaLimitLatitude(TileSystem.MaxLatitude, -TileSystem.MaxLatitude, 0)
         map.isVerticalMapRepetitionEnabled = false
         map.setMultiTouchControls(true)
 
         //Add user location overlay
-        val myOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map)
-        map.overlays.add(myOverlay)
-        myOverlay.enableMyLocation()
-        myOverlay.enableFollowLocation()
+        locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), map)
+        map.overlays.add(locationOverlay)
+        locationOverlay!!.enableMyLocation()
+        locationOverlay!!.enableFollowLocation()
 
         //Add markers if needed
-        if(deliveryMarker != null)
+        if (deliveryMarker != null)
             map.overlays.add(deliveryMarker)
 
-        if(pickupMarker != null)
+        if (pickupMarker != null)
             map.overlays.add(pickupMarker)
 
         map.invalidate()
     }
+
 
     private fun showVehicleSelectionDialog() {
         val alertDialog = AlertDialog.Builder(context)
@@ -276,7 +299,7 @@ class LocationFragment() : Fragment() {
         val waypoints = ArrayList<GeoPoint>()
 
         val currLoc = viewModel.currentLocation.value ?: LocationEntity(0.0, 0.0)
-        val currGeoPoint = currLoc.toGeoPoint(currLoc.latitude, currLoc.longitude)
+        val currGeoPoint = currLoc.toGeoPoint()
 
         val pickupGeoPoint = viewModel.pickupLocation.value!!
         val deliveryGeoPoint = viewModel.deliveryLocation.value!!
@@ -351,7 +374,7 @@ class LocationFragment() : Fragment() {
         alertDialog.setView(view)
 
         alertDialog.setTitle(R.string.delivery_info)
-            .setPositiveButton(getString(R.string.ok)) { _, _ ->}
+            .setPositiveButton(getString(R.string.ok)) { _, _ -> }
 
         deliveryInfoDialog = alertDialog.show()
     }

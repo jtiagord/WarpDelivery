@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceBuilder {
 
-    private const val BASE_URL = "http://192.168.1.8:8080/WarpDelivery/"
+    private const val BASE_URL = "http://192.168.1.66:8080/WarpDelivery/"
 
     private val client = OkHttpClient.Builder().addInterceptor(Interceptor { chain ->
         val token = chain.request().header("Authorization")

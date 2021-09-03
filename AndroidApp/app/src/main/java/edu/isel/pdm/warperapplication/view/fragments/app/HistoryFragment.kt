@@ -43,7 +43,7 @@ class HistoryFragment : Fragment() {
 
     private fun updateDeliveries(view: RecyclerView, deliveries: List<Delivery>?){
         if(deliveries == null){
-            Toast.makeText(activity, "Error updating deliveries", Toast.LENGTH_LONG).show()
+            Toast.makeText(activity, R.string.delivery_update_error, Toast.LENGTH_LONG).show()
             return
         }
 

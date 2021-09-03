@@ -38,6 +38,7 @@ class Delivery (val deliveryId : String?,
                 val deliverLongitude: Double,
                 val deliverAddress: String,
                 var reward: Float?,
+                var storeName: String?,
                 val type : Size,
                 var transitions : List<StateTransition>?)
 

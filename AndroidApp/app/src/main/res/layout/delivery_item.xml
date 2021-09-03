@@ -18,18 +18,16 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/client_username"
+                android:id="@+id/store_name"
                 android:layout_margin="5dp"
-                android:textSize="15sp"
-                android:text="Client : "/>
+                android:textSize="15sp"/>
 
             <TextView
-                android:layout_below="@+id/client_username"
+                android:layout_below="@+id/store_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/delivery_date"
-                android:layout_margin="5dp"
-                android:text="Date : "/>
+                android:layout_margin="5dp"/>
 
             <TextView
                 android:layout_below="@+id/delivery_date"
@@ -37,8 +35,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/delivery_rating"
                 android:textSize="15sp"
-                android:layout_margin="5dp"
-                android:text="Rating : "/>
+                android:layout_margin="5dp"/>
 
             <TextView
                 android:layout_below="@+id/delivery_rating"
@@ -46,8 +43,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/delivery_reward"
                 android:textSize="15sp"
-                android:layout_margin="5dp"
-                android:text="Reward: "/>
+                android:layout_margin="5dp"/>
 
             <TextView
                 android:layout_below="@+id/delivery_reward"
@@ -55,8 +51,15 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/delivery_state"
                 android:textSize="15sp"
-                android:layout_margin="5dp"
-                android:text="State: "/>
+                android:layout_margin="5dp"/>
+
+            <TextView
+                android:layout_below="@+id/delivery_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/delivery_type"
+                android:textSize="15sp"
+                android:layout_margin="5dp"/>
 
 
         </RelativeLayout>

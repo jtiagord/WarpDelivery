@@ -36,23 +36,30 @@ class DeliveriesAdapter(private val deliveries: List<Delivery>) :
 class DeliveriesViewHolder(itemView: View, val context: Context) :
     RecyclerView.ViewHolder(itemView) {
 
-    private val client: TextView = itemView.findViewById(R.id.client_username)
+    private val store: TextView = itemView.findViewById(R.id.store_name)
     private val date: TextView = itemView.findViewById(R.id.delivery_date)
     private val rating: TextView = itemView.findViewById(R.id.delivery_rating)
     private val reward: TextView = itemView.findViewById(R.id.delivery_reward)
+    private val type: TextView = itemView.findViewById(R.id.delivery_type)
     private val state: TextView = itemView.findViewById(R.id.delivery_state)
 
     fun bind(delivery: Delivery) {
 
-        client.text = context.getString(R.string.delivery_item_client, delivery.clientUsername)
+        store.text = context.getString(R.string.delivery_item_store, delivery.storeName)
         date.text =
             context.getString(R.string.delivery_item_date, getDateTime(delivery.deliverDate))
 
-        if (delivery.rating != null && delivery.reward != null) {
-            rating.text = context.getString(R.string.delivery_item_rating, delivery.rating)
-            reward.text = context.getString(R.string.delivery_item_reward, delivery.reward)
-        }
+        if (delivery.rating != null)
+            rating.text = context.getString(R.string.delivery_item_rating, delivery.rating.toString())
+        else
+            rating.text = context.getString(R.string.delivery_item_rating, "N/A")
 
+        if (delivery.reward != null)
+            reward.text = context.getString(R.string.delivery_item_reward, delivery.reward.toString())
+        else
+            reward.text = context.getString(R.string.delivery_item_reward, "N/A")
+
+        type.text = context.getString(R.string.delivery_item_type, delivery.type)
         state.text = context.getString(R.string.delivery_item_state, delivery.state)
     }
 

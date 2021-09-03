@@ -13,6 +13,7 @@ data class Delivery (
     val deliverLatitude: Double,
     val deliverLongitude: Double,
     val deliverAddress: String,
+    val storeName: String,
     var reward: Float?,
     val type : String,
 )

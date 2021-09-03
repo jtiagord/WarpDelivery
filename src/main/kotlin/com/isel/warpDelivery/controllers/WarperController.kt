@@ -37,13 +37,12 @@ import javax.servlet.http.HttpServletRequest
 class WarperController(
     val warperMapper: WarperMapper, val deliveryMapper: DeliveryMapper, val vehicleMapper: VehicleMapper,
     val activeWarpers: ActiveWarperRepository, val keys: KeyPair
-)
-{
+) {
 
     var logger: Logger = LoggerFactory.getLogger(WarperController::class.java)
 
-    companion object{
-        private const val EXPIRATION_TIME = 60*30 //in seconds
+    companion object {
+        private const val EXPIRATION_TIME = 60 * 30 //in seconds
     }
 
 
@@ -57,13 +56,11 @@ class WarperController(
     }
 
 
-
     @GetMapping("/{username}")
     fun getWarper(@PathVariable username: String): WarperOutputModel {
-        val warper = warperMapper.read(username) ?: throw ApiException("Warper Not Found",HttpStatus.NOT_FOUND)
+        val warper = warperMapper.read(username) ?: throw ApiException("Warper Not Found", HttpStatus.NOT_FOUND)
         return warper.toOutputModel()
     }
-
 
 
     @PostMapping
@@ -74,30 +71,30 @@ class WarperController(
     }
 
 
-
     @PostMapping("/Login")
-    fun login(@RequestBody warperCredentials : WarperLoginInputModel): Map<String,String>{
+    fun login(@RequestBody warperCredentials: WarperLoginInputModel): Map<String, String> {
 
-        val warper = warperMapper.read(warperCredentials.username) ?:
-            throw ApiException("Invalid Credentials" , HttpStatus.UNAUTHORIZED)
+        val warper = warperMapper.read(warperCredentials.username) ?: throw ApiException(
+            "Invalid Credentials",
+            HttpStatus.UNAUTHORIZED
+        )
 
         val (salt, password) = warper.password.split(":")
 
-        val encodedPasswordInput = encodePassword(warperCredentials.password,salt)
+        val encodedPasswordInput = encodePassword(warperCredentials.password, salt)
 
-        if(password != encodedPasswordInput)
-            throw ApiException("Invalid Credentials" , HttpStatus.UNAUTHORIZED)
+        if (password != encodedPasswordInput)
+            throw ApiException("Invalid Credentials", HttpStatus.UNAUTHORIZED)
 
         val token = JWT.create().withIssuer(ISSUER)
             .withClaim("id", warperCredentials.username)
             .withClaim("usertype", "WARPER")
             .withIssuedAt(Date(System.currentTimeMillis())) // Expiration time of 15 Minutes
-            .withExpiresAt(Date(System.currentTimeMillis()+EXPIRATION_TIME*1000))
-            .sign(Algorithm.RSA256(keys.publicKey,keys.privateKey))
+            .withExpiresAt(Date(System.currentTimeMillis() + EXPIRATION_TIME * 1000))
+            .sign(Algorithm.RSA256(keys.publicKey, keys.privateKey))
 
         return mapOf("token" to token)
     }
-
 
 
     @DeleteMapping("/{username}")
@@ -122,10 +119,10 @@ class WarperController(
     @WarperResource
     @PutMapping()
     fun updateWarper(req: HttpServletRequest, @RequestBody warper: WarperEdit): ResponseEntity<Any> {
-        if(warper.email!= null && !warper.email.contains('@')) throw ApiException("Email is invalid")
+        if (warper.email != null && !warper.email.contains('@')) throw ApiException("Email is invalid")
         val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
 
-        if(warper.password != null){
+        if (warper.password != null) {
             warper.password = encodePassword(warper.password!!)
         }
 
@@ -137,7 +134,8 @@ class WarperController(
     @WarperResource
     @AdminResource
     @PutMapping("/{username}/vehicles")
-    fun addVehicle( req: HttpServletRequest,
+    fun addVehicle(
+        req: HttpServletRequest,
         @PathVariable username: String,
         @RequestBody vehicle: VehicleInputModel
     ): ResponseEntity<Any> {
@@ -150,18 +148,17 @@ class WarperController(
     @AdminResource
     @DeleteMapping("/{username}/vehicles/{registration}")
     fun removeVehicle(req: HttpServletRequest, @PathVariable username: String, @PathVariable registration: String)
-    : ResponseEntity<Any> {
+            : ResponseEntity<Any> {
         val vehicleKey = VehicleKey(username, registration)
         val user = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
 
         //TODO : user.type == ADMIN ||
-        if( user.id == username) {
+        if (user.id == username) {
             vehicleMapper.delete(vehicleKey)
             return ResponseEntity.status(200).build()
         }
         return ResponseEntity.status(403).build()
     }
-
 
     /// NEED TESTING STILL
     @GetMapping("/{username}/deliveries/{deliveryId}")
@@ -171,54 +168,59 @@ class WarperController(
     }
 
     @GetMapping("/{username}/deliveries")
-    fun getDeliveries(@PathVariable username: String,
-                      @RequestParam(defaultValue = "10") limit : Int,
-                      @RequestParam(defaultValue = "10") offset : Int): ResponseEntity<List<Delivery>> {
-        val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username, limit , offset)
+    fun getDeliveries(
+        @PathVariable username: String,
+        @RequestParam(defaultValue = "10") limit: Int,
+        @RequestParam(defaultValue = "0") offset: Int
+    ): ResponseEntity<List<Delivery>> {
+        val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username, limit, offset)
         return ResponseEntity.status(200).body(deliveries)
     }
 
     /* ROUTING RELATED ENDPOINTS */
     @WarperResource
     @PostMapping("/SetActive")
-    fun addActiveWarper(req: HttpServletRequest, @RequestBody warperReq: ActiveWarperInputModel) : ResponseEntity<Any>{
+    fun addActiveWarper(req: HttpServletRequest, @RequestBody warperReq: ActiveWarperInputModel): ResponseEntity<Any> {
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        val warperInfo = warperMapper.read(warper.id) ?: throw ApiException("Warper doesn't exist",HttpStatus.NOT_FOUND)
+        val warperInfo =
+            warperMapper.read(warper.id) ?: throw ApiException("Warper doesn't exist", HttpStatus.NOT_FOUND)
 
-        val warperVehicle = warperInfo.vehicles.find { it.registration == warperReq.vehicle} ?:
-        throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
+        val warperVehicle = warperInfo.vehicles.find { it.registration == warperReq.vehicle } ?: throw ApiException(
+            "Vehicle Not Found",
+            HttpStatus.NOT_FOUND
+        )
 
-        val size = Size.fromText(warperVehicle.type)?:throw ApiException("Vehicle Not Found",HttpStatus.NOT_FOUND)
-        activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size ,warperReq.notificationToken))
+        val size = Size.fromText(warperVehicle.type) ?: throw ApiException("Vehicle Not Found", HttpStatus.NOT_FOUND)
+        activeWarpers.add(ActiveWarper(warper.id, warperReq.location, size, warperReq.notificationToken))
 
         return ResponseEntity.status(200).build()
     }
 
     @WarperResource
     @PostMapping("/confirmDelivery")
-    fun confirmDelivery(req: HttpServletRequest){
+    fun confirmDelivery(req: HttpServletRequest) {
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val activeWarper = activeWarpers.removeDeliveringWarper(warper.id)
-        if(activeWarper != null)
+        if (activeWarper != null)
             deliveryMapper.updateState(activeWarper.delivery.id, DeliveryState.DELIVERED)
     }
 
     @WarperResource
     @PutMapping("/location")
-    fun updateWarperLocation(req: HttpServletRequest, @RequestBody location: Location){
+    fun updateWarperLocation(req: HttpServletRequest, @RequestBody location: Location) {
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
-        activeWarpers.updateLocation(warper.id,location)
+        activeWarpers.updateLocation(warper.id, location)
     }
 
     @WarperResource
     @PostMapping("/revokeDelivery")
-    fun revokeDelivery(req: HttpServletRequest){
+    fun revokeDelivery(req: HttpServletRequest) {
         val warperInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val warper = activeWarpers.removeDeliveringWarper(warperInfo.id)
 
-        if(warper != null){
+        if (warper != null) {
             val delivery = deliveryMapper.read(warper.delivery.id)
-            if(delivery?.state == DeliveryState.DELIVERING || delivery?.state == DeliveryState.DELIVERED){
+            if (delivery?.state == DeliveryState.DELIVERING || delivery?.state == DeliveryState.DELIVERED) {
                 throw ApiException("You can't revoke a delivery that has already been handled")
             }
             WarperPublisher.publishDelivery(warper.delivery)
@@ -227,7 +229,7 @@ class WarperController(
 
     @WarperResource
     @PutMapping("/SetInactive")
-    fun removeActiveWarper(req: HttpServletRequest){
+    fun removeActiveWarper(req: HttpServletRequest) {
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         activeWarpers.remove(warper.id)
     }

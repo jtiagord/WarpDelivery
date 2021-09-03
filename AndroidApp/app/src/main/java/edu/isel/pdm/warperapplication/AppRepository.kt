@@ -216,7 +216,7 @@ class AppRepository(val app: Application) {
                 response: Response<DeliveryFullInfo?>
             ) {
                 if (response.isSuccessful) {
-                    Log.d("DELIVERY", "Delivery confirmed")
+                    Log.d("DELIVERY", "Delivery info obtained")
                     onSuccess(response.body()!!)
                 } else {
                     onFailure()
@@ -225,7 +225,7 @@ class AppRepository(val app: Application) {
 
             override fun onFailure(call: Call<DeliveryFullInfo?>, t: Throwable) {
                 onFailure()
-                Log.e("ACTIVE", t.message!!)
+                Log.e("DELIVERY", t.message!!)
             }
         })
     }
