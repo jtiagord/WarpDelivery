@@ -28,3 +28,4 @@ INSERT INTO DELIVERY (deliveryid , warperusername, storeid, state, clientphone, 
 --DELIVERY STATE TRANSITIONS
 INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 18:20:33', 'Delivering', 'Delivered');
 INSERT INTO STATE_TRANSITIONS VALUES (1, '2020-06-22 19:00:25', 'Delivering', 'Cancelled');
+
