@@ -85,4 +85,9 @@
     <string name="client_address_title">Client Address:</string>
     <string name="delivery_update_error">Error updating deliveries</string>
     <string name="store_title">Store :</string>
+    <string name="state_looking">Looking for warper</string>
+    <string name="state_delivering">Delivering</string>
+    <string name="state_delivered">Delivered</string>
+    <string name="state_cancelled">Cancelled</string>
+    <string name="center_button_description">Center map on position</string>
 </resources>

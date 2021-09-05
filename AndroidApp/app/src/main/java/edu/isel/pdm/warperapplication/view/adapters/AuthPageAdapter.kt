@@ -4,8 +4,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 
-//TODO: Migrate to ViewPager2
-class AuthenticationPagerAdapter(fm: FragmentManager) :
+class AuthPageAdapter(fm: FragmentManager) :
     FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
     private val fragmentList: ArrayList<Fragment> = ArrayList()

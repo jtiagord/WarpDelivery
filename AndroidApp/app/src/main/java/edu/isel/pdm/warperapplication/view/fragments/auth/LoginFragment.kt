@@ -38,9 +38,7 @@ class LoginFragment : Fragment() {
             }
         }
 
-
         val rootView = inflater.inflate(R.layout.fragment_login, container, false)
-
         val loginButton = rootView.findViewById<Button>(R.id.btn_login)
         val usernameInput = rootView.findViewById<EditText>(R.id.et_username)
         val passwordInput = rootView.findViewById<EditText>(R.id.et_password)

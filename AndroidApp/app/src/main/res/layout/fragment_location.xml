@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.fragments.app.LocationFragment">
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/btn_tracking"
+        android:id="@+id/btn_center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
@@ -15,8 +14,9 @@
         android:layout_marginTop="30dp"
         android:clickable="true"
         android:focusable="true"
-        android:src="@drawable/ic_tracking"
-        android:text="@string/delivery_info"/>
+        android:src="@drawable/ic_center_location"
+        android:text="@string/delivery_info"
+        android:contentDescription="@string/center_button_description" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/btn_deliveryInfo"
@@ -57,13 +57,6 @@
         android:id="@+id/map"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingActionButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:src="@drawable/ic_location" />
     </org.osmdroid.views.MapView>
 
     <Button

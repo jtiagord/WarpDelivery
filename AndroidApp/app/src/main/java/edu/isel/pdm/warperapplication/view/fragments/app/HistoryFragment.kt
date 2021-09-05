@@ -1,6 +1,7 @@
 package edu.isel.pdm.warperapplication.view.fragments.app
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.adapters.DeliveriesAdapter
@@ -27,6 +29,7 @@ class HistoryFragment : Fragment() {
         val rootView = inflater.inflate(R.layout.fragment_history, container, false)
         val recyclerView = rootView.findViewById<RecyclerView>(R.id.recyclerView)
         val refreshButton = rootView.findViewById<FloatingActionButton>(R.id.refreshButton)
+        viewModel.getDeliveries()
 
         refreshButton.setOnClickListener {
             viewModel.getDeliveries()

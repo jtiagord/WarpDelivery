@@ -74,6 +74,7 @@ class UserFragment : Fragment() {
                 }
             }
             val intent = Intent(activity, AuthActivity::class.java)
+            activity?.finish()
             this.startActivity(intent)
         }
 

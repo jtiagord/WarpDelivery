@@ -38,6 +38,8 @@ class VehiclesFragment : Fragment() {
         val refreshButton = rootView.findViewById<FloatingActionButton>(R.id.refreshButton)
         val addButton = rootView.findViewById<FloatingActionButton>(R.id.addButton)
 
+        viewModel.getVehicles()
+
         addButton.setOnClickListener {
             showVehicleCreationDialog()
         }

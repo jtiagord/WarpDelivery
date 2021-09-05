@@ -1,13 +1,10 @@
 package edu.isel.pdm.warperapplication.view.activities
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager.widget.ViewPager
 import edu.isel.pdm.warperapplication.R
-import edu.isel.pdm.warperapplication.view.adapters.AuthenticationPagerAdapter
+import edu.isel.pdm.warperapplication.view.adapters.AuthPageAdapter
 import edu.isel.pdm.warperapplication.view.fragments.auth.LoginFragment
 import edu.isel.pdm.warperapplication.view.fragments.auth.RegisterFragment
 
@@ -20,7 +17,7 @@ class AuthActivity : AppCompatActivity() {
 
 
         val viewPager: ViewPager = findViewById(R.id.viewPager)
-        val authPageAdapter = AuthenticationPagerAdapter(supportFragmentManager)
+        val authPageAdapter = AuthPageAdapter(supportFragmentManager)
 
         authPageAdapter.addFragment(LoginFragment())
         authPageAdapter.addFragment(RegisterFragment())

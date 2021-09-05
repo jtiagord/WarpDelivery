@@ -13,6 +13,7 @@ import java.text.DateFormat.getDateTimeInstance
 import java.text.SimpleDateFormat
 import java.util.*
 
+
 class DeliveriesAdapter(private val deliveries: List<Delivery>) :
     RecyclerView.Adapter<DeliveriesViewHolder>() {
 
@@ -20,6 +21,8 @@ class DeliveriesAdapter(private val deliveries: List<Delivery>) :
 
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.delivery_item, parent, false)
+
+
 
         return DeliveriesViewHolder(view, parent.context)
     }
@@ -31,10 +34,19 @@ class DeliveriesAdapter(private val deliveries: List<Delivery>) :
     override fun onBindViewHolder(holder: DeliveriesViewHolder, position: Int) {
         return holder.bind(deliveries[position])
     }
+
+
 }
 
 class DeliveriesViewHolder(itemView: View, val context: Context) :
     RecyclerView.ViewHolder(itemView) {
+
+    private val states = hashMapOf(
+        Pair("LOOKING_FOR_WARPER", context.getString(R.string.state_looking)),
+        Pair("DELIVERING", context.getString(R.string.state_delivering)),
+        Pair("DELIVERED", context.getString(R.string.state_delivered)),
+        Pair("CANCELLED", context.getString(R.string.state_cancelled))
+    )
 
     private val store: TextView = itemView.findViewById(R.id.store_name)
     private val date: TextView = itemView.findViewById(R.id.delivery_date)
@@ -50,17 +62,19 @@ class DeliveriesViewHolder(itemView: View, val context: Context) :
             context.getString(R.string.delivery_item_date, getDateTime(delivery.deliverDate))
 
         if (delivery.rating != null)
-            rating.text = context.getString(R.string.delivery_item_rating, delivery.rating.toString())
+            rating.text =
+                context.getString(R.string.delivery_item_rating, delivery.rating.toString())
         else
             rating.text = context.getString(R.string.delivery_item_rating, "N/A")
 
         if (delivery.reward != null)
-            reward.text = context.getString(R.string.delivery_item_reward, delivery.reward.toString())
+            reward.text =
+                context.getString(R.string.delivery_item_reward, delivery.reward.toString())
         else
             reward.text = context.getString(R.string.delivery_item_reward, "N/A")
 
         type.text = context.getString(R.string.delivery_item_type, delivery.type)
-        state.text = context.getString(R.string.delivery_item_state, delivery.state)
+        state.text = context.getString(R.string.delivery_item_state, states[delivery.state])
     }
 
     private fun getDateTime(timestamp: String?): String {

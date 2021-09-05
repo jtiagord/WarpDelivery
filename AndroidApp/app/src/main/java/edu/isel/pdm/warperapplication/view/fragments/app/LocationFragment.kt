@@ -36,17 +36,15 @@ import org.osmdroid.bonuspack.routing.Road
 import org.osmdroid.util.TileSystem
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import org.osmdroid.views.overlay.compass.CompassOverlay
 
 import kotlin.collections.ArrayList
 
-
-class LocationFragment() : Fragment() {
+class LocationFragment : Fragment() {
 
     private val viewModel: LocationViewModel by viewModels()
 
     companion object {
-        private val userAgent = "OsmNavigator/2.4"
+        private const val userAgent = "OsmNavigator/2.4"
         private lateinit var roadManager: RoadManager
     }
 
@@ -57,17 +55,14 @@ class LocationFragment() : Fragment() {
     private var deliveryMarker: Marker? = null
     private var vehicleSelectionDialog: AlertDialog? = null
     private var deliveryInfoDialog: AlertDialog? = null
-    private var compassOverlay: CompassOverlay? = null
     private var locationOverlay: MyLocationNewOverlay? = null
-    private var tracking = false
-
 
     private lateinit var activeBtn: Button
     private lateinit var inactiveBtn: ExtendedFloatingActionButton
     private lateinit var finishBtn: ExtendedFloatingActionButton
     private lateinit var revokeBtn: ExtendedFloatingActionButton
     private lateinit var infoBtn: ExtendedFloatingActionButton
-    private lateinit var trackingBtn: FloatingActionButton
+    private lateinit var centerBtn: FloatingActionButton
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -81,7 +76,7 @@ class LocationFragment() : Fragment() {
         finishBtn = rootView.findViewById(R.id.btn_finish)
         revokeBtn = rootView.findViewById(R.id.btn_revoke)
         infoBtn = rootView.findViewById(R.id.btn_deliveryInfo)
-        trackingBtn = rootView.findViewById(R.id.btn_tracking)
+        centerBtn = rootView.findViewById(R.id.btn_center)
         initButtons()
 
         map = rootView.findViewById(R.id.map)
@@ -117,6 +112,8 @@ class LocationFragment() : Fragment() {
 
         //Displays the vehicle selection dialog after vehicles are obtained from the API
         viewModel.vehicleIds.observe(viewLifecycleOwner, {
+            if (it == null)
+                return@observe
             if (it.isEmpty())
                 Toast.makeText(context, getString(R.string.no_vehicles_error), Toast.LENGTH_LONG)
                     .show()
@@ -145,7 +142,7 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = false
-        trackingBtn.isVisible = false
+        centerBtn.isVisible = false
 
         map.isVisible = false
 
@@ -159,7 +156,7 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = false
-        trackingBtn.isVisible = true
+        centerBtn.isVisible = true
 
         map.isVisible = true
     }
@@ -172,7 +169,7 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = true
         infoBtn.isVisible = true
-        trackingBtn.isVisible = true
+        centerBtn.isVisible = true
 
         map.isVisible = true
     }
@@ -185,37 +182,49 @@ class LocationFragment() : Fragment() {
         finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = true
-        trackingBtn.isVisible = true
+        centerBtn.isVisible = true
 
         map.isVisible = true
     }
 
+    private fun disableTemporarily(button: Button) {
+        button.isEnabled = false
+        button.postDelayed({ button.isEnabled = true }, 1000)
+    }
+
     private fun initButtons() {
         activeBtn.setOnClickListener {
+            disableTemporarily(activeBtn)
             viewModel.getVehicles()
         }
 
         inactiveBtn.setOnClickListener {
+            disableTemporarily(inactiveBtn)
             viewModel.setInactive()
         }
 
         finishBtn.setOnClickListener {
+            disableTemporarily(finishBtn)
             viewModel.confirmDelivery()
         }
 
         revokeBtn.setOnClickListener {
+            disableTemporarily(revokeBtn)
             viewModel.revokeDelivery()
         }
 
         infoBtn.setOnClickListener {
-
+            disableTemporarily(infoBtn)
             viewModel.getDeliveryInfo { delivery ->
                 showDeliveryInfoDialog(delivery)
             }
         }
 
-        trackingBtn.setOnClickListener {
-            tracking = !tracking
+        centerBtn.setOnClickListener {
+
+            val location = viewModel.currentLocation.value
+            if (location != null)
+                mapController.animateTo(location.toGeoPoint())
         }
     }
 
@@ -239,10 +248,6 @@ class LocationFragment() : Fragment() {
         if (oldLocation != null &&
             newLocation.getDistance(oldLocation) > 2 && deliveryLocation != null
         ) {
-            Log.v("TRACKING", tracking.toString())
-            if(tracking)
-                mapController.animateTo(newLocation.toGeoPoint())
-
             getRouteAsync(viewModel.state.value!!)
         }
 
@@ -290,6 +295,7 @@ class LocationFragment() : Fragment() {
                 viewModel.setActive(vehiclesList[selectedItem])
             }
             .setNegativeButton(R.string.cancel) { dialog, _ ->
+                viewModel.vehicleIds.postValue(null)
                 dialog.cancel()
             }
         vehicleSelectionDialog = alertDialog.show()
@@ -311,11 +317,13 @@ class LocationFragment() : Fragment() {
             waypoints.add(deliveryGeoPoint)
 
         waypoints.add(currGeoPoint)
+
         //Obtain the road in a new thread
         lifecycleScope.launch(Dispatchers.IO) {
             val newRoad = roadManager.getRoad(waypoints)
 
-            lifecycleScope.launch() {
+
+            lifecycleScope.launch(Dispatchers.Main) {
                 updateUIWithRoadAndMarker(newRoad, pickupGeoPoint, deliveryGeoPoint)
             }
         }
@@ -326,6 +334,10 @@ class LocationFragment() : Fragment() {
         pickupGeoPoint: GeoPoint,
         deliveryGeoPoint: GeoPoint
     ) {
+
+        //Don't proceed with UI update if the fragment has been destroyed
+        if (this.isRemoving || this.isDetached || !this.isAdded)
+            return
 
         //Remove old road overlay if exists
         if (roadOverlay != null) map.overlays.remove(roadOverlay)
@@ -386,6 +398,7 @@ class LocationFragment() : Fragment() {
 
     override fun onPause() {
         super.onPause()
+        viewModel.vehicleIds.postValue(null)
         vehicleSelectionDialog?.dismiss()
         deliveryInfoDialog?.dismiss()
     }
