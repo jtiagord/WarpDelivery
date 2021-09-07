@@ -78,7 +78,7 @@ class WarperApplication : Application() {
         onSuccess: (Warper) -> Unit,
         onFailure: () -> Unit
     ) {
-        return repository.getUserInfo(username, onSuccess, onFailure)
+        return repository.getUserInfo(onSuccess, onFailure)
     }
 
     fun updateUser(

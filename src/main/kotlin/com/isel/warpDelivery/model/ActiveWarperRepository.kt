@@ -15,7 +15,7 @@ enum class DeliveringWarperState {
     RETRIEVING, DELIVERING
 }
 
-data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
+data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String?)
 
 data class ActiveDelivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
@@ -70,7 +70,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
                                   val deliverySize: Size? = null, val token : String? = null){
             fun toWarper() : ActiveWarper?{
                 val location = this.location?.toLocation()
-                return if(username == null || location == null || token == null || deliverySize ==null) null
+                return if(username == null || location == null || deliverySize ==null) null
                 else ActiveWarper(username!!, location, deliverySize,token)
 
             }

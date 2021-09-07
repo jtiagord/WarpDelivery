@@ -149,7 +149,7 @@ class AppRepository(val app: Application) {
             )
         } else {
 
-            val call = request.getWarperDeliveries(username, token!!)
+            val call = request.getWarperDeliveries(token!!)
             call.clone().enqueue(object : Callback<List<DeliveryFullInfo>> {
                 override fun onResponse(
                     call: Call<List<DeliveryFullInfo>>,
@@ -266,21 +266,30 @@ class AppRepository(val app: Application) {
     }
 
     //USER
-    fun getUserInfo(username: String, onSuccess: (Warper) -> Unit, onFailure: () -> Unit) {
-
-        val call = request.getWarperInfo(username)
-        call.clone().enqueue(object : Callback<Warper> {
-            override fun onResponse(call: Call<Warper>, response: Response<Warper>) {
-                if (response.isSuccessful) {
-                    onSuccess(response.body()!!)
+    fun getUserInfo(onSuccess: (Warper) -> Unit, onFailure: () -> Unit) {
+        if (!tokenValid()) {
+            tryLogin(this.username!!, this.password!!,
+                onSuccess = {
+                    getUserInfo(onSuccess, onFailure)
+                }, onFailure = {
+                    throw java.lang.IllegalStateException("Error getting token")
                 }
-            }
+            )
+        } else {
+            val call = request.getWarperInfo(token!!)
+            call.clone().enqueue(object : Callback<Warper> {
+                override fun onResponse(call: Call<Warper>, response: Response<Warper>) {
+                    if (response.isSuccessful) {
+                        onSuccess(response.body()!!)
+                    }
+                }
 
-            override fun onFailure(call: Call<Warper>, t: Throwable) {
-                onFailure()
-                Log.e("USER", t.message!!)
-            }
-        })
+                override fun onFailure(call: Call<Warper>, t: Throwable) {
+                    onFailure()
+                    Log.e("USER", t.message!!)
+                }
+            })
+        }
     }
 
     fun updateUser(
@@ -362,7 +371,7 @@ class AppRepository(val app: Application) {
                 }
             )
         } else {
-            val call = request.tryAddVehicle(username!!, vehicle, token!!)
+            val call = request.tryAddVehicle(vehicle, token!!)
             call.clone().enqueue(object : Callback<Unit> {
                 override fun onResponse(call: Call<Unit>, response: Response<Unit>) {
                     if (response.isSuccessful) {
@@ -392,7 +401,7 @@ class AppRepository(val app: Application) {
                 }
             )
         } else {
-            val call = request.removeVehicle(username!!, registration, token!!)
+            val call = request.removeVehicle(registration, token!!)
             call.clone().enqueue(object : Callback<Unit> {
                 override fun onResponse(
                     call: Call<Unit>,

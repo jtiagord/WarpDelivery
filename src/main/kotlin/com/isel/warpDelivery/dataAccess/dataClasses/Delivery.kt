@@ -1,8 +1,8 @@
 package com.isel.warpDelivery.dataAccess.dataClasses
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.isel.warpDelivery.inputmodels.Size
 import org.jdbi.v3.core.mapper.ColumnMapper
-import org.jdbi.v3.core.mapper.RowMapper
 import org.jdbi.v3.core.statement.StatementContext
 import java.lang.IllegalStateException
 import java.sql.ResultSet
@@ -26,6 +26,7 @@ enum class DeliveryState(val text : String) {
     }
 }
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 class Delivery (val deliveryId : String?,
                 val warperUsername: String?,
                 val storeId: String,

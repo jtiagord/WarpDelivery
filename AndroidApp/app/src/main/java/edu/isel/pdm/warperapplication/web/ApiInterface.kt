@@ -7,8 +7,8 @@ import retrofit2.http.*
 interface ApiInterface {
 
     //Deliveries
-    @GET("warpers/{username}/deliveries/")
-    fun getWarperDeliveries(@Path("username") username: String, @Header("Authorization") token: String): Call<List<DeliveryFullInfo>>
+    @GET("warpers/deliveries/")
+    fun getWarperDeliveries(@Header("Authorization") token: String): Call<List<DeliveryFullInfo>>
 
     @GET("deliveries/{deliveryId}")
     fun getDeliveryInfo(@Path("deliveryId") deliveryId: String): Call<DeliveryFullInfo?>
@@ -24,8 +24,8 @@ interface ApiInterface {
     ): Call<Unit>
 
     //User
-    @GET("warpers/{username}/")
-    fun getWarperInfo(@Path("username") username: String): Call<Warper>
+    @GET("warpers/")
+    fun getWarperInfo(@Header("Authorization") token: String): Call<Warper>
 
     @PUT("warpers/")
     fun updateWarper(@Body warper: WarperEdit, @Header("Authorization") token: String): Call<Unit>
@@ -38,9 +38,8 @@ interface ApiInterface {
     fun tryRegister(@Body registerDetails: RegisterDetails): Call<Unit>
 
     //Vehicles
-    @PUT("warpers/{username}/vehicles")
+    @PUT("warpers/vehicles")
     fun tryAddVehicle(
-        @Path("username") username: String,
         @Body vehicle: Vehicle,
         @Header("Authorization") token: String
     ): Call<Unit>
@@ -48,9 +47,8 @@ interface ApiInterface {
     @GET("warpers/vehicles")
     fun getWarperVehicles(@Header("Authorization") token: String): Call<List<Vehicle>>
 
-    @DELETE("warpers/{username}/vehicles/{registration}")
+    @DELETE("warpers/vehicles/{registration}")
     fun removeVehicle(
-        @Path("username") username: String,
         @Path("registration") registration: String,
         @Header("Authorization") token: String
     ): Call<Unit>

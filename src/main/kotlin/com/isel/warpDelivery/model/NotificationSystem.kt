@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component
 class NotificationSystem {
 
     fun sendNotification(warper : ActiveWarper){
+        if(warper.token == null) return
         val message: Message = Message.builder()
             .putData("latitude", warper.location.latitude.toString())
             .putData("longitude", warper.location.latitude.toString())
