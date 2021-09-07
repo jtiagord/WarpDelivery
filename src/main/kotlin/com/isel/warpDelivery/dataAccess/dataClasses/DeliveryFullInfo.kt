@@ -16,7 +16,8 @@ class DeliveryFullInfo (
     val purchaseDate : Timestamp?,
     var deliverDate : Timestamp?,
     val deliverAddress: String,
-    val clientPhone : String
+    val clientPhone : String,
+    val type : Size
 )
 
 data class WarperInfo (
@@ -52,7 +53,8 @@ class DeliveryFullInfoMapper : RowMapper<DeliveryFullInfo> {
                         purchaseDate = rs.getTimestamp("purchaseDate"),
                         deliverDate = rs.getTimestamp("deliverDate"),
                         deliverAddress = rs.getString("deliverAddress"),
-                        clientPhone = rs.getString("clientPhone")
+                        clientPhone = rs.getString("clientPhone"),
+                        type = Size.fromText(rs.getString("type"))?: Size.SMALL
         )
 
     }

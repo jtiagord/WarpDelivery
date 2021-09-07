@@ -26,7 +26,8 @@ data class DeliveryFullInfo (
     val purchaseDate : String,
     var deliverDate : String,
     val deliverAddress: String,
-    val clientPhone : String
+    val clientPhone : String,
+    val type : String
 )
 
 data class WarperInfo (

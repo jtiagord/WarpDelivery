@@ -91,7 +91,6 @@ class AuthenticationFilter(val keys : KeyPair, val storeMapper : StoreMapper) : 
         val userType = USERTYPE.valueOf(jwt.claims["usertype"]?.asString()?: "CLIENT")
         val id = jwt.claims["id"]?.asString()?: return null
         return UserInfo(id,userType)
-
     }
 
 }

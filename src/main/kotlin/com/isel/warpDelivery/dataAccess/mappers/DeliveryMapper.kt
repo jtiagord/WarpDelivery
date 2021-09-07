@@ -63,14 +63,6 @@ class DeliveryMapper(val jdbi: Jdbi) {
 
             val delivery = deliveryOpt.get()
 
-            val transitions = handle.createQuery(
-                "SELECT  deliveryid, transitiondate, previousstate, nextstate " +
-                        "from $TRANSITIONS_TABLE " +
-                        "where deliveryid = :id"
-            ).bind("id", key).mapTo(StateTransition::class.java).list()
-
-            delivery.transitions = transitions
-
             return@inTransaction delivery
         }
 
@@ -172,22 +164,19 @@ class DeliveryMapper(val jdbi: Jdbi) {
 
 
 
-    fun getDeliveriesByWarperUsername(username: String, limit : Int , offset : Int): List<Delivery> =
+    fun getDeliveriesByWarperUsername(username: String, limit : Int , offset : Int): List<DeliveryFullInfo> =
 
-        jdbi.inTransaction<List<Delivery>, Exception> { handle ->
-
+        jdbi.inTransaction<List<DeliveryFullInfo>, Exception> { handle ->
             return@inTransaction handle.createQuery(
-                "SELECT deliveryid, warperusername, $DELIVERY_TABLE.storeid, state, clientphone, purchasedate, deliverDate, " +
-                        "deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type, name AS storeName " +
-                        "FROM $DELIVERY_TABLE JOIN $STORE_TABLE ON $DELIVERY_TABLE.storeid = $STORE_TABLE.storeid " +
-                        "WHERE warperusername = :username " +
-                        "limit :limit " +
-                        "offset :offset"
+                "SELECT * FROM $DELIVERY_TABLE  d " +
+                        "JOIN $WARPER_TABLE w ON d.warperusername = w.username " +
+                        "JOIN $STORE_TABLE s ON d.storeid = s.storeid " +
+                        "WHERE d.warperusername = :warperusername"
                 )
                 .bind("limit", limit)
                 .bind("offset", offset)
-                .bind("username", username)
-                .mapTo(Delivery::class.java)
+                .bind("warperusername", username)
+                .mapTo(DeliveryFullInfo::class.java)
                 .list()
         }
 

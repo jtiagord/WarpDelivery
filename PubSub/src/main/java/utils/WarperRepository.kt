@@ -14,7 +14,7 @@ import kotlin.collections.ArrayList
 
 
 enum class Size(val text: String) {
-    SMALL("small"), MEDIUM("medium"), LARGE("large");
+    SMALL("SMALL"), MEDIUM("MEDIUM"), LARGE("LARGE");
 
     companion object {
         fun fromText(text: String): Size?{

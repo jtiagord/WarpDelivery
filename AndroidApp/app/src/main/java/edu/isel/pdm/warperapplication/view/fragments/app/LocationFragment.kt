@@ -179,7 +179,6 @@ class LocationFragment : Fragment() {
 
         activeBtn.isVisible = false
         inactiveBtn.isVisible = false
-        finishBtn.isVisible = false
         revokeBtn.isVisible = false
         infoBtn.isVisible = true
         centerBtn.isVisible = true

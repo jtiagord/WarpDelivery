@@ -9,6 +9,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import java.sql.Timestamp
 
 enum class DeliveringWarperState {
     RETRIEVING, DELIVERING
@@ -52,7 +53,8 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         }
 
         class DummyDelivery(val id : String? = null, val size : Size? = null,
-                            val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null) {
+                            val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null,
+                            val timestamp : Timestamp? = null) {
 
             fun toDelivery() : ActiveDelivery? {
                 val pickUpLocation = this.pickUpLocation?.toLocation()
@@ -103,11 +105,13 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         if(warperDeliveryRef.get().get().exists())
             throw ApiException("The warper ${warper.username} is already delivering", HttpStatus.BAD_REQUEST)
 
-        GlobalScope.launch {
+
             db.runTransaction { transaction ->
                 val docs = transaction.get(queryRef).get().documents
                 for (document in docs) {
-                    val delivery = document.toObject(DummyDelivery::class.java).toDelivery() ?: continue
+                    val deliverydoc = document.data
+                    val deliveryobj = document.toObject(DummyDelivery::class.java)
+                    val delivery = deliveryobj.toDelivery() ?: continue
                     if (delivery.pickUpLocation.getDistance(warper.location) <= MAX_DISTANCE) {
                         transaction.delete(document.reference)
                         transaction.delete(warperRef)
@@ -119,7 +123,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
 
                 transaction.set(warperRef, warper)
             }
-        }
+
     }
 
     /**

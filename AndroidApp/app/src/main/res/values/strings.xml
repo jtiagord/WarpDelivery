@@ -27,8 +27,11 @@
     <string name="phone_number">Phone Number</string>
     <string name="delivery_item_store">Store: %s</string>
     <string name="delivery_item_date">Date: %s</string>
+    <string name="delivery_item_storeAddress">Store Address: %s</string>
+
     <string name="delivery_item_type">Type: %s</string>
     <string name="delivery_item_rating">Rating: %s</string>
+    <string name="delivery_item_clientPhone">Client Phone: %s</string>
     <string name="delivery_item_reward">Reward: %s</string>
     <string name="delivery_item_state">State: %s</string>
     <string name="logout">LOGOUT</string>
@@ -89,5 +92,8 @@
     <string name="state_delivering">Delivering</string>
     <string name="state_delivered">Delivered</string>
     <string name="state_cancelled">Cancelled</string>
+    <string name="size_small">Small</string>
+    <string name="size_medium">Medium</string>
+    <string name="size_large">Small</string>
     <string name="center_button_description">Center map on position</string>
 </resources>

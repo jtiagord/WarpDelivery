@@ -135,7 +135,7 @@ class AppRepository(val app: Application) {
     //DELIVERIES
     fun getDeliveries(
         username: String,
-        onSuccess: (List<Delivery>) -> Unit,
+        onSuccess: (List<DeliveryFullInfo>) -> Unit,
         onFailure: () -> Unit
     ) {
 
@@ -149,18 +149,18 @@ class AppRepository(val app: Application) {
             )
         } else {
 
-            val call = request.getWarperDeliveries(username)
-            call.clone().enqueue(object : Callback<List<Delivery>> {
+            val call = request.getWarperDeliveries(username, token!!)
+            call.clone().enqueue(object : Callback<List<DeliveryFullInfo>> {
                 override fun onResponse(
-                    call: Call<List<Delivery>>,
-                    response: Response<List<Delivery>>
+                    call: Call<List<DeliveryFullInfo>>,
+                    response: Response<List<DeliveryFullInfo>>
                 ) {
                     if (response.isSuccessful) {
                         onSuccess(response.body()!!)
                     }
                 }
 
-                override fun onFailure(call: Call<List<Delivery>>, t: Throwable) {
+                override fun onFailure(call: Call<List<DeliveryFullInfo>>, t: Throwable) {
                     onFailure()
                     Log.e("HISTORY", t.message!!)
                 }

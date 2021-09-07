@@ -10,10 +10,7 @@ import com.isel.warpDelivery.common.ISSUER
 import com.isel.warpDelivery.common.KeyPair
 import com.isel.warpDelivery.common.WARPERS_PATH
 import com.isel.warpDelivery.common.encodePassword
-import com.isel.warpDelivery.dataAccess.dataClasses.Delivery
-import com.isel.warpDelivery.dataAccess.dataClasses.DeliveryState
-import com.isel.warpDelivery.dataAccess.dataClasses.Vehicle
-import com.isel.warpDelivery.dataAccess.dataClasses.WarperEdit
+import com.isel.warpDelivery.dataAccess.dataClasses.*
 import com.isel.warpDelivery.dataAccess.mappers.*
 import com.isel.warpDelivery.errorHandling.ApiException
 import com.isel.warpDelivery.inputmodels.*
@@ -172,9 +169,9 @@ class WarperController(
         @PathVariable username: String,
         @RequestParam(defaultValue = "10") limit: Int,
         @RequestParam(defaultValue = "0") offset: Int
-    ): ResponseEntity<List<Delivery>> {
+    ): List<DeliveryFullInfo> {
         val deliveries = deliveryMapper.getDeliveriesByWarperUsername(username, limit, offset)
-        return ResponseEntity.status(200).body(deliveries)
+        return deliveries
     }
 
     /* ROUTING RELATED ENDPOINTS */

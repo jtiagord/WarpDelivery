@@ -44,7 +44,7 @@ class WarperApplication : Application() {
     //Deliveries
     fun getDeliveries(
         username: String,
-        onSuccess: (List<Delivery>) -> Unit,
+        onSuccess: (List<DeliveryFullInfo>) -> Unit,
         onFailure: () -> Unit
     ) {
         return repository.getDeliveries(username, onSuccess, onFailure)
