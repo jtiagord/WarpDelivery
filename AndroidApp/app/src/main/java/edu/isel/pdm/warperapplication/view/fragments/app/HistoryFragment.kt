@@ -16,6 +16,7 @@ import edu.isel.pdm.warperapplication.R
 import edu.isel.pdm.warperapplication.view.adapters.DeliveriesAdapter
 import edu.isel.pdm.warperapplication.viewModels.HistoryViewModel
 import edu.isel.pdm.warperapplication.web.entities.Delivery
+import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 
 class HistoryFragment : Fragment() {
 
@@ -44,7 +45,7 @@ class HistoryFragment : Fragment() {
         return rootView
     }
 
-    private fun updateDeliveries(view: RecyclerView, deliveries: List<Delivery>?){
+    private fun updateDeliveries(view: RecyclerView, deliveries: List<DeliveryFullInfo>?){
         if(deliveries == null){
             Toast.makeText(activity, R.string.delivery_update_error, Toast.LENGTH_LONG).show()
             return

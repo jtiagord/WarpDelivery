@@ -23,6 +23,17 @@
                 android:textSize="15sp"/>
 
             <TextView
+                android:id="@+id/address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/delivery_date"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:textSize="15sp" />
+
+            <TextView
                 android:layout_below="@+id/store_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -30,23 +41,15 @@
                 android:layout_margin="5dp"/>
 
             <TextView
-                android:layout_below="@+id/delivery_date"
+                android:layout_below="@+id/address"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/delivery_rating"
+                android:id="@+id/delivery_type"
                 android:textSize="15sp"
                 android:layout_margin="5dp"/>
 
             <TextView
-                android:layout_below="@+id/delivery_rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/delivery_reward"
-                android:textSize="15sp"
-                android:layout_margin="5dp"/>
-
-            <TextView
-                android:layout_below="@+id/delivery_reward"
+                android:layout_below="@+id/delivery_type"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/delivery_state"
@@ -57,7 +60,7 @@
                 android:layout_below="@+id/delivery_state"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/delivery_type"
+                android:id="@+id/client_phone_item"
                 android:textSize="15sp"
                 android:layout_margin="5dp"/>
 

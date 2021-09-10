@@ -7,14 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import edu.isel.pdm.warperapplication.R
-import edu.isel.pdm.warperapplication.web.entities.Delivery
-import java.text.DateFormat.getDateInstance
+import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 import java.text.DateFormat.getDateTimeInstance
-import java.text.SimpleDateFormat
 import java.util.*
 
 
-class DeliveriesAdapter(private val deliveries: List<Delivery>) :
+class DeliveriesAdapter(private val deliveries: List<DeliveryFullInfo>) :
     RecyclerView.Adapter<DeliveriesViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeliveriesViewHolder {
@@ -48,32 +46,31 @@ class DeliveriesViewHolder(itemView: View, val context: Context) :
         Pair("CANCELLED", context.getString(R.string.state_cancelled))
     )
 
+    private val types = hashMapOf(
+        Pair("SMALL", context.getString(R.string.size_small)),
+        Pair("MEDIUM", context.getString(R.string.size_medium)),
+        Pair("LARGE", context.getString(R.string.size_large))
+    )
+
     private val store: TextView = itemView.findViewById(R.id.store_name)
+    private val storeAddress: TextView = itemView.findViewById(R.id.address)
     private val date: TextView = itemView.findViewById(R.id.delivery_date)
-    private val rating: TextView = itemView.findViewById(R.id.delivery_rating)
-    private val reward: TextView = itemView.findViewById(R.id.delivery_reward)
+
     private val type: TextView = itemView.findViewById(R.id.delivery_type)
     private val state: TextView = itemView.findViewById(R.id.delivery_state)
+    private val clientPhone: TextView = itemView.findViewById(R.id.client_phone_item)
 
-    fun bind(delivery: Delivery) {
+    fun bind(delivery: DeliveryFullInfo) {
 
-        store.text = context.getString(R.string.delivery_item_store, delivery.storeName)
+        store.text = context.getString(R.string.delivery_item_store, delivery.store.name)
         date.text =
-            context.getString(R.string.delivery_item_date, getDateTime(delivery.deliverDate))
+            context.getString(R.string.delivery_item_date, getDateTime(delivery.purchaseDate))
+        storeAddress.text =
+            context.getString(R.string.delivery_item_storeAddress, delivery.store.address)
+        clientPhone.text =
+            context.getString(R.string.delivery_item_clientPhone, delivery.clientPhone)
 
-        if (delivery.rating != null)
-            rating.text =
-                context.getString(R.string.delivery_item_rating, delivery.rating.toString())
-        else
-            rating.text = context.getString(R.string.delivery_item_rating, "N/A")
-
-        if (delivery.reward != null)
-            reward.text =
-                context.getString(R.string.delivery_item_reward, delivery.reward.toString())
-        else
-            reward.text = context.getString(R.string.delivery_item_reward, "N/A")
-
-        type.text = context.getString(R.string.delivery_item_type, delivery.type)
+        type.text = context.getString(R.string.delivery_item_type, types[delivery.type])
         state.text = context.getString(R.string.delivery_item_state, states[delivery.state])
     }
 

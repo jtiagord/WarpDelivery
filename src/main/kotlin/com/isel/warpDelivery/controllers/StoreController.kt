@@ -37,9 +37,10 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
         val uuid = UUID.randomUUID().toString()
         val apiKey = uuid.replace("-","")
         val storeDao = store.toDao(apiKey)
-        val storeCreated = storeMapper.create(storeDao)
+        val createdStoreId = storeMapper.create(storeDao)
 
-        return ResponseEntity.created(URI("${STORE_PATH}/$storeCreated")).body(mapOf("apiKey" to apiKey))
+        return ResponseEntity.created(URI("${STORE_PATH}/$createdStoreId")).body(
+            mapOf("apiKey" to apiKey,"storeId" to createdStoreId))
     }
 
     @StoreResource
@@ -68,7 +69,8 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
         WarperPublisher.publishDelivery(deliveryToPublish)
 
 
-        return ResponseEntity.created(URI("$DELIVERIES_PATH/${deliveryId}")).build()
+        return ResponseEntity.created(URI("$DELIVERIES_PATH/${deliveryId}")).body(
+            mapOf("deliveryId" to deliveryId))
     }
 
     @StoreResource

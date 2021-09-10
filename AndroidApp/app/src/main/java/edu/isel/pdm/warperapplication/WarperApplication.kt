@@ -44,7 +44,7 @@ class WarperApplication : Application() {
     //Deliveries
     fun getDeliveries(
         username: String,
-        onSuccess: (List<Delivery>) -> Unit,
+        onSuccess: (List<DeliveryFullInfo>) -> Unit,
         onFailure: () -> Unit
     ) {
         return repository.getDeliveries(username, onSuccess, onFailure)
@@ -78,7 +78,7 @@ class WarperApplication : Application() {
         onSuccess: (Warper) -> Unit,
         onFailure: () -> Unit
     ) {
-        return repository.getUserInfo(username, onSuccess, onFailure)
+        return repository.getUserInfo(onSuccess, onFailure)
     }
 
     fun updateUser(

@@ -20,6 +20,7 @@ data class WarperEdit(
 
 data class ActiveWarper(
     val vehicle : String,
+    val deliverySize : String,
     val location : LocationEntity,
     val notificationToken: String
 )

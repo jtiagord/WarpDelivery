@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import edu.isel.pdm.warperapplication.WarperApplication
 import edu.isel.pdm.warperapplication.web.entities.Delivery
+import edu.isel.pdm.warperapplication.web.entities.DeliveryFullInfo
 
 
 class HistoryViewModel(app: Application) : AndroidViewModel(app){
@@ -13,7 +14,7 @@ class HistoryViewModel(app: Application) : AndroidViewModel(app){
         getApplication<WarperApplication>()
     }
 
-    var deliveries = MutableLiveData<List<Delivery>>()
+    var deliveries = MutableLiveData<List<DeliveryFullInfo>>()
 
     fun getDeliveries(){
         app.getDeliveries(app.getCurrentUser(),

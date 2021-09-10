@@ -9,12 +9,13 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
+import java.sql.Timestamp
 
 enum class DeliveringWarperState {
     RETRIEVING, DELIVERING
 }
 
-data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String)
+data class ActiveWarper(val username : String, val location : Location, val deliverySize: Size, val token : String?)
 
 data class ActiveDelivery(val id : String, val size : Size, val pickUpLocation : Location, val deliveryLocation : Location)
 
@@ -52,7 +53,8 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         }
 
         class DummyDelivery(val id : String? = null, val size : Size? = null,
-                            val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null) {
+                            val pickUpLocation : DummyLocation? = null, val deliveryLocation : DummyLocation? = null,
+                            val timestamp : Timestamp? = null) {
 
             fun toDelivery() : ActiveDelivery? {
                 val pickUpLocation = this.pickUpLocation?.toLocation()
@@ -68,7 +70,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
                                   val deliverySize: Size? = null, val token : String? = null){
             fun toWarper() : ActiveWarper?{
                 val location = this.location?.toLocation()
-                return if(username == null || location == null || token == null || deliverySize ==null) null
+                return if(username == null || location == null || deliverySize ==null) null
                 else ActiveWarper(username!!, location, deliverySize,token)
 
             }
@@ -103,11 +105,13 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
         if(warperDeliveryRef.get().get().exists())
             throw ApiException("The warper ${warper.username} is already delivering", HttpStatus.BAD_REQUEST)
 
-        GlobalScope.launch {
+
             db.runTransaction { transaction ->
                 val docs = transaction.get(queryRef).get().documents
                 for (document in docs) {
-                    val delivery = document.toObject(DummyDelivery::class.java).toDelivery() ?: continue
+                    val deliverydoc = document.data
+                    val deliveryobj = document.toObject(DummyDelivery::class.java)
+                    val delivery = deliveryobj.toDelivery() ?: continue
                     if (delivery.pickUpLocation.getDistance(warper.location) <= MAX_DISTANCE) {
                         transaction.delete(document.reference)
                         transaction.delete(warperRef)
@@ -119,7 +123,7 @@ class ActiveWarperRepository(val api : RouteApi, val db : Firestore){
 
                 transaction.set(warperRef, warper)
             }
-        }
+
     }
 
     /**
