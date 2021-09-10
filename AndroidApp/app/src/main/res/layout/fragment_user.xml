@@ -160,9 +160,29 @@
                 android:src="@drawable/ic_edit" />
         </LinearLayout>
 
-
         <TextView
             android:id="@+id/phone_value"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="3dp"
+            android:scrollbars="vertical"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/balance_title"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:paddingEnd="15dp"
+            android:scrollbars="vertical"
+            android:text="@string/balance"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/balance_value"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginStart="16dp"
@@ -184,6 +204,8 @@
                 android:text="@string/logout"/>
 
         </LinearLayout>
+
+
 
     </LinearLayout>
 

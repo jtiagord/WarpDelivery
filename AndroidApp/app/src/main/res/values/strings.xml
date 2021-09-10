@@ -90,4 +90,5 @@
     <string name="state_delivered">Delivered</string>
     <string name="state_cancelled">Cancelled</string>
     <string name="center_button_description">Center map on position</string>
+    <string name="balance">Balance</string>
 </resources>

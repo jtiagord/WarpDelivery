@@ -42,16 +42,24 @@ class UserFragment : Fragment() {
     private val viewModel: UserViewModel by viewModels()
     private var editDialog: AlertDialog? = null
 
+    lateinit var userTextView: TextView
+    lateinit var fNameTextView: TextView
+    lateinit var lNameTextView: TextView
+    lateinit var emailTextView: TextView
+    lateinit var phoneTextView: TextView
+    lateinit var balanceTextView: TextView
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val rootView = inflater.inflate(R.layout.fragment_user, container, false)
-        val userTextView = rootView.findViewById<TextView>(R.id.username_value)
-        val fNameTextView = rootView.findViewById<TextView>(R.id.first_name_value)
-        val lNameTextView = rootView.findViewById<TextView>(R.id.last_name_value)
-        val emailTextView = rootView.findViewById<TextView>(R.id.email_value)
-        val phoneTextView = rootView.findViewById<TextView>(R.id.phone_value)
+        userTextView = rootView.findViewById(R.id.username_value)
+        fNameTextView = rootView.findViewById(R.id.first_name_value)
+        lNameTextView = rootView.findViewById(R.id.last_name_value)
+        emailTextView = rootView.findViewById(R.id.email_value)
+        phoneTextView = rootView.findViewById(R.id.phone_value)
+        balanceTextView = rootView.findViewById(R.id.balance_value)
 
         val fNameEditButton = rootView.findViewById<ImageButton>(R.id.ib_fName)
         val lNameEditButton = rootView.findViewById<ImageButton>(R.id.ib_lName)
@@ -64,9 +72,10 @@ class UserFragment : Fragment() {
             viewModel.logout()
 
             val sharedPref = activity?.getSharedPreferences(
-                "LOGIN", Context.MODE_PRIVATE)
+                "LOGIN", Context.MODE_PRIVATE
+            )
 
-            if(sharedPref!= null) {
+            if (sharedPref != null) {
                 with(sharedPref.edit()) {
                     remove("username")
                     remove("password")
@@ -90,9 +99,7 @@ class UserFragment : Fragment() {
             val warper = viewModel.userInfo.value
 
             if (warper != null) {
-                displayUserInfo(
-                    userTextView, fNameTextView, lNameTextView, emailTextView, phoneTextView, warper
-                )
+                displayUserInfo(warper)
             }
         })
 
@@ -100,15 +107,13 @@ class UserFragment : Fragment() {
         return rootView
     }
 
-    private fun displayUserInfo(
-        user: TextView, fName: TextView, lName: TextView, email: TextView,
-        phone: TextView, warper: Warper
-    ) {
-        user.text = warper.username
-        fName.text = warper.firstname
-        lName.text = warper.lastname
-        email.text = warper.email
-        phone.text = warper.phonenumber
+    private fun displayUserInfo(warper: Warper) {
+        userTextView.text = warper.username
+        fNameTextView.text = warper.firstname
+        lNameTextView.text = warper.lastname
+        emailTextView.text = warper.email
+        phoneTextView.text = warper.phonenumber
+        balanceTextView.text = warper.balance.toString()
     }
 
     private fun showEditDialog(buttonId: Int) {
