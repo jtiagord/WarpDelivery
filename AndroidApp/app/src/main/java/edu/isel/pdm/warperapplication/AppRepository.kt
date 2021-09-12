@@ -440,7 +440,7 @@ class AppRepository(val app: Application) {
                 }
             )
         } else {
-            val call = request.setActive(ActiveWarper(vehicle, location, nToken), token!!)
+            val call = request.setActive(ActiveWarper(vehicle,  location, nToken), token!!)
             call.clone().enqueue(object : Callback<Unit> {
                 override fun onResponse(
                     call: Call<Unit>,
