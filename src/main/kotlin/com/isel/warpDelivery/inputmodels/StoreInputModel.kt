@@ -15,7 +15,7 @@ data class RequestDeliveryInputModel(
 ) {
     fun toDelivery(warperUsername: String?,storeId : String): Delivery {
         return Delivery(null, warperUsername, storeId, DeliveryState.LOOKING_FOR_WARPER, userPhone, null,
-        null, null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, null, deliverySize)
+        null, deliveryLocation.latitude, deliveryLocation.longitude, address, null, deliverySize)
     }
 }
 

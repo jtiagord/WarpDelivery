@@ -7,6 +7,7 @@ data class WarperOutputModel(
     val lastname : String,
     val phonenumber : String,
     val email : String,
+    val balance : Double,
     val vehicles : List<VehicleOutputModel> = emptyList()
 )
 

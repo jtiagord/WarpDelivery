@@ -224,8 +224,10 @@ class WarperController(
     fun confirmDelivery(req: HttpServletRequest) {
         val warper = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val activeWarper = activeWarpers.removeDeliveringWarper(warper.id)
-        if (activeWarper != null)
+        if (activeWarper != null) {
             deliveryMapper.updateState(activeWarper.delivery.id, DeliveryState.DELIVERED)
+            warperMapper.addBalance(activeWarper.username,2.0)
+        }
         else throw ApiException("Warper Not Active")
     }
 

@@ -82,7 +82,7 @@ class WarperMapper(val jdbi: Jdbi) {
     fun read(key: String): Warper? =
         jdbi.inTransaction<Warper, Exception> { handle ->
             val warperOpt = handle.createQuery(
-                "SELECT username, firstname , lastname, phonenumber, email, password " +
+                "SELECT * " +
                         "from $WARPER_TABLE " +
                         "where username = :username"
             )
@@ -106,6 +106,17 @@ class WarperMapper(val jdbi: Jdbi) {
 
             return@inTransaction warper
         }
+
+    fun addBalance(username : String, value : Double){
+        jdbi.useHandle<Exception>{ handle ->
+            handle.createUpdate("UPDATE $WARPER_TABLE " +
+                    "SET balance = balance + :value " +
+                    "where username = :username")
+                .bind("value", value)
+                .bind("username", username)
+                .execute()
+        }
+    }
 
     fun update(warperInfo: WarperEdit, username: String) {
 

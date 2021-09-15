@@ -26,7 +26,7 @@ data class VehicleInputModel(
 fun WarperInputModel.toDao(): Warper {
     val vehiclesDao = vehicles.map{ it.toDao(username) }
     return Warper(username = username, firstname = firstname, lastname = lastname, phonenumber = phonenumber,
-        email = email, password=password,vehicles = vehiclesDao
+        email = email, password=password,0.0,vehicles = vehiclesDao
     )
 }
 fun VehicleInputModel.toDao(username: String)  : Vehicle = Vehicle(registration = this.registration,

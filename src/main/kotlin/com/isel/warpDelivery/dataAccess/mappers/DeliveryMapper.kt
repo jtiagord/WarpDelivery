@@ -51,7 +51,7 @@ class DeliveryMapper(val jdbi: Jdbi) {
         jdbi.inTransaction<Delivery, Exception> { handle ->
             val deliveryOpt = handle.createQuery(
                 "SELECT deliveryid, warperusername, storeid, state, clientphone, purchasedate, " +
-                        "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type " +
+                        "deliverDate, deliverLatitude, deliverLongitude, deliverAddress, type " +
                         "from $DELIVERY_TABLE " +
                         "where deliveryid = :id"
             )
@@ -78,7 +78,6 @@ class DeliveryMapper(val jdbi: Jdbi) {
             .bind("deliveryid", DAO.deliveryId)
             .bind("state", DAO.state)
             .bind("deliverydate", DAO.deliverDate)
-            .bind("rating", DAO.rating)
             .execute()
         }
     }
@@ -171,7 +170,8 @@ class DeliveryMapper(val jdbi: Jdbi) {
                 "SELECT * FROM $DELIVERY_TABLE  d " +
                         "JOIN $WARPER_TABLE w ON d.warperusername = w.username " +
                         "JOIN $STORE_TABLE s ON d.storeid = s.storeid " +
-                        "WHERE d.warperusername = :warperusername"
+                        "WHERE d.warperusername = :warperusername " +
+                        "ORDER BY purchasedate DESC"
                 )
                 .bind("limit", limit)
                 .bind("offset", offset)
