@@ -23,6 +23,7 @@ CREATE TABLE WARPER (
 	lastname varchar(50) NOT NULL,
 	phonenumber varchar(50) NOT NULL UNIQUE,
 	password varchar(100) NOT NULL,
+	balance DECIMAL(7,2) DEFAULT 0.0,
 	email varchar(100) NOT NULL CHECK (email LIKE '%@%') UNIQUE
 );
 
