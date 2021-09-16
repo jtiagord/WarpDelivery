@@ -34,11 +34,9 @@ class Delivery (val deliveryId : String?,
                 val clientPhone: String,
                 val purchaseDate : Timestamp?,
                 var deliverDate : Timestamp?,
-                var rating : Int?,
                 val deliverLatitude: Double,
                 val deliverLongitude: Double,
                 val deliverAddress: String,
-                var reward: Float?,
                 var storeName: String?,
                 val type : Size)
 

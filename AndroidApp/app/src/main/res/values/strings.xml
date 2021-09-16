@@ -79,12 +79,12 @@
     <string name="delete_vehicle_tip">Hold on a vehicle to delete it</string>
     <string name="delivery_revoke_fail">Failed to revoke delivery</string>
     <string name="revoke_delivery">Revoke delivery</string>
-    <string name="delivery_info">delivery info</string>
+    <string name="delivery_info">Delivery Info</string>
     <string name="store_info">Store Information</string>
     <string name="delivery_get_fail">Failed to get delivery info</string>
     <string name="client_phone_title">Client Phone:</string>
     <string name="store_address_title">Store Address:</string>
-    <string name="store_name_title">Store Name Title:</string>
+    <string name="store_name_title">Store Name:</string>
     <string name="client_address_title">Client Address:</string>
     <string name="delivery_update_error">Error updating deliveries</string>
     <string name="store_title">Store :</string>

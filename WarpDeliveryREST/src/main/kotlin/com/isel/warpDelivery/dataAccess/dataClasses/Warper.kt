@@ -10,6 +10,7 @@ class Warper (val username : String,
               val email : String,
               @JsonIgnore
               val password :String,
+              val balance : Double,
               var vehicles : List<Vehicle> = emptyList()){
 
     fun toOutputModel(): WarperOutputModel = WarperOutputModel(
@@ -18,6 +19,7 @@ class Warper (val username : String,
         lastname = lastname,
         phonenumber = phonenumber,
         email = email,
+        balance = balance,
         vehicles = vehicles.map{ it.toOutputModel()}
     )
 }
@@ -27,5 +29,5 @@ data class WarperEdit(
     val lastname: String?,
     val phonenumber: String?,
     val email: String?,
-    var password: String?,
+    var password: String?
 )

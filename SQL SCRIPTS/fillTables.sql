@@ -14,15 +14,15 @@ INSERT INTO VEHICLE VALUES ('user3', 'medium', 'BB-32-AS');
 
 --DELIVERIES
 INSERT INTO DELIVERY (deliveryid, warperusername, storeid, state, clientphone, purchasedate, deliverdate
-                        , deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
+                        , deliverLatitude, deliverLongitude, deliverAddress, type)
 					  VALUES (1,'user3', 1, 'Delivered', '923947365', '2020-06-22 18:10:35', null,
-							             12.343421, 13.31231, 'Rua teste 123', null, null, 'small');
+							             12.343421, 13.31231, 'Rua teste 123', 'small');
 
 
 INSERT INTO DELIVERY (deliveryid , warperusername, storeid, state, clientphone, purchasedate, deliverdate,
-                            deliverLatitude, deliverLongitude, deliverAddress, rating, reward, type)
+                            deliverLatitude, deliverLongitude, deliverAddress, type)
 					  VALUES (2,'user3', 1, 'Cancelled', '923947365', '2020-06-22 18:10:35', null,
-							         13.343421, 13.31231, 'Rua teste 123', null, null, 'small');
+							         13.343421, 13.31231, 'Rua teste 123', 'small');
 
 
 --DELIVERY STATE TRANSITIONS
