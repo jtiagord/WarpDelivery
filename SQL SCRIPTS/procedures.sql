@@ -27,3 +27,23 @@ CREATE OR REPLACE FUNCTION generate_id() RETURNS char(32) AS $$
                 RETURN replace(gen_random_uuid ()::text,'-','');
         END;
 $$ LANGUAGE plpgsql;
+
+
+create or replace function addDeliveryDate() RETURNS TRIGGER
+LANGUAGE PLPGSQL
+as $$
+DECLARE 
+BEGIN
+    IF(NEW.state = 'Delivered') THEN
+		NEW.deliverdate = now();
+		RETURN NEW;
+    END IF;
+	NEW.deliverdate = now();
+	
+	RETURN NEW;
+END;$$;
+
+CREATE TRIGGER adddeliverydate
+BEFORE UPDATE ON DELIVERY
+FOR EACH ROW EXECUTE PROCEDURE addDeliveryDate();
+	
