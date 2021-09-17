@@ -115,7 +115,7 @@ class StoreController(val storeMapper : StoreMapper , val deliveryMapper : Deliv
     @GetMapping("/deliveries")
     fun getDeliveries(req: HttpServletRequest,
                       @RequestParam(defaultValue = "10") limit : Int = 10,
-                      @RequestParam(defaultValue = "10") offset : Int = 10) : ResponseEntity<Any> {
+                      @RequestParam(defaultValue = "0") offset : Int = 0) : ResponseEntity<Any> {
 
         val storeInfo = req.getAttribute(USER_ATTRIBUTE_KEY) as UserInfo
         val store = storeMapper.read(storeInfo.id) ?: throw ApiException("Store doesn't exist")

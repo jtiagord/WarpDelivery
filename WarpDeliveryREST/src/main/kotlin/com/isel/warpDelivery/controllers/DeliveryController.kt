@@ -26,8 +26,8 @@ class DeliveryController(val deliveryMapper: DeliveryMapper, val storeMapper : S
     @GetMapping
     fun getAllDeliveries(
         req: HttpServletRequest,
-        @RequestParam(defaultValue = "0") limit: Int,
-        @RequestParam(defaultValue = "10") offset: Int
+        @RequestParam(defaultValue = "10") limit: Int,
+        @RequestParam(defaultValue = "0") offset: Int
     ): List<Delivery> {
         return deliveryMapper.readAll(limit, offset)
     }
