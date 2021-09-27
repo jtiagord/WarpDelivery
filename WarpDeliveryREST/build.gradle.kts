@@ -7,6 +7,7 @@ plugins {
 	kotlin("plugin.spring") version "1.4.32"
 }
 
+
 group = "com.isel"
 version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
@@ -33,6 +34,8 @@ dependencies {
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
+
+
 
 tasks.withType<KotlinCompile> {
 	kotlinOptions {
